@@ -5,13 +5,13 @@ Welcome to the team! This guide walks you through everything you need to test Ka
 
 ---
 
-## 🧭 Table of Contents
+## Table of Contents
 1. [Zero-Cost Quickstart (Mock Mode)](#1-zero-cost-quickstart-mock-mode)
 2. [Setting Up Your Voice Agent on Bolna.ai](#2-setting-up-your-voice-agent-on-bolnaai)
 3. [Configuring Your Local Environment](#3-configuring-your-local-environment)
 4. [How to Test Kasauti (Mock vs Real)](#4-how-to-test-kasauti-mock-vs-real)
 5. [Understanding Test Results & Compliance Checks](#5-understanding-test-results--compliance-checks)
-6. [⚠️ Critical Git Rule & Teammate Note](#-critical-git-rule--teammate-note)
+6. [Critical Git Policy](#6-critical-git-policy)
 
 ---
 
@@ -132,11 +132,11 @@ Run all 21 deterministic rule, rubric, and contract tests:
 ```bash
 pytest tests/ -v
 ```
-- ✅ Tests TRAI calling hours (IST 09:00 - 20:00).
-- ✅ Tests early AI disclosure rules.
-- ✅ Tests DND opt-out compliance.
-- ✅ Tests OTP, Aadhaar, PAN leakage detection.
-- ✅ Tests staging agent safety guards (ensuring production targets are NEVER overwritten).
+- Tests TRAI calling hours (IST 09:00 - 20:00).
+- Tests early AI disclosure rules.
+- Tests DND opt-out compliance.
+- Tests OTP, Aadhaar, PAN leakage detection.
+- Tests staging agent safety guards (ensuring production targets are NEVER overwritten).
 
 ### Level 2: Full 4-Phase Pipeline Test
 Run the end-to-end ASGI test pipeline:
@@ -176,20 +176,20 @@ When viewing runs on the UI ([http://localhost:3000](http://localhost:3000)):
 
 ---
 
-## ⚠️ Critical Git Rule & Teammate Note
+## 6. Critical Git Policy
 
 > [!CAUTION]
-> ### 🛑 DO NOT PUSH DIRECTLY TO `main`!
+> ### DO NOT PUSH DIRECTLY TO `main`
 > 
-> The `main` branch is our single source of truth for stable hackathon demos. **Direct pushes to `main` are strictly forbidden.**
+> The `main` branch is the production demo line. Direct pushes to `main` are blocked.
 > 
-> Always create a feature or testing branch before writing any code:
+> Always branch off `main` before testing or writing code:
 > ```bash
-> # 1. Make sure main is fresh
+> # 1. Sync local main
 > git checkout main
 > git pull origin main
 > 
-> # 2. Create your own branch
+> # 2. Create an isolated branch
 > git checkout -b feat/your-feature-name
 > # or:
 > git checkout -b test/your-agent-name
@@ -204,13 +204,10 @@ When viewing runs on the UI ([http://localhost:3000](http://localhost:3000)):
 
 ---
 
-<div align="center">
+### Final Note
 
-### 🪙 Touchstone Approved
+Kasauti exists to test whether gold is pure or counterfeit. If you push broken code directly to `main`, you are proving the latter.
 
-*Remember: **Kasauti** tests gold before you dial, so don't make a **karat** mistake by pushing to `main`!*  
-*Keep your branches clean, your prompts pure, and may your git history stay un-**main**-gled.* ✨
+Branches exist so your mistakes die in isolation. Push directly to `main` without a pull request, and the only thing Kasauti will be evaluating next is your post-mortem. Don't make `main` your crime scene.
 
-**— Signed with 24k love, Vatsa** 💛
-
-</div>
+— Vatsa
