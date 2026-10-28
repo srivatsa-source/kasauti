@@ -17,6 +17,10 @@ Kasauti is an automated testing and compliance benchmarking suite for Indian voi
 
 ---
 
+> 📖 **Teammates:** Read the [Teammate Testing & Bolna Setup Guide](docs/TESTING_GUIDE.md) for step-by-step instructions on setting up Bolna agents, running test suites, and team Git branching rules.
+
+---
+
 ## Architecture Overview
 
 ```
@@ -145,7 +149,7 @@ Kasauti supports seamless transition from zero-cost mock mode to live telephony 
    - Numeric timezone offset (`+05:30` / `+00:00`), never `Z`
    - Hard safety guard: **Staging agents only** (`PATCH /v2/agent/{agent_id}`), never modifies production targets.
 
-See [docs/IMPROVEMENTS.md](docs/IMPROVEMENTS.md) for the live agent setup and system optimization guide.
+See [docs/TESTING_GUIDE.md](docs/TESTING_GUIDE.md) for the full teammate setup and testing guide, and [docs/IMPROVEMENTS.md](docs/IMPROVEMENTS.md) for future system improvements.
 
 ---
 
