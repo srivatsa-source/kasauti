@@ -1,0 +1,37 @@
+{
+  "id": "exec_demo_01_bolna_webhook",
+  "status": "completed",
+  "agent_id": "agent_staging_kasauti_01",
+  "batch_id": null,
+  "conversation_duration": 48.5,
+  "total_cost": 0.042,
+  "recording_url": "https://assets.kasauti.ai/recordings/sample_call_01.wav",
+  "transcript": "Agent: Namaste, main Bolna AI assistant hoon. Kya main aapse 2 minute baat kar sakta hoon?\nUser: Haan kahiye, kya baat hai?\nAgent: Hum aapke loan account ke sambandh mein call kar rahe hain. Kya aap loan details verify karna chahenge?\nUser: Theek hai, batayein.\nAgent: Dhanyawad, aapka din shubh ho.",
+  "extracted_data": {
+    "intent": "loan_verification",
+    "caller_sentiment": "neutral",
+    "opt_out_requested": false,
+    "consent_given": true
+  },
+  "telephony_data": {
+    "provider": "plivo",
+    "from_number": "+918001234567",
+    "to_number": "+919876543210",
+    "hangup_cause": "NORMAL_CLEARING"
+  },
+  "usage_breakdown": {
+    "synthesizerCharacters": 182,
+    "synthesizerModel": "eleven_turbo_v2_5",
+    "transcriberDuration": 48.5,
+    "transcriberModel": "deepgram-nova-3",
+    "llmTokens": 245,
+    "llmModel": {
+      "gpt-4.1-mini": {
+        "input": 190,
+        "output": 55
+      }
+    }
+  },
+  "createdAt": "2026-10-24T12:00:00+05:30",
+  "updatedAt": "2026-10-24T12:00:52+05:30"
+}

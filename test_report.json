@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-10-28T13:52:58.580980+00:00",
+  "phases": {
+    "unit_tests": {
+      "exit_code": 0,
+      "passed": 21,
+      "failed": 0,
+      "errors": 0,
+      "elapsed_seconds": 5.86,
+      "output": ": Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class ScenarioSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:31\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CheckSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:42\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:42: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CallSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:56\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:56: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class FixSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:66\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:66: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class RunDetailResponse(BaseModel):\n\napps\\api\\app\\routes\\calls.py:11\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\calls.py:11: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CheckResponse(BaseModel):\n\napps\\api\\app\\routes\\calls.py:22\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\calls.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class ScenarioInfo(BaseModel):\n\napps\\api\\app\\routes\\calls.py:35\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\calls.py:35: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CallDetailResponse(BaseModel):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================= 21 passed, 14 warnings in 3.94s =======================\n"
+    },
+    "mock_pipeline": {
+      "health": {
+        "status": "healthy",
+        "app": "Kasauti",
+        "tagline": "Test it like gold before you dial.",
+        "bolna_mode": "mock",
+        "llm_mode": "mock"
+      },
+      "targets_count": 1,
+      "target_id": "9ee8707c-72ca-4e59-8ff8-0f15282750da",
+      "initial_score": 57.1,
+      "bench_run_id": "a1d5f701-1ad5-452e-9353-42d20e8840ef",
+      "initial_passed": 4,
+      "initial_total": 7,
+      "fix_id": "c59d0b37-20df-40b7-8bcb-373c1a2f15f3",
+      "fix_diff_lines": 8,
+      "rerun_score": 33.3,
+      "rerun_passed": 1,
+      "rerun_total": 3,
+      "score_improved": false,
+      "pdf_size_bytes": 6646,
+      "steps_passed": 6,
+      "steps_total": 6
+    },
+    "real_call": {
+      "bolna_auth": "OK",
+      "bolna_wallet": 998.0,
+      "bolna_agents_count": 0,
+      "sarvam_auth": "OK",
+      "sarvam_probe": "SUCCESS",
+      "skipped": true,
+      "reason": "Live API keys verified. BOLNA_TARGET_PHONE and agent ID not set for outbound call."
+    }
+  },
+  "summary": {
+    "phase1_unit_tests": "PASS",
+    "phase2_mock_pipeline": "PASS",
+    "phase3_real_call": "PASS",
+    "overall": "PASS"
+  }
+}

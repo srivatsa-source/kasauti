@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: kasauti-db
+    environment:
+      POSTGRES_DB: kasauti
+      POSTGRES_USER: kasauti_user
+      POSTGRES_PASSWORD: kasauti_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kasauti_user -d kasauti"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: kasauti-api
+    ports:
+      - "8000:8000"
+    environment:
+      - BOLNA_MODE=mock
+      - DATABASE_URL=postgresql+asyncpg://kasauti_user:kasauti_password@db:5432/kasauti
+      - BOLNA_BASE_URL=https://api.bolna.ai
+      - BOLNA_WEBHOOK_IPS=13.203.39.153,13.126.9.249,13.202.133.53
+      - MAX_CALLS_PER_RUN=20
+      - DAILY_SPEND_CAP=5.00
+      - API_BASE_URL=http://api:8000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: kasauti-web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
