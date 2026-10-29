@@ -7,6 +7,8 @@ from app.routes.targets import router as targets_router
 from app.routes.runs import router as runs_router
 from app.routes.calls import router as calls_router
 from app.routes.webhooks import router as webhooks_router
+from app.routes.budget import router as budget_router
+from app.routes.knowledge import router as knowledge_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,6 +36,8 @@ app.include_router(targets_router)
 app.include_router(runs_router)
 app.include_router(calls_router)
 app.include_router(webhooks_router)
+app.include_router(budget_router)
+app.include_router(knowledge_router)
 
 @app.get("/health")
 async def health_check():

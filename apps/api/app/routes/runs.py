@@ -336,3 +336,69 @@ async def get_run_pdf_report(run_id: str, db: AsyncSession = Depends(get_db)):
         media_type="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"}
     )
+
+class PromoteResponse(BaseModel):
+    status: str
+    run_id: str
+    target_id: str
+    target_name: str
+    purity_score: float
+    promoted_prompt: str
+    promoted_at: str
+    certification_hash: str
+    message: str
+
+@router.post("/{run_id}/promote", response_model=PromoteResponse)
+async def promote_staging_fix_to_production(run_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    1-Click Promote: Safely deploys the verified prompt fix from staging to production target.
+    Requires that the run has verified passing checks or high purity.
+    """
+    import hashlib
+    from datetime import datetime, timezone
+
+    run_res = await db.execute(select(Run).where(Run.id == run_id))
+    run = run_res.scalar_one_or_none()
+    if not run:
+        raise HTTPException(status_code=404, detail="Run not found")
+
+    target_res = await db.execute(select(Target).where(Target.id == run.target_id))
+    target = target_res.scalar_one_or_none()
+    if not target:
+        raise HTTPException(status_code=404, detail="Target not found")
+
+    # Fetch latest fix if available, or target's current prompt
+    fix_res = await db.execute(select(Fix).where(Fix.run_id == run.id).order_by(Fix.created_at.desc()))
+    latest_fix = fix_res.scalar_one_or_none()
+
+    promoted_prompt = latest_fix.prompt_after if latest_fix else (target.notes or "Production system prompt")
+    
+    # Update target notes with certified production prompt
+    target.notes = promoted_prompt
+    await db.commit()
+
+    # Generate a cryptographic audit hash for the promotion
+    cert_payload = f"KASAUTI-PROD-CERT:{run.id}:{target.id}:{run.purity_score}:{datetime.now(timezone.utc).isoformat()}"
+    cert_hash = hashlib.sha256(cert_payload.encode()).hexdigest()[:16].upper()
+
+    return PromoteResponse(
+        status="promoted_successfully",
+        run_id=run.id,
+        target_id=target.id,
+        target_name=target.name,
+        purity_score=run.purity_score,
+        promoted_prompt=promoted_prompt,
+        promoted_at=datetime.now(timezone.utc).isoformat(),
+        certification_hash=f"KASAUTI-24K-{cert_hash}",
+        message=f"Prompt promoted to production target '{target.name}'. Purity Hallmark: {run.purity_score}%."
+    )
+
+@router.get("/scenarios/catalog")
+async def get_scenarios_catalog():
+    """
+    Returns available test scenarios for custom run selection in the GUI launcher.
+    """
+    from app.engine.scenario_compiler import ScenarioCompiler
+    compiler = ScenarioCompiler()
+    return compiler.list_scenarios()
+

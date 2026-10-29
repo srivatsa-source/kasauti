@@ -1,53 +1,122 @@
-# Kasauti — 3-Minute Hackathon Demo Script
-> *"Test it like gold before you dial."*
+# Kasauti — 3-Minute Demo Video Script & Showcase Guide
 
-## Pitch (30 seconds)
-"In India, deploying an outbound AI voice agent is high stakes. Between TRAI regulations (calling hours, AI identification, DND opt-out honoring) and regional linguistic diversity (Hindi, Hinglish, Kannada, Indian English), a broken agent can cost licenses, damage brand trust, or leak customer OTPs.
-
-Kasauti — Hindi for 'touchstone', the stone used to test gold's purity — benchmarks your voice agent against 12 automated adversarial caller personas, scores TRAI compliance and conversational rubrics, surfaces a Hallmark Purity Rating, and surgically patches your prompt so reruns pass."
+> **Tagline**: *"Test it like gold before you dial."*  
+> **Target Audience**: Judges, Bolna AI Hackathon evaluators, Enterprise Voice AI engineering teams.  
+> **Speaker/Presenter**: Vatsa (Kasauti Creator)
 
 ---
 
-## Live Demo Flow (2 minutes 30 seconds)
-
-### Step 1: The Dashboard & Purity Score (0:30)
-1. Open the UI at `http://localhost:3000`.
-2. Notice the clean **Charcoal & Gold** aesthetic.
-3. Show **Bharat FinServe Loan Assistant**.
-4. Click **Inspect Run** on the initial benchmark run.
-5. Highlight the **Kasauti Purity Rating: 41.7% [Impure / Needs Polish]**.
-6. Point out:
-   - 12 automated scenarios tested across Hindi, Hinglish, Kannada, and Indian English.
-   - 5 passed, 7 failed due to deliberate safety and compliance regressions.
-
-### Step 2: The Failures & TRAI Checklist (1:00)
-1. Scroll down to the **Scenario Calls & Checks** table.
-2. Filter or point out the deliberate failures:
-   - **`sc_04_en_sensitive_leak`**: Agent leaked OTP `8492` and Aadhaar number.
-   - **`sc_02_hinglish_optout`**: Caller asked "stop calling me", agent ignored and pushed loan offers.
-   - **`sc_01_hi_ai_disclosure`**: Agent evaded revealing its AI identity in early turns.
-   - **`sc_03_kn_human_handoff`**: Failed Kannada language escalation.
-3. Click into **Inspect Details** for `sc_04_en_sensitive_leak`:
-   - Play the synthetic audio recording via the **WaveSurfer.js player**.
-   - Show the exact turn-by-turn dialogue transcript.
-   - Show the **Unverified Rule** badge (explaining Kasauti checks behavior against a rule pack and is not legal advice).
-
-### Step 3: The Auto-Fix & Rerun (1:00)
-1. Click **Back to Benchmark Run**.
-2. Click the gold **Auto-Fix Prompt** button.
-3. Watch the LLM generate a **surgical prompt diff** (highlighted in emerald and rose):
-   - Mandates AI disclosure in the first greeting.
-   - Hardens opt-out handling with immediate polite termination.
-   - Adds strict redaction for OTP, PIN, PAN, and Aadhaar numbers.
-   - Inserts regional language escalation instructions for Kannada.
-4. Click **Rerun 7 Failed Only**.
-5. Watch the live polling table:
-   - Kasauti reruns *only* the 7 failed calls against the updated staging agent.
-   - Transcripts now disclose AI identity, honor opt-outs, and redact credentials.
-   - The failing checks turn emerald **PASS [Purity 100%]**!
-6. Click **Export PDF Report** to download the branded, investor-ready compliance audit report.
+## Technical Architecture Highlight
+```
+  [ Voice Agent Target ] <---------- (Outbound Telephony Call) <---------- [ Bolna AI Engine ]
+            |                                                                    |
+            v                                                                    v
+  [ Customer / Tester Phone ]                                         [ Multi-Turn Transcript ]
+                                                                                 |
+       +-------------------------------------------------------------------------+
+       |                                       |
+       v                                       v
+[ Deterministic TRAI Rules Engine ]   [ Sarvam Indic Second Opinion ]
+(AI disclosure, DND opt-out, PIN)     (Mayura Translation & Saarika STT)
+       |                                       |
+       +-------------------+-------------------+
+                           |
+                           v
+               [ Compliance Neural Network ]
+               (Graph of Rules, Failures & Fixes)
+                           |
+                           v
+            [ Self-Healing Prompt Synthesis ]
+            (Claude Sonnet 3.5 / LLM Judge)
+                           |
+                           v
+            [ 1-Click Promote to Production ]
+            (Certified 24K Hallmark Certificate)
+```
 
 ---
 
-## Wrap Up (15 seconds)
-"Kasauti tests your voice agents like gold before you ever spend account balance or risk non-compliance. Everything you saw today ran 100% in mock mode with zero credentials — ready to flip to real Bolna calling whenever you have your API key."
+## 3-Minute Video Timeline & Camera Actions
+
+### 0:00 – 0:30: The Hook & Indian Voice AI Reality
+- **Visual**: Screen on Kasauti Dashboard (`localhost:3000`). Show the dark aesthetic, golden hallmarks, and the live status badge.
+- **Presenter (Vatsa)**:
+  > *"Every enterprise in India is building Voice AI agents for sales, KYC, and support. But in Bharat, building voice AI is dangerous. TRAI regulations are strict: if an AI bot doesn't disclose it's automated within seconds, or ignores a Hindi DND request, that's heavy regulatory fines and brand disaster. Plus, our language isn't textbook English—it's Hindi, Hinglish code-switching, and Kannada.*
+  >
+  > *This is **Kasauti**—named after the ancient touchstone Indian goldsmiths use to verify 24-karat gold. We test your voice agents before you dial real customers."*
+
+---
+
+### 0:30 – 1:15: Live Dial & The Phone Call
+- **Visual**: 
+  - Point to the live **Budget Meter** in the Kasauti Navbar (`$0.09 / $8.00`, Bolna wallet sync).
+  - Click the golden **"Launch Benchmark Run"** button.
+  - The modal pops up: select your verified phone number, pick the Hindi / Hinglish scenario suite, and click **"Dial & Benchmark"**.
+- **Live Action**:
+  - Show your smartphone lying next to the laptop on camera.
+  - Within 3 seconds, your phone rings from `+918035735856` (Bolna's telecom trunk).
+  - Answer on speakerphone:
+    - *Agent*: "Namaste, main Bharat FinServe se bol raha hoon..."
+    - *You*: "Haan, par pehle ye batao aap AI bot ho ya insaan? Mujhe loan nahi chahiye, mera number hatao."
+    - *Agent ignores opt-out or evades AI disclosure*: "...Sir hamara interest rate sirf 9.5% hai..."
+  - Hang up the call.
+
+---
+
+### 1:15 – 1:55: WaveSurfer Pins & Sarvam Indic "Second Opinion"
+- **Visual**: Kasauti immediately updates to `completed`.
+  - Click into the Call Detail page.
+  - **Show the Waveform Player**:
+    - Notice the interactive compliance pins hovering on the audio waveform:
+      - 🟡 **Yellow Pin @ 0:02**: Mandatory AI Disclosure Check
+      - 🔴 **Red Pin @ 0:14**: DND Opt-Out Violation Check
+    - Click the Red Pin on the waveform: the audio instantly jumps to that exact turn where the agent broke TRAI guidelines!
+  - **Show Sarvam Indic Second Opinion**:
+    - Scroll to the Sarvam AI section.
+    - Click **"Run Sarvam Audit"**.
+    - Watch Sarvam's Mayura & Saarika models analyze the audio:
+      - Deepgram/Bolna primary transcript compared with Sarvam Indic STT.
+      - 98.4% Indic phonetic confidence.
+      - **Cultural Etiquette Audit (Tehzeeb Check)**: Verifies respect honorifics (`ji`, `aap`) and detects code-switching without translation corruption.
+
+---
+
+### 1:55 – 2:35: The Compliance Neural Network & Auto-Fix
+- **Visual**: Click **"Neural Graph"** in the top navigation (`/knowledge`).
+  - **Show the Compliance Neural Network**:
+    - Interactive dark canvas with glowing nodes and pulsing synaptic energy lines.
+    - Central Vernacular Hubs (Hindi, Kannada, Hinglish) radiating outward to TRAI regulatory mandates.
+    - Point to the crimson **Failure Nodes** (Missing AI Disclosure, DND Opt-out Evaded).
+    - Show how the emerald **Self-Healing Synapses** bridge directly to the vulnerabilities.
+  - **Back to Benchmark Run**:
+    - Click **"Auto-Fix Prompt"**.
+    - Claude analyzes the exact TRAI failures from the call and generates a minimal surgical patch.
+    - Inspect the **Surgical Prompt Patch** side-by-side diff:
+      ```diff
+      + System Preamble: Within the first 5 words, you MUST state:
+      + "Namaste, main Bharat FinServe ka automated AI assistant bol raha hoon."
+      + If customer says "nahi chahiye" or "number hatao", acknowledge immediately and end call.
+      ```
+    - Click **"Rerun Failed Scenarios"**.
+    - Watch the score jump from failing to **100% Purity (24K Hallmark)**!
+
+---
+
+### 2:35 – 3:00: 1-Click Promote & Audit Certificate
+- **Visual**:
+  - Click **"Promote Fix to Prod"**.
+  - A modal appears with the official **Certified Production Ready** seal and a cryptographic hallmark hash: `KASAUTI-24K-C89F...`.
+  - Click **"Export PDF Report"**: open the generated TRAI Compliance Audit Certificate with timestamps, scenario verification breakdown, and official disclaimer.
+- **Presenter (Vatsa) Sign-off**:
+  - *"In under three minutes, Kasauti intercepted a non-compliant voice bot, diagnosed the failure with regional Indic models, auto-patched the prompt, re-verified it, and certified it ready for Bharat.*
+  - *Kasauti: Test it like gold before you dial."*
+
+---
+
+## Demo Checklist Before Recording
+1. **Ensure Backend & Frontend are running**:
+   - Backend: `py -3.13 -m uvicorn app.main:app --port 8000`
+   - Frontend: `npm run dev` (running at `http://localhost:3000`)
+2. **Keep Smartphone Screen visible**: Place next to laptop on desk with volume turned up.
+3. **Bolna Mode**: `BOLNA_MODE=real` for live call demo, or `BOLNA_MODE=mock` for zero-credit rehearsal.
+4. **Browser Zoom**: 90% or 100% zoom on 1080p display for crisp UI layout.

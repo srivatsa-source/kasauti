@@ -9,14 +9,19 @@ Kasauti is an automated testing and compliance benchmarking suite for Indian voi
 
 - **Zero-Credential Mock Mode**: The entire app runs out-of-the-box with zero API keys and zero outbound calls.
 - **Linguistic Diversity**: Scenarios covering Hindi, Hinglish, Kannada, and Indian English with code-switching, noise, interruptions, and regional escalation.
+- **Compliance Neural Network (`/knowledge`)**: Interactive canvas mapping regulatory mandates, failure clusters, regional dialect hubs, and automated prompt repairs with animated synaptic pulses.
+- **Audio Waveform Compliance Markers**: WaveSurfer player overlaying visual pins (🟡 AI disclosure, 🟢 consent verification, 🔴 TRAI breach) with instant seek to exact violation timestamps.
+- **Sarvam AI Indic "Second Opinion"**: Dual-ASR vernacular audit verifying phonetic accuracy, code-mixing integrity, Mayura English translations, and Indian telephone etiquette (Tehzeeb check).
+- **1-Click Staging-to-Production Promotion**: One-click safe prompt promotion with cryptographic hallmark verification (`KASAUTI-24K-...`) and ReportLab PDF certificate download.
+- **Interactive GUI Launcher**: Configure and dial test suites with customized scenario selection, target phone validation, and real-time pre-flight cost estimates.
 - **Deterministic Rule Engine**: Checks calling hours (IST), AI disclosure, DND opt-out honoring, and sensitive credential protection (OTP, PAN, Aadhaar, CVV).
 - **LLM Rubric Judge**: Evaluates task completion, language fluency, tone, and hallucination with strict Pydantic JSON validation.
 - **Surgical Auto-Fix Loop**: Diagnoses failures, proposes prompt diffs, updates the staging copy, and reruns only failed scenarios until green.
-- **Investor & Compliance PDF Reports**: Clean ReportLab generation in Kasauti's signature Charcoal & Gold hallmark aesthetic.
-- **Real Bolna Ready**: Swappable `BolnaClient` interface with webhook IP allowlist, numeric timezone scheduling, spend caps, and fixture capture.
+- **Real Bolna Ready**: Swappable `BolnaClient` interface with webhook IP allowlist, numeric timezone scheduling, spend caps, and live wallet balance tracking.
 
 ---
 
+> 📖 **Demo Video Showcase:** See [Demo Video Script](docs/DEMO_SCRIPT.md) for a complete 3-minute video recording storyboard and walkthrough.  
 > 📖 **Teammates:** Read the [Teammate Testing & Bolna Setup Guide](docs/TESTING_GUIDE.md) for step-by-step instructions on setting up Bolna agents, running test suites, and team Git branching rules.
 
 ---

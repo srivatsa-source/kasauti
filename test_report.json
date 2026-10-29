@@ -1,52 +1,60 @@
 {
-  "timestamp": "2026-10-28T13:52:58.580980+00:00",
+  "timestamp": "2026-10-29T14:38:17.095789+00:00",
   "phases": {
     "unit_tests": {
       "exit_code": 0,
-      "passed": 21,
+      "passed": 25,
       "failed": 0,
       "errors": 0,
-      "elapsed_seconds": 5.86,
-      "output": ": Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class ScenarioSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:31\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CheckSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:42\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:42: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CallSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:56\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:56: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class FixSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:66\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:66: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class RunDetailResponse(BaseModel):\n\napps\\api\\app\\routes\\calls.py:11\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\calls.py:11: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CheckResponse(BaseModel):\n\napps\\api\\app\\routes\\calls.py:22\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\calls.py:22: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class ScenarioInfo(BaseModel):\n\napps\\api\\app\\routes\\calls.py:35\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\calls.py:35: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CallDetailResponse(BaseModel):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================= 21 passed, 14 warnings in 3.94s =======================\n"
+      "elapsed_seconds": 8.98,
+      "output": "de at https://errors.pydantic.dev/2.12/migration/\n    staging_agent_id: Optional[str] = Field(None, example=\"agent_staging_123\")\n\napps\\api\\app\\routes\\targets.py:17\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\targets.py:17: PydanticDeprecatedSince20: Using extra keyword arguments on `Field` is deprecated and will be removed. Use `json_schema_extra` instead. (Extra keys: 'example'). Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    notes: Optional[str] = Field(None, example=\"System prompt and agent details\")\n\napps\\api\\app\\routes\\targets.py:19\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\targets.py:19: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class TargetResponse(BaseModel):\n\napps\\api\\app\\routes\\runs.py:20\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:20: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class ScenarioSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:31\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:31: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CheckSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:42\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:42: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class CallSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:56\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:56: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class FixSummary(BaseModel):\n\napps\\api\\app\\routes\\runs.py:66\n  C:\\Users\\Srinath_veda\\Documents\\kasauti\\apps\\api\\app\\routes\\runs.py:66: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/\n    class RunDetailResponse(BaseModel):\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================= 25 passed, 11 warnings in 6.46s =======================\n"
     },
     "mock_pipeline": {
       "health": {
         "status": "healthy",
         "app": "Kasauti",
         "tagline": "Test it like gold before you dial.",
-        "bolna_mode": "mock",
+        "bolna_mode": "real",
         "llm_mode": "mock"
       },
       "targets_count": 1,
       "target_id": "9ee8707c-72ca-4e59-8ff8-0f15282750da",
-      "initial_score": 57.1,
-      "bench_run_id": "a1d5f701-1ad5-452e-9353-42d20e8840ef",
-      "initial_passed": 4,
-      "initial_total": 7,
-      "fix_id": "c59d0b37-20df-40b7-8bcb-373c1a2f15f3",
-      "fix_diff_lines": 8,
-      "rerun_score": 33.3,
-      "rerun_passed": 1,
-      "rerun_total": 3,
+      "initial_score": 33.3,
+      "bench_run_id": "b8c09064-271f-4499-90b8-6a52e09d8681",
+      "initial_passed": 1,
+      "initial_total": 3,
+      "fix_error": "Client error '404 Not Found' for url 'https://api.bolna.ai/v2/agent/kasauti_staging_bharat'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404",
+      "rerun_score": 0.0,
+      "rerun_passed": 0,
+      "rerun_total": 2,
       "score_improved": false,
-      "pdf_size_bytes": 6646,
-      "steps_passed": 6,
+      "pdf_size_bytes": 4987,
+      "steps_passed": 5,
       "steps_total": 6
     },
     "real_call": {
       "bolna_auth": "OK",
-      "bolna_wallet": 998.0,
-      "bolna_agents_count": 0,
+      "bolna_wallet": 995.0,
+      "bolna_agents_count": 1,
       "sarvam_auth": "OK",
       "sarvam_probe": "SUCCESS",
-      "skipped": true,
-      "reason": "Live API keys verified. BOLNA_TARGET_PHONE and agent ID not set for outbound call."
+      "call_status_code": 200,
+      "execution_id": "8242a60b-957d-4a91-942e-76377c4320e5",
+      "call_response_keys": [
+        "status",
+        "message",
+        "execution_id",
+        "run_id"
+      ],
+      "poll_count": 23,
+      "total_elapsed_seconds": 95.06,
+      "crash": "object of type 'NoneType' has no len()"
     }
   },
   "summary": {
     "phase1_unit_tests": "PASS",
-    "phase2_mock_pipeline": "PASS",
-    "phase3_real_call": "PASS",
-    "overall": "PASS"
+    "phase2_mock_pipeline": "FAIL",
+    "phase3_real_call": "FAIL",
+    "overall": "FAIL"
   }
 }

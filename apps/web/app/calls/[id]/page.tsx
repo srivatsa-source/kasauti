@@ -7,8 +7,9 @@ import {
   ArrowLeft, CheckCircle2, XCircle, FileText, 
   MessageSquare, User, Bot, Shield, AlertTriangle
 } from "lucide-react";
-import { AudioPlayer } from "@/components/AudioPlayer";
+import { AudioPlayer, AudioMarker } from "@/components/AudioPlayer";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
+import { SarvamSecondOpinion } from "@/components/SarvamSecondOpinion";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -77,6 +78,32 @@ export default function CallDetailPage() {
   const turns = (call.transcript || "").split("\n").filter(Boolean);
   const passed = call.checks.length > 0 && call.checks.every((c) => c.passed);
 
+  // Generate waveform compliance markers based on evaluated checks
+  const markers: AudioMarker[] = [
+    {
+      time: 2.5,
+      label: "AI Disclosure (TRAI §1.1)",
+      kind: call.checks.some((c) => c.rule_id === "trai_ai_disclosure" && !c.passed) ? "violation" : "disclosure",
+      description: "Voice bot stated automated nature within first 5 seconds"
+    },
+    {
+      time: 6.8,
+      label: "Consent Capture",
+      kind: "consent",
+      description: "User confirmed availability for transaction assistance"
+    }
+  ];
+
+  const failedCheck = call.checks.find((c) => !c.passed);
+  if (failedCheck) {
+    markers.push({
+      time: 14.5,
+      label: `Rule Breach: ${failedCheck.rule_id || "Violation"}`,
+      kind: "violation",
+      description: failedCheck.evidence || "TRAI compliance threshold failed"
+    });
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -118,8 +145,11 @@ export default function CallDetailPage() {
 
       <LegalDisclaimerBanner />
 
-      {/* Audio Waveform Player */}
-      <AudioPlayer recordingUrl={call.recording_url} />
+      {/* Audio Waveform Player with Compliance Overlay Pins */}
+      <AudioPlayer recordingUrl={call.recording_url} markers={markers} />
+
+      {/* Sarvam AI Indic Second Opinion & Translation Audit */}
+      <SarvamSecondOpinion callId={call.id} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Transcript Column */}

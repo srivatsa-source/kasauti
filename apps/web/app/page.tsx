@@ -4,10 +4,11 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
   Phone, Plus, Play, Sparkles, AlertCircle, 
-  ExternalLink, ArrowRight, Activity
+  ExternalLink, ArrowRight, Activity, Brain
 } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
+import { NewRunModal } from "@/components/NewRunModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -39,6 +40,7 @@ export default function HomePage() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showRunModal, setShowRunModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   // New target form state
@@ -136,19 +138,33 @@ export default function HomePage() {
 
         <div className="mt-6 flex flex-wrap gap-4 items-center">
           <button
-            onClick={() => setShowAddModal(true)}
+            onClick={() => setShowRunModal(true)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-sm transition-transform active:scale-95 shadow-lg shadow-gold/20"
           >
-            <Plus className="w-4 h-4" />
-            Add Voice Agent Target
+            <Play className="w-4 h-4 fill-charcoal-900" />
+            Launch Benchmark Run
           </button>
+          <button
+            onClick={() => setShowAddModal(true)}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surfaceHover hover:bg-charcoal-700 border border-border text-charcoal-200 hover:text-white font-medium text-sm transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Target
+          </button>
+          <Link
+            href="/knowledge"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surfaceHover hover:bg-charcoal-700 border border-border text-charcoal-200 hover:text-white font-medium text-sm transition-colors"
+          >
+            <Brain className="w-4 h-4 text-gold" />
+            Neural Topology
+          </Link>
           {runs.length > 0 && (
             <Link
               href={`/runs/${runs[0].id}`}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-surfaceHover hover:bg-charcoal-600 border border-border text-charcoal-200 hover:text-white font-medium text-sm transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-charcoal-900 hover:bg-charcoal-800 border border-gold/30 text-gold font-medium text-sm transition-colors"
             >
               <Activity className="w-4 h-4 text-gold" />
-              View Latest Benchmark ({runs[0].purity_score}% Purity)
+              Latest: {runs[0].purity_score}% Purity
             </Link>
           )}
         </div>
@@ -405,6 +421,13 @@ export default function HomePage() {
           </div>
         </div>
       )}
+
+      {/* New Run Launcher Modal */}
+      <NewRunModal
+        isOpen={showRunModal}
+        onClose={() => setShowRunModal(false)}
+        targets={targets}
+      />
     </div>
   );
 }

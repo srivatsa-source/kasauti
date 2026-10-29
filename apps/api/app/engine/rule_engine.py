@@ -43,6 +43,9 @@ class RuleEngine:
     def get_rule(self, rule_id: str) -> Optional[RuleDefinition]:
         return self.rules.get(rule_id)
 
+    def list_rules(self) -> List[Dict[str, Any]]:
+        return [r.model_dump() for r in self.rules.values()]
+
     def evaluate_rule(
         self,
         rule_id: str,

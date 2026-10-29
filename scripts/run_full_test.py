@@ -397,10 +397,10 @@ async def phase3_real_call():
         
         # 3. Capture results
         final_status = final_payload.get("status", "unknown")
-        duration = final_payload.get("conversation_duration", 0)
-        cost = final_payload.get("total_cost", 0)
-        transcript = final_payload.get("transcript", "")
-        recording_url = final_payload.get("recording_url", "")
+        duration = final_payload.get("conversation_duration", 0) or 0
+        cost = final_payload.get("total_cost", 0) or 0
+        transcript = final_payload.get("transcript") or ""
+        recording_url = final_payload.get("recording_url") or (final_payload.get("telephony_data") or {}).get("recording_url") or ""
         
         log(f"Final status: {final_status}")
         log(f"Duration: {duration}s, Cost: ${cost}")

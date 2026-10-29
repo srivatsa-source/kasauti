@@ -76,6 +76,29 @@ export default function RunDetailPage() {
   const [fixing, setFixing] = useState(false);
   const [rerunning, setRerunning] = useState(false);
   const [selectedFix, setSelectedFix] = useState<Fix | null>(null);
+  const [promoting, setPromoting] = useState(false);
+  const [promotionResult, setPromotionResult] = useState<any | null>(null);
+  const [filterMode, setFilterMode] = useState<"all" | "passed" | "failed">("all");
+  const [filterLang, setFilterLang] = useState<string>("all");
+
+  const handlePromote = async () => {
+    if (!confirm("Are you sure you want to promote this verified staging fix to Production?")) return;
+    setPromoting(true);
+    try {
+      const res = await fetch(`${API_BASE}/runs/${runId}/promote`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setPromotionResult(data);
+      } else {
+        const err = await res.json();
+        alert(err.detail || "Failed to promote fix.");
+      }
+    } catch (err) {
+      alert("Error promoting: " + err);
+    } finally {
+      setPromoting(false);
+    }
+  };
 
   const fetchRun = async () => {
     try {
@@ -190,6 +213,19 @@ export default function RunDetailPage() {
             Export PDF Report
           </a>
 
+          {/* 1-Click Promote Staging Fix to Production */}
+          {selectedFix && (
+            <button
+              onClick={handlePromote}
+              disabled={promoting}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-gold to-gold-dark hover:brightness-110 text-charcoal-900 text-xs font-bold transition-transform active:scale-95 shadow-lg shadow-gold/30"
+              title="Promote verified staging prompt to production agent"
+            >
+              <Sparkles className="w-4 h-4 fill-charcoal-900" />
+              {promoting ? "Promoting..." : "Promote Fix to Prod"}
+            </button>
+          )}
+
           {!allPassed && (
             <button
               onClick={handleAutoFix}
@@ -292,14 +328,41 @@ export default function RunDetailPage() {
 
       {/* Calls Grid */}
       <section className="space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h2 className="text-xl font-bold text-white">Scenario Calls & Checks</h2>
             <p className="text-xs text-charcoal-400">Live call progression with rule verifications</p>
           </div>
-          <span className="text-xs text-charcoal-400 font-mono">
-            Auto-polling every 3s
-          </span>
+
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-lg bg-charcoal-900 border border-border p-0.5 text-xs">
+              <button
+                onClick={() => setFilterMode("all")}
+                className={`px-3 py-1 rounded-md font-semibold transition-colors ${
+                  filterMode === "all" ? "bg-gold text-charcoal-900" : "text-charcoal-400 hover:text-white"
+                }`}
+              >
+                All ({run.calls.length})
+              </button>
+              <button
+                onClick={() => setFilterMode("passed")}
+                className={`px-3 py-1 rounded-md font-semibold transition-colors ${
+                  filterMode === "passed" ? "bg-emerald-600 text-white" : "text-charcoal-400 hover:text-white"
+                }`}
+              >
+                Pass ({run.passed_calls})
+              </button>
+              <button
+                onClick={() => setFilterMode("failed")}
+                className={`px-3 py-1 rounded-md font-semibold transition-colors ${
+                  filterMode === "failed" ? "bg-rose-600 text-white" : "text-charcoal-400 hover:text-white"
+                }`}
+              >
+                Fail ({run.failed_calls})
+              </button>
+            </div>
+          </div>
         </div>
 
         <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
@@ -315,7 +378,15 @@ export default function RunDetailPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
-              {run.calls.map((call) => {
+              {run.calls
+                .filter((call) => {
+                  const checks = call.checks || [];
+                  const passed = checks.length > 0 && checks.every((c) => c.passed);
+                  if (filterMode === "passed") return passed;
+                  if (filterMode === "failed") return !passed;
+                  return true;
+                })
+                .map((call) => {
                 const checks = call.checks || [];
                 const passed = checks.length > 0 && checks.every((c) => c.passed);
                 const title = call.scenario?.title || call.scenario_id;
@@ -397,6 +468,58 @@ export default function RunDetailPage() {
           </table>
         </div>
       </section>
+
+      {/* 1-Click Promotion Hallmark Modal */}
+      {promotionResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-surface border-2 border-gold p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute -right-12 -top-12 w-48 h-48 bg-gold/15 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="text-center space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-2xl bg-gold/20 border border-gold flex items-center justify-center text-gold shadow-lg shadow-gold/20">
+                <Sparkles className="w-8 h-8 fill-gold" />
+              </div>
+
+              <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold uppercase tracking-widest">
+                Certified Production Ready
+              </div>
+
+              <h3 className="text-2xl font-black text-white tracking-tight">
+                Prompt Promoted to Production!
+              </h3>
+              
+              <p className="text-xs text-charcoal-400">
+                The surgical fix tested in this benchmark has been safely deployed to target{" "}
+                <strong className="text-white">{promotionResult.target_name}</strong>.
+              </p>
+            </div>
+
+            <div className="mt-6 p-4 rounded-xl bg-charcoal-900 border border-border space-y-2 text-xs font-mono">
+              <div className="flex justify-between text-charcoal-400">
+                <span>Hallmark Hash:</span>
+                <span className="text-gold font-bold">{promotionResult.certification_hash}</span>
+              </div>
+              <div className="flex justify-between text-charcoal-400">
+                <span>Purity Verified:</span>
+                <span className="text-emerald-400 font-bold">{promotionResult.purity_score}% Purity</span>
+              </div>
+              <div className="flex justify-between text-charcoal-400">
+                <span>Promoted At:</span>
+                <span className="text-charcoal-200">{new Date(promotionResult.promoted_at).toLocaleTimeString()}</span>
+              </div>
+            </div>
+
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={() => setPromotionResult(null)}
+                className="w-full py-2.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-colors shadow-lg shadow-gold/20"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
