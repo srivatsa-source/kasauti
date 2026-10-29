@@ -151,7 +151,7 @@ class RunOrchestrator:
 
             call.status = execution_data.get("status", "completed")
             call.transcript = execution_data.get("transcript", "")
-            call.recording_url = execution_data.get("recording_url")
+            call.recording_url = execution_data.get("recording_url") or (execution_data.get("telephony_data") or {}).get("recording_url")
             call.cost = float(execution_data.get("total_cost", 0.03))
             call.ended_at = datetime.now(timezone.utc)
             await db.commit()

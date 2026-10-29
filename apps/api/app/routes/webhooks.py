@@ -52,8 +52,9 @@ async def handle_bolna_webhook(
     call.status = status
     if "transcript" in payload and payload["transcript"]:
         call.transcript = payload["transcript"]
-    if "recording_url" in payload and payload["recording_url"]:
-        call.recording_url = payload["recording_url"]
+    rec_url = payload.get("recording_url") or (payload.get("telephony_data") or {}).get("recording_url")
+    if rec_url:
+        call.recording_url = rec_url
     if "total_cost" in payload and payload["total_cost"] is not None:
         call.cost = float(payload["total_cost"])
 

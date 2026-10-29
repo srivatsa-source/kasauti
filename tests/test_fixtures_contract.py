@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 from typing import Optional, Dict, Any
 import pytest
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from app.config import settings
 
 class BolnaUsageBreakdown(BaseModel):
@@ -18,6 +18,7 @@ class BolnaTelephonyData(BaseModel):
     from_number: Optional[str] = None
     to_number: Optional[str] = None
     hangup_cause: Optional[str] = None
+    recording_url: Optional[str] = None
 
 class BolnaExecutionContract(BaseModel):
     id: str | int
@@ -29,6 +30,16 @@ class BolnaExecutionContract(BaseModel):
     extracted_data: Optional[Dict[str, Any]] = None
     telephony_data: Optional[BolnaTelephonyData] = None
     usage_breakdown: Optional[BolnaUsageBreakdown] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def extract_recording_url(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if not data.get("recording_url"):
+                tel = data.get("telephony_data")
+                if isinstance(tel, dict) and tel.get("recording_url"):
+                    data["recording_url"] = tel["recording_url"]
+        return data
 
 def test_execution_response_fixture_contract():
     fixture_path = Path(settings.FIXTURES_DIR) / "execution_response.json"

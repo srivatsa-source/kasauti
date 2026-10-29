@@ -63,11 +63,15 @@ def main():
     print("\n[CONFIG]")
     print(f"  Direction:      {direction}")
     print(f"  Dialing Agent:  {dialing_agent}")
-    print(f"  Recipient:      {recipient}")
+    masked_recipient = recipient[:3] + "******" + recipient[-4:] if len(recipient) >= 7 else "***"
+    print(f"  Recipient:      {masked_recipient}")
     print(f"  Estimated Cost: ~$0.04 - $0.07 USD (~1 minute max)")
     print(f"  Fixtures Dir:   {FIXTURES_DIR}")
 
-    confirm = input("\nPlace 1 LIVE call to capture fixtures? (yes/no): ").strip().lower()
+    if "--yes" in sys.argv or os.getenv("AUTO_CONFIRM") == "1":
+        confirm = "yes"
+    else:
+        confirm = input("\nPlace 1 LIVE call to capture fixtures? (yes/no): ").strip().lower()
     if confirm not in ("yes", "y"):
         print("Aborted. No real calls placed.")
         sys.exit(0)

@@ -1,37 +1,236 @@
 {
-  "id": "exec_demo_01_bolna_webhook",
-  "status": "completed",
-  "agent_id": "agent_staging_kasauti_01",
+  "id": "9d6e483f-e8b2-43c3-bc4d-deb6eaaa4d59",
+  "agent_id": "74bbf2a4-6561-48de-aec3-aafc7153bcd7",
   "batch_id": null,
-  "conversation_duration": 48.5,
-  "total_cost": 0.042,
-  "recording_url": "https://assets.kasauti.ai/recordings/sample_call_01.wav",
-  "transcript": "Agent: Namaste, main Bolna AI assistant hoon. Kya main aapse 2 minute baat kar sakta hoon?\nUser: Haan kahiye, kya baat hai?\nAgent: Hum aapke loan account ke sambandh mein call kar rahe hain. Kya aap loan details verify karna chahenge?\nUser: Theek hai, batayein.\nAgent: Dhanyawad, aapka din shubh ho.",
-  "extracted_data": {
-    "intent": "loan_verification",
-    "caller_sentiment": "neutral",
-    "opt_out_requested": false,
-    "consent_given": true
-  },
-  "telephony_data": {
-    "provider": "plivo",
-    "from_number": "+918001234567",
-    "to_number": "+919876543210",
-    "hangup_cause": "NORMAL_CLEARING"
-  },
+  "scheduled_at": null,
+  "answered_by_voice_mail": null,
+  "conversation_duration": 25.0,
+  "total_cost": 3.0,
+  "transcript": "assistant: Hi, this is Anika, Bolna's customer support agent. Ready for the demo? \nuser:  yes\nassistant: I see you have a recent order. Do you have an issue related to your recent order for Shaving Cream or the Razor Blade?\nassistant: Hello, क्या आप अभी भी लाइन पर हैं?\n",
   "usage_breakdown": {
-    "synthesizerCharacters": 182,
-    "synthesizerModel": "eleven_turbo_v2_5",
-    "transcriberDuration": 48.5,
-    "transcriberModel": "deepgram-nova-3",
-    "llmTokens": 245,
     "llmModel": {
-      "gpt-4.1-mini": {
-        "input": 190,
-        "output": 55
+      "azure/gpt-4.1-mini": {
+        "input": 7735,
+        "output": 28
+      }
+    },
+    "voice_id": "90ipbRoKi4CpHXvKVtl0",
+    "llmTokens": 0,
+    "provider_source": {
+      "llm": "bolna",
+      "synthesizer": "bolna",
+      "transcriber": "bolna"
+    },
+    "synthesizer_model": "eleven_turbo_v2_5",
+    "transcriber_model": "nova-3",
+    "llm_usage_breakdown": {
+      "hangup": null,
+      "analytics": null,
+      "voicemail": {
+        "input": 714,
+        "model": "gpt-4.1-mini",
+        "output": 9,
+        "provider": "openai",
+        "provider_connected": false
+      },
+      "extraction": null,
+      "disposition": {
+        "input": 0,
+        "model": null,
+        "output": 0,
+        "cached_tokens": 0,
+        "llm_key_source": []
+      },
+      "conversation": {
+        "input": 7735,
+        "model": "azure/gpt-4.1-mini",
+        "output": 28,
+        "provider": "azure",
+        "service_tier": null,
+        "routing_target": "ptu",
+        "provider_connected": false
+      },
+      "summarization": {
+        "input": 334,
+        "model": "gpt-4.1-mini",
+        "output": 75,
+        "cached_tokens": 0,
+        "provider_connected": false
+      }
+    },
+    "synthesizer_provider": "elevenlabs",
+    "transcriber_duration": 24.3999,
+    "transcriber_language": "hi",
+    "transcriber_provider": "deepgram",
+    "synthesizer_characters": 223,
+    "synthesizer_usage_breakdown": {
+      "provider_connected": false,
+      "welcome_message_cache": false,
+      "conversation_characters": 152,
+      "welcome_message_characters": 71
+    },
+    "transcriber_usage_breakdown": {
+      "provider_connected": false,
+      "transcriber_duration": 24.3999
+    },
+    "voicemail_detection_enabled": true,
+    "endpointing": 150,
+    "incremental_delay": 300,
+    "buffer_size": 230,
+    "hangup_after_silence": 12,
+    "check_if_user_online": true,
+    "trigger_user_online_message_after": 8
+  },
+  "cost_breakdown": {
+    "llm": 0.34299999999999997,
+    "network": 0.25,
+    "platform": 1.0,
+    "synthesizer": 1.52,
+    "transcriber": 0.374,
+    "llm_breakdown": {
+      "hangup": 0,
+      "routing": 0,
+      "analytics": 0,
+      "voicemail": 0.03,
+      "extraction": 0,
+      "conversation": 0.313,
+      "summarization": 0
+    },
+    "transfer_cost": 0.0,
+    "total_cost_to_deduct": 0.763,
+    "synthesizer_breakdown": {
+      "conversation": 1.52,
+      "welcome_message": 0.0
+    },
+    "transcriber_breakdown": {
+      "analytics": 0,
+      "conversation": 0.374
+    }
+  },
+  "extracted_data": {
+    "General": {
+      "Call Summary": {
+        "subjective": "The conversation was between a customer and Anika, Bolna's customer support agent. Anika initiated the demo and noticed the user had a recent order for Shaving Cream or Razor Blade, asking if there was an issue related to that order. There was also a follow-up attempt by the agent to confirm if the user was still on the line."
       }
     }
   },
-  "createdAt": "2026-10-24T12:00:00+05:30",
-  "updatedAt": "2026-10-24T12:00:52+05:30"
+  "summary": "The conversation was between a customer and Anika, Bolna's customer support agent. Anika initiated the demo and noticed the user had a recent order for Shaving Cream or Razor Blade, asking if there was an issue related to that order. There was also a follow-up attempt by the agent to confirm if the user was still on the line.",
+  "error_message": null,
+  "status": "completed",
+  "agent_extraction": null,
+  "workflow_retries": null,
+  "rescheduled_at": null,
+  "custom_extractions": null,
+  "campaign_id": null,
+  "smart_status": null,
+  "user_number": "+919876543210",
+  "agent_number": "+918035735856",
+  "initiated_at": "2026-10-29T14:10:30.516654",
+  "retry_config": null,
+  "retry_count": 0,
+  "retry_history": null,
+  "agent_version_id": "d7b06a67-748e-499a-8d10-806a0dd13c49",
+  "created_at": "2026-10-29T14:10:29.201030+00:00",
+  "updated_at": "2026-10-29T14:11:28.480638+00:00",
+  "processing_status": null,
+  "post_processing_phases": null,
+  "billing_settled": false,
+  "lid_data": null,
+  "termination_reason": "user_hung_up",
+  "telephony_data": {
+    "duration": 25.0,
+    "to_number": "+919876543210",
+    "from_number": "+918035735856",
+    "recording_url": "https://api.bolna.ai/recordings/call/9d6e483f-e8b2-43c3-bc4d-deb6eaaa4d59",
+    "hosted_telephony": true,
+    "provider_call_id": "62152013-f4c5-42ba-bdc2-893b4b1a2036",
+    "call_type": "outbound",
+    "provider": "plivo",
+    "hangup_by": "Callee",
+    "hangup_reason": "Call recipient hungup",
+    "hangup_provider_code": 4000,
+    "ring_duration": 15,
+    "post_dial_delay": 2,
+    "to_number_carrier": "Reliance (JIO) - Karnataka"
+  },
+  "transfer_call_data": null,
+  "context_details": {
+    "recipient_data": {
+      "scenario_id": "fixture_capture_probe",
+      "caller_persona": "Priya Sharma calling to inquire about loan eligibility"
+    },
+    "recipient_phone_number": "+919019823296"
+  },
+  "agent_context_details": null,
+  "batch_run_details": null,
+  "provider": "plivo",
+  "latency_data": {
+    "stream_id": 9.15601,
+    "time_to_first_audio": 12.87354,
+    "region": "in",
+    "transcriber": {
+      "time_to_connect": 64,
+      "turns": [
+        {
+          "turn": 1,
+          "turn_latency": [
+            {
+              "sequence_id": 1,
+              "audio_to_text_latency": 22.0791,
+              "text": "yes"
+            },
+            {
+              "sequence_id": 2,
+              "audio_to_text_latency": 22.8606,
+              "text": "yes"
+            },
+            {
+              "sequence_id": 3,
+              "audio_to_text_latency": 28.32495,
+              "text": "yes"
+            }
+          ]
+        }
+      ]
+    },
+    "llm": {
+      "time_to_connect": null,
+      "turns": [
+        {
+          "time_to_first_token": 419.68903,
+          "time_to_last_token": 643.92418,
+          "turn": 1
+        }
+      ]
+    },
+    "synthesizer": {
+      "time_to_connect": 86,
+      "turns": [
+        {
+          "time_to_first_token": 97,
+          "time_to_last_token": 499,
+          "turn": 1
+        },
+        {
+          "time_to_first_token": 104,
+          "time_to_last_token": 305,
+          "turn": -1
+        }
+      ]
+    },
+    "rag": null,
+    "interruption_stats": {
+      "user_speaking_ms": 2601,
+      "agent_speaking_ms": 397,
+      "total_interruptions": 0,
+      "talk_to_listen_ratio": 13.2,
+      "barge_in_recovery_rate": null,
+      "barge_in_recovery_count": 0,
+      "longest_agent_monologue_ms": 397,
+      "agent_interrupted_user_count": 0,
+      "user_interrupted_agent_count": 0
+    }
+  },
+  "tool_call_logs": [],
+  "node_extracted_data": null
 }
