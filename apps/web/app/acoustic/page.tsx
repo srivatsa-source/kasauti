@@ -2,16 +2,23 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ArrowLeft, Radio, Volume2, ShieldCheck, 
-  Activity, RefreshCw, Play, AlertTriangle, Layers
+import {
+  ArrowLeft,
+  Radio,
+  Volume2,
+  ShieldCheck,
+  Activity,
+  RefreshCw,
+  Play,
+  AlertTriangle,
+  Layers,
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface NoiseProfile {
   id: string;
-  name: str;
+  name: string;
   category: string;
   snr_db: number;
   frequency_cutoff_hz: number;
@@ -35,7 +42,8 @@ interface AcousticResult {
 
 export default function AcousticPage() {
   const [profiles, setProfiles] = useState<NoiseProfile[]>([]);
-  const [selectedProfileId, setSelectedProfileId] = useState<string>("profile_railway");
+  const [selectedProfileId, setSelectedProfileId] =
+    useState<string>("profile_railway");
   const [result, setResult] = useState<AcousticResult | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [simulating, setSimulating] = useState<boolean>(false);
@@ -69,8 +77,8 @@ export default function AcousticPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          profile_id: selectedProfileId
-        })
+          profile_id: selectedProfileId,
+        }),
       });
       if (res.ok) {
         setResult(await res.json());
@@ -104,7 +112,8 @@ export default function AcousticPage() {
               </h1>
             </div>
             <p className="text-xs text-zinc-400 mt-1">
-              Evaluates Indian STT phoneme degradation across Bandra railway stations, Chandni Chowk traffic, and 2G narrowband packet drops
+              Evaluates Indian STT phoneme degradation across Bandra railway
+              stations, Chandni Chowk traffic, and 2G narrowband packet drops
             </p>
           </div>
 
@@ -112,7 +121,9 @@ export default function AcousticPage() {
             onClick={fetchProfiles}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs transition-colors self-start"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+            />
             <span>Reload Profiles</span>
           </button>
         </div>
@@ -170,9 +181,12 @@ export default function AcousticPage() {
       <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900 pb-3">
           <div>
-            <span className="text-[10px] uppercase text-zinc-500 block">Selected Stress Profile</span>
+            <span className="text-[10px] uppercase text-zinc-500 block">
+              Selected Stress Profile
+            </span>
             <span className="text-sm font-bold text-white mt-0.5 block">
-              {selectedProfile?.name || "Acoustic Profile"} &bull; {selectedProfile?.snr_db}dB SNR
+              {selectedProfile?.name || "Acoustic Profile"} &bull;{" "}
+              {selectedProfile?.snr_db}dB SNR
             </span>
           </div>
 
@@ -182,7 +196,9 @@ export default function AcousticPage() {
             className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50 self-start sm:self-auto"
           >
             <Play className="w-3.5 h-3.5 fill-black" />
-            <span>{simulating ? "Degrading Audio..." : "Simulate Acoustic Stress"}</span>
+            <span>
+              {simulating ? "Degrading Audio..." : "Simulate Acoustic Stress"}
+            </span>
           </button>
         </div>
 
@@ -192,29 +208,52 @@ export default function AcousticPage() {
             {/* KPI Result Strip */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
               <div className="p-3 rounded-lg bg-black border border-zinc-900">
-                <span className="text-[10px] text-zinc-500 uppercase block">Clean Baseline WER</span>
-                <span className="text-xl font-bold text-white mt-0.5 block">{result.clean_wer_pct}%</span>
-                <span className="text-[10px] text-zinc-500 block">Sarvam Indic STT</span>
+                <span className="text-[10px] text-zinc-500 uppercase block">
+                  Clean Baseline WER
+                </span>
+                <span className="text-xl font-bold text-white mt-0.5 block">
+                  {result.clean_wer_pct}%
+                </span>
+                <span className="text-[10px] text-zinc-500 block">
+                  Sarvam Indic STT
+                </span>
               </div>
 
               <div className="p-3 rounded-lg bg-black border border-zinc-900">
-                <span className="text-[10px] text-zinc-500 uppercase block">Degraded WER</span>
-                <span className="text-xl font-bold text-white mt-0.5 block">{result.degraded_wer_pct}%</span>
-                <span className="text-[10px] text-zinc-500 block">Under {result.snr_db}dB Noise</span>
+                <span className="text-[10px] text-zinc-500 uppercase block">
+                  Degraded WER
+                </span>
+                <span className="text-xl font-bold text-white mt-0.5 block">
+                  {result.degraded_wer_pct}%
+                </span>
+                <span className="text-[10px] text-zinc-500 block">
+                  Under {result.snr_db}dB Noise
+                </span>
               </div>
 
               <div className="p-3 rounded-lg bg-black border border-zinc-900">
-                <span className="text-[10px] text-zinc-500 uppercase block">Error Delta (WER Δ)</span>
-                <span className="text-xl font-bold text-white mt-0.5 block">+{result.wer_delta_pct}%</span>
-                <span className="text-[10px] text-zinc-500 block">Phoneme distortion</span>
+                <span className="text-[10px] text-zinc-500 uppercase block">
+                  Error Delta (WER Δ)
+                </span>
+                <span className="text-xl font-bold text-white mt-0.5 block">
+                  +{result.wer_delta_pct}%
+                </span>
+                <span className="text-[10px] text-zinc-500 block">
+                  Phoneme distortion
+                </span>
               </div>
 
               <div className="p-3 rounded-lg bg-black border border-zinc-900">
-                <span className="text-[10px] text-zinc-500 uppercase block">Resilience Rating</span>
+                <span className="text-[10px] text-zinc-500 uppercase block">
+                  Resilience Rating
+                </span>
                 <span className="text-sm font-bold text-white mt-1.5 block uppercase">
                   {result.resilience_rating}
                 </span>
-                <span className="text-[10px] text-zinc-500 block">Indic Confidence: {(result.sarvam_indic_confidence * 100).toFixed(0)}%</span>
+                <span className="text-[10px] text-zinc-500 block">
+                  Indic Confidence:{" "}
+                  {(result.sarvam_indic_confidence * 100).toFixed(0)}%
+                </span>
               </div>
             </div>
 
@@ -230,11 +269,11 @@ export default function AcousticPage() {
           </div>
         ) : (
           <div className="p-8 text-center text-xs text-zinc-500">
-            Click &quot;Simulate Acoustic Stress&quot; to test STT phoneme degradation under {selectedProfile?.name}.
+            Click &quot;Simulate Acoustic Stress&quot; to test STT phoneme
+            degradation under {selectedProfile?.name}.
           </div>
         )}
       </div>
     </div>
   );
 }
-

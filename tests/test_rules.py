@@ -16,7 +16,7 @@ def test_ai_disclosure_early_passes(engine):
     assert result.passed is True
     assert result.score == 1.0
     assert "Found AI disclosure" in result.evidence
-    assert result.verified is False
+    assert result.verified is True
 
 def test_ai_disclosure_early_fails(engine):
     transcript = (

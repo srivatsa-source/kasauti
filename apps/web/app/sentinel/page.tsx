@@ -2,17 +2,25 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ArrowLeft, Shield, ShieldAlert, Zap, 
-  Terminal, Activity, Clock, CheckCircle2, AlertTriangle, RefreshCw
+import {
+  ArrowLeft,
+  Shield,
+  ShieldAlert,
+  Zap,
+  Terminal,
+  Activity,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 interface SentinelMetric {
-  total_chunks_processed: int;
-  interceptions_triggered: int;
-  avg_latency_ms: float;
+  total_chunks_processed: number;
+  interceptions_triggered: number;
+  avg_latency_ms: number;
   violations_prevented: Record<string, number>;
   system_status: string;
 }
@@ -35,16 +43,20 @@ export default function SentinelPage() {
 
   // Interactive Test Interceptor state
   const [speaker, setSpeaker] = useState<"agent" | "user">("agent");
-  const [inputText, setInputText] = useState<string>("Namaste, verification ke liye kripya apna card OTP bataiye.");
+  const [inputText, setInputText] = useState<string>(
+    "Namaste, verification ke liye kripya apna card OTP bataiye.",
+  );
   const [evaluating, setEvaluating] = useState<boolean>(false);
-  const [latestResult, setLatestResult] = useState<InterceptionLog | null>(null);
+  const [latestResult, setLatestResult] = useState<InterceptionLog | null>(
+    null,
+  );
 
   const fetchSentinelData = async () => {
     try {
       setLoading(true);
       const [mRes, lRes] = await Promise.all([
         fetch(`${API_BASE}/sentinel/metrics`),
-        fetch(`${API_BASE}/sentinel/logs`)
+        fetch(`${API_BASE}/sentinel/logs`),
       ]);
       if (mRes.ok) setMetrics(await mRes.json());
       if (lRes.ok) setLogs(await lRes.json());
@@ -72,8 +84,8 @@ export default function SentinelPage() {
           speaker: speaker,
           text: inputText,
           call_elapsed_seconds: 1.5,
-          language: "Hindi"
-        })
+          language: "Hindi",
+        }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -107,7 +119,8 @@ export default function SentinelPage() {
               </h1>
             </div>
             <p className="text-xs text-zinc-400 mt-1">
-              Ultra-low latency streaming guardrail sidecar proxy inspecting audio text chunks before acoustic dispatch
+              Ultra-low latency streaming guardrail sidecar proxy inspecting
+              audio text chunks before acoustic dispatch
             </p>
           </div>
 
@@ -115,7 +128,9 @@ export default function SentinelPage() {
             onClick={fetchSentinelData}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs transition-colors self-start"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`}
+            />
             <span>Sync Shield</span>
           </button>
         </div>
@@ -131,7 +146,9 @@ export default function SentinelPage() {
             <div className="text-2xl font-bold text-white">
               {metrics.total_chunks_processed}
             </div>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">Live telephony stream packets</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">
+              Live telephony stream packets
+            </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
@@ -141,7 +158,9 @@ export default function SentinelPage() {
             <div className="text-2xl font-bold text-white">
               {metrics.interceptions_triggered}
             </div>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">Pre-TTS acoustic interventions</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">
+              Pre-TTS acoustic interventions
+            </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
@@ -151,7 +170,9 @@ export default function SentinelPage() {
             <div className="text-2xl font-bold text-white">
               {metrics.avg_latency_ms} ms
             </div>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">Sub-50ms deterministic guard</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">
+              Sub-50ms deterministic guard
+            </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800">
@@ -161,7 +182,9 @@ export default function SentinelPage() {
             <div className="text-sm font-bold text-white mt-1.5 truncate">
               {metrics.system_status}
             </div>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">TRAI Section 5(a) Active</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">
+              TRAI Section 5(a) Active
+            </span>
           </div>
         </div>
       )}
@@ -182,13 +205,17 @@ export default function SentinelPage() {
 
         <form onSubmit={handleInterceptTest} className="space-y-3">
           <div className="flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-zinc-500 text-[11px] uppercase">Speaker Origin:</span>
+            <span className="text-zinc-500 text-[11px] uppercase">
+              Speaker Origin:
+            </span>
             <div className="flex rounded-md bg-black border border-zinc-800 p-0.5">
               <button
                 type="button"
                 onClick={() => setSpeaker("agent")}
                 className={`px-3 py-1 rounded text-xs transition-colors ${
-                  speaker === "agent" ? "bg-white text-black font-bold" : "text-zinc-400"
+                  speaker === "agent"
+                    ? "bg-white text-black font-bold"
+                    : "text-zinc-400"
                 }`}
               >
                 Voice Agent (Bot)
@@ -197,7 +224,9 @@ export default function SentinelPage() {
                 type="button"
                 onClick={() => setSpeaker("user")}
                 className={`px-3 py-1 rounded text-xs transition-colors ${
-                  speaker === "user" ? "bg-white text-black font-bold" : "text-zinc-400"
+                  speaker === "user"
+                    ? "bg-white text-black font-bold"
+                    : "text-zinc-400"
                 }`}
               >
                 Customer (Caller)
@@ -209,7 +238,9 @@ export default function SentinelPage() {
                 type="button"
                 onClick={() => {
                   setSpeaker("agent");
-                  setInputText("Aapka loan pass ho gaya hai, OTP bata dijiye confirm karne ke liye.");
+                  setInputText(
+                    "Aapka loan pass ho gaya hai, OTP bata dijiye confirm karne ke liye.",
+                  );
                 }}
                 className="px-2 py-1 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
               >
@@ -219,7 +250,9 @@ export default function SentinelPage() {
                 type="button"
                 onClick={() => {
                   setSpeaker("user");
-                  setInputText("Mujhe koi loan nahi chahiye, kripya mera number call list se hata do.");
+                  setInputText(
+                    "Mujhe koi loan nahi chahiye, kripya mera number call list se hata do.",
+                  );
                 }}
                 className="px-2 py-1 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
               >
@@ -229,7 +262,9 @@ export default function SentinelPage() {
                 type="button"
                 onClick={() => {
                   setSpeaker("user");
-                  setInputText("Please speak in Kannada, kannada dalli mathadi.");
+                  setInputText(
+                    "Please speak in Kannada, kannada dalli mathadi.",
+                  );
                 }}
                 className="px-2 py-1 rounded text-[10px] bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white"
               >
@@ -261,15 +296,20 @@ export default function SentinelPage() {
           <div className="p-4 rounded-lg bg-black border border-zinc-800 space-y-2.5 text-xs animate-in fade-in duration-200">
             <div className="flex items-center justify-between border-b border-zinc-900 pb-2">
               <div className="flex items-center gap-2">
-                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                  latestResult.action === "ALLOW"
-                    ? "bg-zinc-900 text-zinc-300 border border-zinc-700"
-                    : "bg-white text-black"
-                }`}>
+                <span
+                  className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                    latestResult.action === "ALLOW"
+                      ? "bg-zinc-900 text-zinc-300 border border-zinc-700"
+                      : "bg-white text-black"
+                  }`}
+                >
                   ACTION: {latestResult.action}
                 </span>
                 <span className="text-[11px] text-zinc-400">
-                  Latency: <strong className="text-white">{latestResult.latency_ms}ms</strong>
+                  Latency:{" "}
+                  <strong className="text-white">
+                    {latestResult.latency_ms}ms
+                  </strong>
                 </span>
               </div>
 
@@ -282,13 +322,19 @@ export default function SentinelPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
               <div className="p-2.5 rounded bg-zinc-950 border border-zinc-900">
-                <span className="text-[10px] text-zinc-500 uppercase block mb-1">Original Spoken Chunk</span>
+                <span className="text-[10px] text-zinc-500 uppercase block mb-1">
+                  Original Spoken Chunk
+                </span>
                 <p className="text-zinc-300">{latestResult.original_text}</p>
               </div>
 
               <div className="p-2.5 rounded bg-zinc-950 border border-zinc-900">
-                <span className="text-[10px] text-zinc-500 uppercase block mb-1">Modified Acoustic Dispatch</span>
-                <p className="text-white font-semibold">{latestResult.modified_text}</p>
+                <span className="text-[10px] text-zinc-500 uppercase block mb-1">
+                  Modified Acoustic Dispatch
+                </span>
+                <p className="text-white font-semibold">
+                  {latestResult.modified_text}
+                </p>
               </div>
             </div>
 
@@ -326,14 +372,21 @@ export default function SentinelPage() {
               </thead>
               <tbody className="divide-y divide-zinc-900">
                 {logs.map((log, idx) => (
-                  <tr key={idx} className="hover:bg-zinc-900/40 transition-colors">
+                  <tr
+                    key={idx}
+                    className="hover:bg-zinc-900/40 transition-colors"
+                  >
                     <td className="px-4 py-3 text-zinc-500 whitespace-nowrap">
                       {log.timestamp.slice(11, 19)}
                     </td>
                     <td className="px-4 py-3 whitespace-nowrap">
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
-                        log.action === "ALLOW" ? "bg-zinc-900 text-zinc-400" : "bg-white text-black"
-                      }`}>
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                          log.action === "ALLOW"
+                            ? "bg-zinc-900 text-zinc-400"
+                            : "bg-white text-black"
+                        }`}
+                      >
                         {log.action}
                       </span>
                     </td>
@@ -359,4 +412,3 @@ export default function SentinelPage() {
     </div>
   );
 }
-
