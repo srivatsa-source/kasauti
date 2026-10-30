@@ -207,7 +207,7 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
       ctx.beginPath();
       ctx.moveTo(0, centerY);
       ctx.lineTo(width, centerY);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
       ctx.lineWidth = 1;
       ctx.stroke();
 
@@ -246,12 +246,12 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
         }
 
         // Draw symmetrical frequency bars around center
-        ctx.fillStyle = running || micActive ? "#FFFFFF" : "#3F3F46";
+        ctx.fillStyle = running || micActive ? "#ffc900" : "#555555";
         ctx.fillRect(x, centerY - amplitude, barWidth, amplitude * 2);
 
         // Peak highlight dot
         if ((running || micActive) && amplitude > 8) {
-          ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+          ctx.fillStyle = "#ff90e8";
           ctx.fillRect(x, centerY - amplitude - 2, barWidth, 1.5);
         }
       }
@@ -277,39 +277,39 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
   );
 
   return (
-    <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-4 sm:p-5 space-y-3 font-mono">
+    <div className="rounded-xl bg-white border-3 border-black p-4 sm:p-5 space-y-3 font-mono shadow-[4px_4px_0px_#000]">
       {/* Top Telemetry Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-900 pb-3 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-black pb-3 text-xs">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${running || micActive ? "bg-white animate-pulse" : "bg-zinc-600"}`} />
-          <span className="font-bold text-white uppercase tracking-tight">
+          <div className={`w-2.5 h-2.5 rounded-full border border-black ${running || micActive ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`} />
+          <span className="font-extrabold text-black uppercase tracking-tight font-display text-sm">
             Realtime Telephony Oscilloscope
           </span>
-          <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800 uppercase">
+          <span className="text-[10px] px-2 py-0.5 rounded border border-black bg-yellow-200 font-bold uppercase text-black shadow-[1px_1px_0px_#000]">
             {running
               ? (micActive ? "Live Mic Input" : `Bolna #${telemetry?.execution_id.slice(0, 8) || "Stream"}`)
               : statusText}
           </span>
         </div>
 
-        <div className="flex items-center gap-3 text-[11px] text-zinc-400">
+        <div className="flex items-center gap-3 text-[11px] font-bold text-black">
           <div>
-            <span className="text-zinc-600">VU: </span>
-            <span className="text-white font-bold">{liveDb} dBFS</span>
+            <span className="text-gray-500">VU: </span>
+            <span className="text-black font-extrabold">{liveDb} dBFS</span>
           </div>
           <div>
-            <span className="text-zinc-600">CARRIER: </span>
-            <span className="text-zinc-300">{telemetry?.carrier || "Plivo / JIO"}</span>
+            <span className="text-gray-500">CARRIER: </span>
+            <span className="text-black">{telemetry?.carrier || "Plivo / JIO"}</span>
           </div>
           <div>
-            <span className="text-zinc-600">DURATION: </span>
-            <span className="text-zinc-300">{telemetry?.duration ? `${telemetry.duration.toFixed(0)}s` : "Live"}</span>
+            <span className="text-gray-500">DURATION: </span>
+            <span className="text-black">{telemetry?.duration ? `${telemetry.duration.toFixed(0)}s` : "Live"}</span>
           </div>
         </div>
       </div>
 
       {/* Realtime Canvas Waveform */}
-      <div className="relative w-full h-24 bg-black rounded-lg border border-zinc-900 overflow-hidden flex items-center justify-center">
+      <div className="relative w-full h-24 bg-black rounded-lg border-2 border-black overflow-hidden flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]">
         <canvas
           ref={canvasRef}
           width={800}
@@ -317,24 +317,24 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
           className="w-full h-full"
         />
 
-        <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/85 border border-zinc-800 text-[9px] text-zinc-400">
-          <Radio className={`w-2.5 h-2.5 ${running || micActive ? "text-white animate-pulse" : "text-zinc-600"}`} />
+        <div className="absolute top-2 right-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-white border border-black text-[9px] font-black text-black shadow-[1px_1px_0px_#000]">
+          <Radio className={`w-2.5 h-2.5 ${running || micActive ? "text-emerald-600 animate-pulse" : "text-gray-500"}`} />
           <span>{running || micActive ? "LIVE TELEMETRY" : "STANDBY"}</span>
         </div>
       </div>
 
       {/* Live Transcript Stream & Controls */}
-      <div className="p-3 rounded-lg bg-black border border-zinc-900 flex items-start gap-2.5 text-xs">
+      <div className="p-3 rounded-lg bg-[#faf9f5] border-2 border-black flex items-start gap-2.5 text-xs shadow-[2px_2px_0px_#000]">
         <div className="mt-0.5 shrink-0">
-          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-            currentSpeaker === "agent" ? "bg-white text-black" : "bg-zinc-800 text-zinc-300"
+          <span className={`px-2 py-0.5 rounded border border-black text-[10px] font-black uppercase shadow-[1px_1px_0px_#000] ${
+            currentSpeaker === "agent" ? "bg-brutal-pink text-black" : "bg-brutal-yellow text-black"
           }`}>
             {currentSpeaker === "agent" ? "BOLNA BOT" : "USER"}
           </span>
         </div>
 
         <div className="flex-1 min-w-0">
-          <p className="text-zinc-200 leading-relaxed font-sans text-xs">
+          <p className="text-black font-medium leading-relaxed font-sans text-xs">
             {displayTurnText}
           </p>
         </div>
@@ -342,10 +342,10 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={toggleMicrophone}
-            className={`p-1.5 rounded transition-colors ${
+            className={`p-1.5 rounded-lg border-2 border-black transition-all shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 ${
               micActive
-                ? "bg-white text-black font-bold"
-                : "bg-zinc-900 hover:bg-zinc-800 text-zinc-400 border border-zinc-800"
+                ? "bg-brutal-pink text-black font-bold"
+                : "bg-white hover:bg-gray-100 text-black"
             }`}
             title={micActive ? "Stop Microphone" : "Test Live Microphone Audio"}
           >
@@ -354,13 +354,13 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
 
           <button
             onClick={toggleAudioStream}
-            className={`px-3 py-1 rounded text-[11px] font-semibold transition-all active:scale-95 shrink-0 ${
+            className={`px-3 py-1.5 rounded-lg border-2 border-black text-xs font-black uppercase tracking-wide transition-all shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 shrink-0 ${
               running
-                ? "bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700"
-                : "bg-white hover:bg-zinc-200 text-black shadow-sm"
+                ? "bg-brutal-yellow text-black"
+                : "bg-black text-white hover:bg-gray-800"
             }`}
           >
-            {running ? "Pause Telephony" : "Play Bolna Audio"}
+            {running ? "Pause Audio" : "Play Bolna Audio"}
           </button>
         </div>
       </div>

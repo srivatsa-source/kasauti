@@ -216,7 +216,7 @@ export default function HomePage() {
 
               {/* Small floating coins like in the reference image */}
               <div className="absolute -top-4 -left-6 w-16 h-16 rounded-full bg-brutal-yellow border-3 border-black shadow-[4px_4px_0px_#000] flex items-center justify-center font-display text-2xl font-black text-black -rotate-12 animate-pulse">
-                G
+                24K
               </div>
 
               <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-brutal-purple border-3 border-black shadow-[4px_4px_0px_#000] flex items-center justify-center font-display text-3xl font-black text-black rotate-12">
@@ -249,7 +249,7 @@ export default function HomePage() {
           <div className="card-brutal-hover rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
             <div>
               <h3 className="font-display text-2xl font-black uppercase text-black tracking-tight">
-                SELL ANYTHING
+                TEST ANY VOICE AGENT
               </h3>
               <p className="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">
                 Outbound sales, KYC verification, loan recovery, inbound helpdesks. Test once, dial forever.
@@ -284,11 +284,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Bento Card 2: MAKE YOUR OWN ROAD (AUTO-PATCH) */}
+          {/* Bento Card 2: AUTO-PATCH STAGING (AUTO-PATCH) */}
           <div className="card-brutal-hover rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden">
             <div>
               <h3 className="font-display text-2xl font-black uppercase text-black tracking-tight">
-                MAKE YOUR OWN ROAD
+                AUTO-PATCH STAGING
               </h3>
               <p className="mt-1 text-xs font-semibold text-gray-700 leading-relaxed">
                 More compliance. More reliability. A safe self-healing path for voice AI is up to you.
@@ -326,11 +326,11 @@ export default function HomePage() {
               </h3>
               
               <div className="mt-3 font-display text-5xl font-black text-black tracking-tight">
-                ${avgPurity}k
+                {runs.length > 0 ? `${avgPurity}%` : "100%"}
               </div>
               
               <p className="mt-1 text-xs font-black uppercase tracking-wider text-black">
-                BENCHMARKED THIS WEEK ACROSS 1,420 VOICE TURNS.
+                {runs.length > 0 ? `BENCHMARKED ACROSS ${runs.length} RECORDED RUNS.` : "READY TO BENCHMARK YOUR AGENTS."}
               </p>
             </div>
 
@@ -356,11 +356,11 @@ export default function HomePage() {
         {/* Second Row of Bento Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           
-          {/* Card 4: Multi-Lingual Indic Coverage (SELL TO ANYONE) */}
+          {/* Card 4: Multi-Lingual Indic Coverage (MULTI-LINGUAL INDIC ACCENTS) */}
           <div className="card-brutal-hover rounded-2xl p-6 flex flex-col justify-between">
             <div>
               <h3 className="font-display text-2xl font-black uppercase text-black tracking-tight">
-                SELL TO ANYONE
+                MULTI-LINGUAL INDIC ACCENTS
               </h3>
               <p className="mt-1 text-xs font-semibold text-gray-700">
                 Go from 0 to 100% purity and automated compliance workflows in any regional dialect.
@@ -390,11 +390,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Card 5: Connect Stack Anywhere (SELL ANYWHERE) */}
+          {/* Card 5: Connect Stack Anywhere (TELEPHONY & LLM INTEGRATIONS) */}
           <div className="card-brutal-hover rounded-2xl p-6 flex flex-col justify-between">
             <div>
               <h3 className="font-display text-2xl font-black uppercase text-black tracking-tight">
-                SELL ANYWHERE
+                TELEPHONY & LLM INTEGRATIONS
               </h3>
               <p className="mt-1 text-xs font-semibold text-gray-700">
                 Benchmark and test with our all-in-one suite or connect to thousands of telephony and LLM apps in your current stack.
