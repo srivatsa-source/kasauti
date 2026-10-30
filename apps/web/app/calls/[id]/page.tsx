@@ -68,11 +68,19 @@ export default function CallDetailPage() {
   }, [callId]);
 
   if (loading) {
-    return <div className="p-12 text-center text-charcoal-400">Loading call execution details...</div>;
+    return (
+      <div className="p-12 text-center text-xs font-bold text-black bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+        Loading call execution details...
+      </div>
+    );
   }
 
   if (!call) {
-    return <div className="p-12 text-center text-red-400">Call not found.</div>;
+    return (
+      <div className="p-12 text-center text-xs font-bold text-rose-600 bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+        Call not found.
+      </div>
+    );
   }
 
   const turns = (call.transcript || "").split("\n").filter(Boolean);
@@ -105,37 +113,37 @@ export default function CallDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Header */}
       <div>
         <Link
           href={`/runs/${call.run_id}`}
-          className="inline-flex items-center gap-1.5 text-xs text-charcoal-400 hover:text-gold mb-2 font-medium"
+          className="inline-flex items-center gap-1.5 text-xs text-black hover:underline mb-2 font-black uppercase"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Benchmark Run
+          <ArrowLeft className="w-3.5 h-3.5 stroke-[3]" /> Back to Benchmark Run
         </Link>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold text-white">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display">
               {call.scenario?.title || "Call Execution"}
             </h1>
-            <p className="text-xs text-charcoal-400 font-mono mt-1">
-              Execution ID: {call.bolna_execution_id || call.id} &bull; Cost: ${call.cost.toFixed(3)}
+            <p className="text-xs text-gray-700 font-mono font-bold mt-1">
+              Execution ID: {call.bolna_execution_id || call.id.slice(0, 10)} &bull; Cost: ${call.cost.toFixed(3)}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="px-2.5 py-1 rounded text-xs font-semibold bg-charcoal-700 text-charcoal-200 border border-border">
+            <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-brutal-purple text-black border-2 border-black shadow-[2px_2px_0px_#000]">
               {call.scenario?.language}
             </span>
             {passed ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                <CheckCircle2 className="w-4 h-4" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black bg-brutal-green text-black border-2 border-black shadow-[2px_2px_0px_#000]">
+                <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                 PASS [Purity 100%]
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                <XCircle className="w-4 h-4" />
+              <span className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black bg-rose-500 text-white border-2 border-black shadow-[2px_2px_0px_#000]">
+                <XCircle className="w-4 h-4 stroke-[2.5]" />
                 FAIL
               </span>
             )}
@@ -154,18 +162,20 @@ export default function CallDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Transcript Column */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-gold" />
+          <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
+              <h2 className="text-sm font-black uppercase tracking-tight text-black flex items-center gap-2 font-display">
+                <MessageSquare className="w-4 h-4 text-black stroke-[2.5]" />
                 Conversational Transcript
               </h2>
-              <span className="text-xs text-charcoal-400">{turns.length} turns</span>
+              <span className="text-xs font-black uppercase px-2 py-0.5 rounded bg-brutal-yellow border border-black shadow-[1px_1px_0px_#000]">
+                {turns.length} turns
+              </span>
             </div>
 
             <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
               {turns.length === 0 ? (
-                <div className="text-xs text-charcoal-400 italic">No transcript recorded yet.</div>
+                <div className="text-xs font-semibold text-gray-500 italic">No transcript recorded yet.</div>
               ) : (
                 turns.map((line, idx) => {
                   const isAgent = line.toLowerCase().startsWith("agent:");
@@ -174,28 +184,28 @@ export default function CallDetailPage() {
                   return (
                     <div
                       key={idx}
-                      className={`flex gap-3 text-xs leading-relaxed p-3 rounded-xl ${
+                      className={`flex gap-3 text-xs leading-relaxed p-3.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] ${
                         isAgent 
-                          ? "bg-charcoal-900 border border-border/70" 
-                          : "bg-surfaceHover border border-border/40"
+                          ? "bg-yellow-50" 
+                          : "bg-white"
                       }`}
                     >
                       <div className="shrink-0 mt-0.5">
                         {isAgent ? (
-                          <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center text-gold">
-                            <Bot className="w-3.5 h-3.5" />
+                          <div className="w-7 h-7 rounded-full bg-brutal-pink border-2 border-black flex items-center justify-center text-black font-black text-xs">
+                            <Bot className="w-4 h-4 stroke-[2.5]" />
                           </div>
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-charcoal-700 flex items-center justify-center text-charcoal-200">
-                            <User className="w-3.5 h-3.5" />
+                          <div className="w-7 h-7 rounded-full bg-brutal-purple border-2 border-black flex items-center justify-center text-white font-black text-xs">
+                            <User className="w-4 h-4 stroke-[2.5]" />
                           </div>
                         )}
                       </div>
                       <div className="flex-1">
-                        <div className="font-semibold text-charcoal-400 text-[11px] mb-0.5">
+                        <div className="font-black uppercase text-black text-[11px] mb-1">
                           {isAgent ? "Agent (Voice Bot)" : "User (Simulated Persona)"}
                         </div>
-                        <div className="text-charcoal-200 whitespace-pre-wrap">{text}</div>
+                        <div className="text-black font-medium whitespace-pre-wrap">{text}</div>
                       </div>
                     </div>
                   );
@@ -208,27 +218,27 @@ export default function CallDetailPage() {
         {/* Verification Checks & Scenario Meta Column */}
         <div className="lg:col-span-5 space-y-4">
           {/* Scenario Details Card */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-3">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-gold" />
+          <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-3">
+            <h2 className="text-sm font-black uppercase tracking-tight text-black flex items-center gap-2 font-display border-b-2 border-black pb-2">
+              <FileText className="w-4 h-4 text-black stroke-[2.5]" />
               Scenario Persona &amp; Goal
             </h2>
-            <div className="text-xs space-y-2 text-charcoal-400">
+            <div className="text-xs space-y-3">
               <div>
-                <strong className="text-charcoal-200 block mb-0.5">Persona:</strong>
-                <p className="bg-charcoal-900/60 p-2.5 rounded-lg border border-border/60">
+                <strong className="text-black uppercase font-black block mb-1">Persona:</strong>
+                <p className="bg-gray-50 p-3 rounded-xl border-2 border-black font-semibold text-gray-800">
                   {call.scenario?.persona}
                 </p>
               </div>
               <div>
-                <strong className="text-charcoal-200 block mb-0.5">Test Goal:</strong>
-                <p className="bg-charcoal-900/60 p-2.5 rounded-lg border border-border/60">
+                <strong className="text-black uppercase font-black block mb-1">Test Goal:</strong>
+                <p className="bg-gray-50 p-3 rounded-xl border-2 border-black font-semibold text-gray-800">
                   {call.scenario?.goal}
                 </p>
               </div>
               <div>
-                <strong className="text-charcoal-200 block mb-0.5">Expected Outcome:</strong>
-                <p className="bg-charcoal-900/60 p-2.5 rounded-lg border border-border/60">
+                <strong className="text-black uppercase font-black block mb-1">Expected Outcome:</strong>
+                <p className="bg-gray-50 p-3 rounded-xl border-2 border-black font-semibold text-gray-800">
                   {call.scenario?.expected_outcome}
                 </p>
               </div>
@@ -236,44 +246,46 @@ export default function CallDetailPage() {
           </div>
 
           {/* Compliance & Quality Checks Checklist */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-3">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Shield className="w-4 h-4 text-gold" />
+          <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-3">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
+              <h2 className="text-sm font-black uppercase tracking-tight text-black flex items-center gap-2 font-display">
+                <Shield className="w-4 h-4 text-black stroke-[2.5]" />
                 Compliance &amp; Quality Checks
               </h2>
-              <span className="text-xs text-charcoal-400">{call.checks.length} evaluated</span>
+              <span className="text-xs font-black uppercase px-2 py-0.5 rounded bg-brutal-bg border border-black shadow-[1px_1px_0px_#000]">
+                {call.checks.length} evaluated
+              </span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 max-h-72 overflow-y-auto pr-1">
               {call.checks.map((chk) => (
                 <div
                   key={chk.id}
-                  className={`p-3 rounded-xl border text-xs space-y-1.5 ${
+                  className={`p-3.5 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] text-xs space-y-1.5 ${
                     chk.passed 
-                      ? "bg-emerald-950/20 border-emerald-800/40" 
-                      : "bg-rose-950/20 border-rose-800/40"
+                      ? "bg-emerald-50" 
+                      : "bg-rose-50"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 font-bold">
+                    <div className="flex items-center gap-1.5 font-black text-black">
                       {chk.passed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        <CheckCircle2 className="w-4 h-4 text-emerald-700 stroke-[2.5]" />
                       ) : (
-                        <XCircle className="w-4 h-4 text-rose-400" />
+                        <XCircle className="w-4 h-4 text-rose-700 stroke-[2.5]" />
                       )}
-                      <span className="text-white capitalize">{chk.rule_id}</span>
+                      <span className="capitalize">{chk.rule_id}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       {chk.kind === "rule" && <UnverifiedRuleBadge />}
-                      <span className="font-mono text-[11px] text-charcoal-400">
+                      <span className="font-mono font-bold text-[11px] text-black">
                         {chk.kind === "rubric" ? `${chk.score.toFixed(1)} / 5.0` : (chk.passed ? "1.0" : "0.0")}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-charcoal-300 text-[11px] leading-relaxed pl-5">
+                  <p className="text-gray-800 font-semibold text-[11px] leading-relaxed pl-5">
                     {chk.evidence}
                   </p>
                 </div>

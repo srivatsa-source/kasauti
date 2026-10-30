@@ -2,9 +2,23 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  ShieldCheck, PhoneCall, History, Sparkles, 
-  Brain, Plus, Coins, Zap
+import { usePathname } from "next/navigation";
+import {
+  PhoneCall,
+  History,
+  Sparkles,
+  Brain,
+  ArrowUpRight,
+  Coins,
+  Radio,
+  Volume2,
+  Bug,
+  Zap,
+  Award,
+  GitPullRequest,
+  Menu,
+  X,
+  ChevronDown,
 } from "lucide-react";
 import { NewRunModal } from "@/components/NewRunModal";
 
@@ -30,15 +44,18 @@ interface Target {
 }
 
 export const Navbar: React.FC = () => {
+  const pathname = usePathname();
   const [budget, setBudget] = useState<BudgetInfo | null>(null);
   const [targets, setTargets] = useState<Target[]>([]);
   const [showRunModal, setShowRunModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [moreDropdownOpen, setMoreDropdownOpen] = useState(false);
 
   const fetchStatus = async () => {
     try {
       const [bRes, tRes] = await Promise.all([
         fetch(`${API_BASE}/budget`),
-        fetch(`${API_BASE}/targets`)
+        fetch(`${API_BASE}/targets`),
       ]);
       if (bRes.ok) setBudget(await bRes.json());
       if (tRes.ok) setTargets(await tRes.json());
@@ -53,95 +70,232 @@ export const Navbar: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Close menus on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setMoreDropdownOpen(false);
+  }, [pathname]);
+
   const isReal = budget?.bolna_mode?.toLowerCase() === "real";
+
+  const primaryLinks = [
+    { href: "/", label: "Targets", icon: PhoneCall },
+    { href: "/runs", label: "Runs", icon: History },
+    { href: "/telemetry", label: "Telemetry", icon: Radio },
+    { href: "/knowledge", label: "Neural Graph", icon: Brain },
+    { href: "/marketplace", label: "Marketplace", icon: Award },
+  ];
+
+  const secondaryLinks = [
+    {
+      href: "/acoustic",
+      label: "Acoustic Stress",
+      icon: Volume2,
+      badge: "STT",
+    },
+    { href: "/fuzzer", label: "Tool Fuzzer", icon: Bug, badge: "Security" },
+    {
+      href: "/sentinel",
+      label: "Live Sentinel",
+      icon: Zap,
+      badge: "Guardrail",
+    },
+    {
+      href: "/deployer",
+      label: "CI/CD Deployer",
+      icon: GitPullRequest,
+      badge: "Bolna/Git",
+    },
+  ];
+
+  const isSecondaryActive = secondaryLinks.some((l) => pathname === l.href);
 
   return (
     <>
-      <nav className="border-b border-border bg-surface/85 backdrop-blur-md sticky top-0 z-40">
+      <header className="sticky top-0 z-50 bg-white border-b-2 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-3 group">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-charcoal-900 font-bold shadow-lg shadow-gold/20 group-hover:scale-105 transition-transform">
-                  <Sparkles className="w-5 h-5 text-charcoal-900 fill-charcoal-900" />
+            {/* Left: Brand + Status Pill */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="w-8 h-8 rounded-full bg-brutal-pink border-2 border-black flex items-center justify-center font-black text-black text-sm shadow-[2px_2px_0px_#000000] group-hover:rotate-12 transition-transform">
+                  K
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-extrabold tracking-wider text-white">
-                      KASAUTI
-                    </span>
-                    <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full border ${
-                      isReal 
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 animate-pulse" 
-                        : "bg-gold/15 text-gold border border-gold/30"
-                    }`}>
-                      {isReal ? "REAL BOLNA" : "MOCK MODE"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-charcoal-400 font-medium">Test it like gold before you dial.</p>
-                </div>
-              </Link>
-            </div>
-
-            {/* Nav Links & Controls */}
-            <div className="flex items-center space-x-5 text-sm font-medium">
-              <Link
-                href="/"
-                className="text-charcoal-200 hover:text-gold flex items-center gap-1.5 transition-colors"
-              >
-                <PhoneCall className="w-4 h-4 text-gold" />
-                Targets
-              </Link>
-
-              <Link
-                href="/runs"
-                className="text-charcoal-200 hover:text-gold flex items-center gap-1.5 transition-colors"
-              >
-                <History className="w-4 h-4 text-gold" />
-                Runs
-              </Link>
-
-              <Link
-                href="/knowledge"
-                className="text-charcoal-200 hover:text-gold flex items-center gap-1.5 transition-colors"
-              >
-                <Brain className="w-4 h-4 text-gold" />
-                <span className="relative">
-                  Neural Graph
-                  <span className="absolute -top-2 -right-3 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="font-extrabold text-xl sm:text-2xl tracking-tighter text-black uppercase font-display">
+                  KASAUTI
                 </span>
               </Link>
 
-              {/* Live Budget Pill */}
-              {budget && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-charcoal-900 border border-border text-xs">
-                  <Coins className="w-3.5 h-3.5 text-gold shrink-0" />
-                  <div className="flex items-center gap-1.5 font-mono">
-                    <span className="text-white font-bold">${budget.total_spent_usd.toFixed(2)}</span>
-                    <span className="text-charcoal-600">/</span>
-                    <span className="text-charcoal-400">${budget.budget_limit_usd.toFixed(0)}</span>
+              {/* Mode Pill */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-black text-xs font-bold bg-[#f4f4f0] shadow-[2px_2px_0px_#000]">
+                <span
+                  className={`w-2 h-2 rounded-full border border-black ${isReal ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`}
+                />
+                <span className="text-[10px] uppercase tracking-wide">
+                  {isReal ? "REAL BOLNA" : "MOCK MODE"}
+                </span>
+              </div>
+            </div>
+
+            {/* Center: Navigation Links for Desktop */}
+            <nav className="hidden lg:flex items-center gap-1">
+              {primaryLinks.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-3 py-1.5 text-xs font-bold tracking-tight rounded-full transition-all ${
+                      isActive
+                        ? "bg-black text-white shadow-[2px_2px_0px_#ff90e8]"
+                        : "text-black hover:bg-black/5"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+              {/* Secondary Navigation Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold tracking-tight rounded-full transition-all ${
+                    isSecondaryActive || moreDropdownOpen
+                      ? "bg-black text-white shadow-[2px_2px_0px_#ffc900]"
+                      : "text-black hover:bg-black/5"
+                  }`}
+                >
+                  <span>Labs &amp; Tools</span>
+                  <ChevronDown className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+
+                {moreDropdownOpen && (
+                  <div className="absolute top-9 left-0 w-52 bg-white border-2 border-black rounded-xl shadow-[4px_4px_0px_#000] p-1.5 space-y-1 z-50">
+                    {secondaryLinks.map((sub) => {
+                      const isSubActive = pathname === sub.href;
+                      const Icon = sub.icon;
+                      return (
+                        <Link
+                          key={sub.href}
+                          href={sub.href}
+                          onClick={() => setMoreDropdownOpen(false)}
+                          className={`flex items-center justify-between px-3 py-2 rounded-lg text-xs font-bold transition-all ${
+                            isSubActive
+                              ? "bg-black text-white"
+                              : "text-black hover:bg-yellow-50"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <Icon className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>{sub.label}</span>
+                          </div>
+                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border border-black bg-brutal-bg text-black">
+                            {sub.badge}
+                          </span>
+                        </Link>
+                      );
+                    })}
                   </div>
+                )}
+              </div>
+            </nav>
+
+            {/* Right: Budget + CTA + Mobile Hamburger */}
+            <div className="flex items-center gap-2 sm:gap-3">
+              {budget && (
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brutal-bg border-2 border-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000]">
+                  <Coins className="w-3.5 h-3.5 text-black" />
+                  <span>
+                    ${budget.total_spent_usd.toFixed(2)} / $
+                    {budget.budget_limit_usd.toFixed(0)}
+                  </span>
                   {isReal && budget.bolna_wallet_balance !== undefined && (
-                    <span className="text-[10px] font-mono text-emerald-400 pl-1 border-l border-border/80">
-                      Bal: {budget.bolna_wallet_balance.toFixed(0)} cr
+                    <span className="text-[10px] bg-brutal-mint text-white px-1.5 py-0.5 rounded border border-black font-sans">
+                      {budget.bolna_wallet_balance.toFixed(0)} cr
                     </span>
                   )}
                 </div>
               )}
 
-              {/* Quick Launch Button */}
+              {/* Launch Run CTA */}
               <button
                 onClick={() => setShowRunModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-transform active:scale-95 shadow-md shadow-gold/20"
+                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-lg bg-black text-white hover:bg-[#222222] border-2 border-black text-xs font-extrabold uppercase tracking-wide shadow-[3px_3px_0px_#ff90e8] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#ff90e8] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
               >
-                <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span className="hidden sm:inline">New Benchmark</span>
+                <span>Launch</span>
+                <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
+              </button>
+
+              {/* Mobile Menu Hamburger */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-2 rounded-lg bg-white border-2 border-black text-black shadow-[2px_2px_0px_#000] focus:outline-none"
+                aria-label="Toggle Navigation Menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 stroke-[2.5]" />
+                ) : (
+                  <Menu className="w-5 h-5 stroke-[2.5]" />
+                )}
               </button>
             </div>
           </div>
         </div>
-      </nav>
+
+        {/* Mobile Navigation Drawer */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden border-t-2 border-black bg-white p-4 space-y-3 shadow-[0_4px_0_#000]">
+            <div className="text-[10px] font-black uppercase text-gray-500 tracking-wider">
+              Core Platform
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {primaryLinks.map((item) => {
+                const isActive = pathname === item.href;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border-2 border-black text-xs font-black uppercase transition-all ${
+                      isActive
+                        ? "bg-black text-white shadow-[2px_2px_0px_#ff90e8]"
+                        : "bg-[#faf9f5] text-black shadow-[2px_2px_0px_#000]"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 stroke-[2.5]" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            <div className="text-[10px] font-black uppercase text-gray-500 tracking-wider pt-2 border-t border-gray-200">
+              Labs, Testing &amp; Deploy
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {secondaryLinks.map((sub) => {
+                const isActive = pathname === sub.href;
+                const Icon = sub.icon;
+                return (
+                  <Link
+                    key={sub.href}
+                    href={sub.href}
+                    className={`flex items-center gap-2 p-2.5 rounded-xl border-2 border-black text-xs font-black uppercase transition-all ${
+                      isActive
+                        ? "bg-black text-white shadow-[2px_2px_0px_#ffc900]"
+                        : "bg-[#faf9f5] text-black shadow-[2px_2px_0px_#000]"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4 stroke-[2.5]" />
+                    <span>{sub.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </header>
 
       {/* Modal Launcher */}
       <NewRunModal

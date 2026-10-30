@@ -137,17 +137,17 @@ export default function KnowledgePage() {
         ctx.lineTo(tgt.x, tgt.y);
 
         if (edge.relationship === "HEALS") {
-          ctx.strokeStyle = "rgba(16, 185, 129, 0.4)";
-          ctx.lineWidth = 2;
+          ctx.strokeStyle = "rgba(16, 185, 129, 0.6)";
+          ctx.lineWidth = 2.5;
         } else if (edge.relationship === "VIOLATES") {
-          ctx.strokeStyle = "rgba(244, 63, 94, 0.4)";
-          ctx.lineWidth = 1.8;
+          ctx.strokeStyle = "rgba(244, 63, 94, 0.6)";
+          ctx.lineWidth = 2.2;
         } else if (edge.relationship === "REGULATES") {
-          ctx.strokeStyle = "rgba(229, 184, 66, 0.35)";
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = "rgba(255, 201, 0, 0.7)";
+          ctx.lineWidth = 2;
         } else {
-          ctx.strokeStyle = "rgba(75, 85, 99, 0.25)";
-          ctx.lineWidth = 1;
+          ctx.strokeStyle = "rgba(0, 0, 0, 0.2)";
+          ctx.lineWidth = 1.2;
         }
         ctx.stroke();
 
@@ -157,8 +157,8 @@ export default function KnowledgePage() {
         const py = src.y + (tgt.y - src.y) * pulseProgress;
 
         ctx.beginPath();
-        ctx.arc(px, py, 2, 0, Math.PI * 2);
-        ctx.fillStyle = edge.relationship === "HEALS" ? "#10B981" : (edge.relationship === "VIOLATES" ? "#F43F5E" : "#E5B842");
+        ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = edge.relationship === "HEALS" ? "#10B981" : (edge.relationship === "VIOLATES" ? "#F43F5E" : "#000000");
         ctx.fill();
       });
 
@@ -170,43 +170,39 @@ export default function KnowledgePage() {
         const isHovered = hoveredNodeRef.current?.id === node.id;
         const isSelected = selectedNode?.id === node.id;
 
-        const baseRadius = node.val ? node.val * 0.7 : 10;
+        const baseRadius = node.val ? node.val * 0.75 : 11;
         const radius = isSelected ? baseRadius * 1.3 : (isHovered ? baseRadius * 1.15 : baseRadius);
 
-        // Node Glow
-        if (isSelected || isHovered) {
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, radius + 8, 0, Math.PI * 2);
-          ctx.fillStyle = node.type === "failure" 
-            ? "rgba(244, 63, 94, 0.25)" 
-            : (node.type === "fix" ? "rgba(16, 185, 129, 0.25)" : "rgba(229, 184, 66, 0.25)");
-          ctx.fill();
-        }
+        // Node Drop-shadow brutalist outline
+        ctx.beginPath();
+        ctx.arc(node.x + 2, node.y + 2, radius, 0, Math.PI * 2);
+        ctx.fillStyle = "#000000";
+        ctx.fill();
 
         // Main Node Circle
         ctx.beginPath();
         ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
 
         if (node.type === "failure") {
-          ctx.fillStyle = isFiltered ? "#E11D48" : "#4c1d24";
+          ctx.fillStyle = isFiltered ? "#ff6b6b" : "#ffcccc";
         } else if (node.type === "fix") {
-          ctx.fillStyle = isFiltered ? "#059669" : "#064e3b";
+          ctx.fillStyle = isFiltered ? "#7fe382" : "#d4f7d6";
         } else if (node.type === "language") {
-          ctx.fillStyle = isFiltered ? "#D97706" : "#451a03";
+          ctx.fillStyle = isFiltered ? "#b2a8fd" : "#e3e0ff";
         } else if (node.type === "rule") {
-          ctx.fillStyle = isFiltered ? "#E5B842" : "#3b2e0e";
+          ctx.fillStyle = isFiltered ? "#ffc900" : "#fff3b3";
         } else {
-          ctx.fillStyle = isFiltered ? "#3B82F6" : "#1e293b";
+          ctx.fillStyle = isFiltered ? "#90a8ed" : "#dbe4ff";
         }
 
         ctx.fill();
-        ctx.lineWidth = isSelected ? 3 : 1.5;
-        ctx.strokeStyle = isSelected ? "#FFFFFF" : "#1F222C";
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = "#000000";
         ctx.stroke();
 
         // Node Label
-        ctx.font = isSelected ? "bold 11px Inter, sans-serif" : "9px Inter, sans-serif";
-        ctx.fillStyle = isFiltered ? "#F3F4F6" : "#6B7280";
+        ctx.font = isSelected ? "bold 11px sans-serif" : "bold 9px sans-serif";
+        ctx.fillStyle = isFiltered ? "#000000" : "#888888";
         ctx.textAlign = "center";
         ctx.fillText(node.label, node.x, node.y + radius + 13);
       });
@@ -265,35 +261,35 @@ export default function KnowledgePage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-charcoal-400 hover:text-gold mb-2 font-medium"
+            className="inline-flex items-center gap-1.5 text-xs text-black hover:underline mb-2 font-black uppercase"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+            <ArrowLeft className="w-3.5 h-3.5 stroke-[3]" /> Back to Dashboard
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
-              <Brain className="w-8 h-8 text-gold" />
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display flex items-center gap-2.5">
+              <Brain className="w-8 h-8 text-black stroke-[2.5]" />
               Compliance Neural Network
             </h1>
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-gold/15 text-gold border border-gold/30 uppercase tracking-widest">
+            <span className="px-3 py-1 rounded-full text-xs font-black bg-brutal-yellow text-black border-2 border-black shadow-[2px_2px_0px_#000] uppercase tracking-wider">
               Live Topology
             </span>
           </div>
-          <p className="text-xs text-charcoal-400 mt-1">
+          <p className="text-xs font-semibold text-gray-700 mt-1">
             Dynamic graph linking Indian regulatory mandates, identified failure nodes, regional dialect hubs, and automated prompt repairs.
           </p>
         </div>
 
         <button
           onClick={fetchGraph}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surfaceHover hover:bg-charcoal-600 border border-border text-charcoal-200 hover:text-white text-xs font-semibold self-start"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-gray-100 border-2 border-black text-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] self-start"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          <RefreshCw className={`w-3.5 h-3.5 stroke-[2.5] ${loading ? "animate-spin" : ""}`} />
           Refresh Topology
         </button>
       </div>
@@ -301,52 +297,52 @@ export default function KnowledgePage() {
       {/* Top Metric Cards */}
       {data && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-surface border border-gold/30">
-            <span className="text-[10px] uppercase font-bold text-charcoal-400">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000]">
+            <span className="text-[10px] uppercase font-black text-gray-600">
               Compliance Health
             </span>
-            <div className="text-2xl font-black text-white mt-1 flex items-baseline gap-1">
-              <span className="gold-gradient-text">{data.stats.compliance_health_score}%</span>
+            <div className="text-3xl font-black text-black mt-1 font-display">
+              {data.stats.compliance_health_score}%
             </div>
-            <span className="text-[11px] text-emerald-400 mt-1 block">
+            <span className="text-[11px] font-bold text-emerald-700 mt-1 block">
               Benchmark Integrity Index
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface border border-border">
-            <span className="text-[10px] uppercase font-bold text-charcoal-400">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000]">
+            <span className="text-[10px] uppercase font-black text-gray-600">
               Vulnerabilities Mapped
             </span>
-            <div className="text-2xl font-extrabold text-rose-400 mt-1 flex items-center gap-1.5">
-              <AlertTriangle className="w-5 h-5" />
+            <div className="text-3xl font-black text-rose-600 mt-1 flex items-center gap-1.5 font-display">
+              <AlertTriangle className="w-6 h-6 stroke-[2.5]" />
               {data.stats.total_failures_identified}
             </div>
-            <span className="text-[11px] text-charcoal-400 mt-1 block">
+            <span className="text-[11px] font-bold text-gray-700 mt-1 block">
               TRAI &amp; Vernacular Breaches
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface border border-border">
-            <span className="text-[10px] uppercase font-bold text-charcoal-400">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000]">
+            <span className="text-[10px] uppercase font-black text-gray-600">
               Self-Healing Synapses
             </span>
-            <div className="text-2xl font-extrabold text-emerald-400 mt-1 flex items-center gap-1.5">
-              <Zap className="w-5 h-5" />
+            <div className="text-3xl font-black text-emerald-600 mt-1 flex items-center gap-1.5 font-display">
+              <Zap className="w-6 h-6 stroke-[2.5]" />
               {data.stats.self_healing_fixes_deployed}
             </div>
-            <span className="text-[11px] text-charcoal-400 mt-1 block">
+            <span className="text-[11px] font-bold text-gray-700 mt-1 block">
               Active Surgical Patches
             </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-surface border border-border">
-            <span className="text-[10px] uppercase font-bold text-charcoal-400">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000]">
+            <span className="text-[10px] uppercase font-black text-gray-600">
               Linguistic Hubs
             </span>
-            <div className="text-2xl font-extrabold text-white mt-1">
+            <div className="text-3xl font-black text-black mt-1 font-display">
               {data.stats.languages_covered}
             </div>
-            <span className="text-[11px] text-charcoal-400 mt-1 block">
+            <span className="text-[11px] font-bold text-gray-700 mt-1 block">
               Hindi &bull; Hinglish &bull; Kannada &bull; English
             </span>
           </div>
@@ -356,15 +352,17 @@ export default function KnowledgePage() {
       {/* Main Interactive Canvas & Inspector Split */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Neural Graph Canvas (8 cols) */}
-        <div className="lg:col-span-8 p-5 rounded-2xl bg-surface border border-border space-y-4">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border pb-3">
+        <div className="lg:col-span-8 p-5 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-black pb-3">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-gold" />
-              <span className="text-xs font-bold text-white">Neural Synapse Visualizer</span>
+              <Layers className="w-4 h-4 text-black stroke-[2.5]" />
+              <span className="text-xs font-black uppercase text-black font-display tracking-tight">
+                Neural Synapse Visualizer
+              </span>
             </div>
 
             {/* Filter Pills */}
-            <div className="flex flex-wrap gap-1 text-[11px]">
+            <div className="flex flex-wrap gap-1.5 text-xs">
               {[
                 { id: "all", label: "All Synapses" },
                 { id: "rule", label: "Rules" },
@@ -375,10 +373,10 @@ export default function KnowledgePage() {
                 <button
                   key={f.id}
                   onClick={() => setActiveFilter(f.id)}
-                  className={`px-2.5 py-0.5 rounded-lg font-semibold transition-colors ${
+                  className={`px-3 py-1 rounded-full text-[11px] font-black uppercase transition-all ${
                     activeFilter === f.id
-                      ? "bg-gold text-charcoal-900"
-                      : "bg-charcoal-800 text-charcoal-400 hover:text-white border border-border"
+                      ? "bg-black text-white border-2 border-black shadow-[2px_2px_0px_#ff90e8]"
+                      : "bg-white text-black border-2 border-black shadow-[1.5px_1.5px_0px_#000] hover:bg-gray-100"
                   }`}
                 >
                   {f.label}
@@ -388,7 +386,7 @@ export default function KnowledgePage() {
           </div>
 
           {/* Canvas */}
-          <div className="relative w-full overflow-hidden rounded-xl bg-charcoal-900/90 border border-border/80 flex items-center justify-center">
+          <div className="relative w-full overflow-hidden rounded-xl bg-[#faf9f5] border-2 border-black flex items-center justify-center">
             <canvas
               ref={canvasRef}
               width={900}
@@ -399,18 +397,18 @@ export default function KnowledgePage() {
             />
 
             {/* Legend Overlay */}
-            <div className="absolute bottom-3 left-3 bg-surface/85 backdrop-blur-md p-2.5 rounded-xl border border-border text-[10px] space-y-1 text-charcoal-400 pointer-events-none">
+            <div className="absolute bottom-3 left-3 bg-white/95 p-3 rounded-xl border-2 border-black shadow-[3px_3px_0px_#000] text-[10px] font-black uppercase space-y-1 text-black pointer-events-none">
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-gold" /> Gold: TRAI &amp; Rubric Rules
+                <span className="w-2.5 h-2.5 rounded-full bg-brutal-yellow border border-black" /> Yellow: TRAI &amp; Rubric Rules
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500" /> Rose: Identified Failure Modes
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-black" /> Pink: Identified Failures
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> Emerald: Self-Healing Patches
+                <span className="w-2.5 h-2.5 rounded-full bg-brutal-green border border-black" /> Green: Self-Healing Patches
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-600" /> Amber: Vernacular Dialect Hubs
+                <span className="w-2.5 h-2.5 rounded-full bg-brutal-purple border border-black" /> Purple: Dialect Hubs
               </div>
             </div>
           </div>
@@ -418,14 +416,14 @@ export default function KnowledgePage() {
 
         {/* Right: Node Inspector Card (4 cols) */}
         <div className="lg:col-span-4 space-y-4">
-          <div className="p-6 rounded-2xl bg-surface border border-gold/40 shadow-xl space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Info className="w-4 h-4 text-gold" />
+          <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-4">
+            <div className="flex items-center justify-between border-b-2 border-black pb-3">
+              <h2 className="text-sm font-black uppercase tracking-tight text-black flex items-center gap-2 font-display">
+                <Info className="w-4 h-4 text-black stroke-[2.5]" />
                 Synaptic Node Inspector
               </h2>
               {selectedNode && (
-                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-charcoal-700 text-charcoal-200 border border-border">
+                <span className="px-2.5 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-brutal-bg text-black border border-black shadow-[1px_1px_0px_#000]">
                   {selectedNode.type}
                 </span>
               )}
@@ -434,34 +432,34 @@ export default function KnowledgePage() {
             {selectedNode ? (
               <div className="space-y-4 text-xs">
                 <div>
-                  <div className="text-base font-extrabold text-white">
+                  <div className="text-base font-black text-black uppercase font-display">
                     {selectedNode.label}
                   </div>
-                  <div className="text-charcoal-400 text-xs mt-1">
-                    Node ID: <code className="font-mono text-charcoal-300">{selectedNode.id}</code>
+                  <div className="text-gray-700 text-xs mt-1 font-mono font-bold">
+                    Node ID: <code>{selectedNode.id}</code>
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-charcoal-900 border border-border space-y-2">
-                  <span className="text-[10px] uppercase font-bold text-charcoal-400 block">
+                <div className="p-3.5 rounded-xl bg-gray-50 border-2 border-black space-y-2">
+                  <span className="text-[10px] uppercase font-black text-gray-700 block">
                     Description &amp; Behavior
                   </span>
-                  <p className="text-charcoal-200 leading-relaxed">
+                  <p className="text-black font-medium leading-relaxed">
                     {selectedNode.metadata.description || selectedNode.metadata.goal || "Core node in regulatory neural mapping."}
                   </p>
                 </div>
 
                 {selectedNode.type === "rule" && (
-                  <div className="space-y-2">
+                  <div className="space-y-2 font-bold">
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-charcoal-400">Source Citation:</span>
-                      <span className="text-charcoal-200 font-mono text-right max-w-[180px] truncate">
+                      <span className="text-gray-600">Source Citation:</span>
+                      <span className="text-black font-mono text-right max-w-[180px] truncate">
                         {selectedNode.metadata.citation || "TRAI Telecom Regulation"}
                       </span>
                     </div>
                     <div className="flex justify-between text-[11px]">
-                      <span className="text-charcoal-400">Total Fails Recorded:</span>
-                      <span className="text-rose-400 font-bold font-mono">
+                      <span className="text-gray-600">Total Fails Recorded:</span>
+                      <span className="text-rose-600 font-black font-mono">
                         {selectedNode.metadata.fails || 0}
                       </span>
                     </div>
@@ -469,31 +467,31 @@ export default function KnowledgePage() {
                 )}
 
                 {selectedNode.type === "failure" && (
-                  <div className="p-3 rounded-xl bg-rose-950/20 border border-rose-800/40 space-y-1.5">
-                    <div className="font-bold text-rose-300 flex items-center gap-1.5">
-                      <AlertTriangle className="w-4 h-4" />
+                  <div className="p-3.5 rounded-xl bg-rose-50 border-2 border-black space-y-1.5">
+                    <div className="font-black text-rose-800 uppercase flex items-center gap-1.5">
+                      <AlertTriangle className="w-4 h-4 stroke-[2.5]" />
                       Active Vulnerability
                     </div>
-                    <p className="text-[11px] text-charcoal-300">
+                    <p className="text-[11px] font-medium text-rose-900">
                       When this failure triggers, Kasauti automatically synthesizes a prompt patch to heal the agent.
                     </p>
                   </div>
                 )}
 
                 {selectedNode.type === "fix" && (
-                  <div className="p-3 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1.5">
-                    <div className="font-bold text-emerald-300 flex items-center gap-1.5">
-                      <Zap className="w-4 h-4" />
+                  <div className="p-3.5 rounded-xl bg-emerald-50 border-2 border-black space-y-1.5">
+                    <div className="font-black text-emerald-800 uppercase flex items-center gap-1.5">
+                      <Zap className="w-4 h-4 stroke-[2.5]" />
                       Self-Healing Mitigation
                     </div>
-                    <p className="text-[11px] text-charcoal-300">
+                    <p className="text-[11px] font-medium text-emerald-900">
                       This surgical prompt injection is automatically tested against regressions before production promotion.
                     </p>
                   </div>
                 )}
               </div>
             ) : (
-              <div className="p-8 text-center text-charcoal-400 text-xs">
+              <div className="p-8 text-center text-gray-600 font-semibold text-xs">
                 Click any node on the neural canvas to inspect its parameters and regulatory connections.
               </div>
             )}
@@ -501,16 +499,16 @@ export default function KnowledgePage() {
 
           {/* Top Vulnerability Cluster Summary */}
           {data && (
-            <div className="p-5 rounded-2xl bg-surface border border-border space-y-3">
-              <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                <Shield className="w-4 h-4 text-gold" />
+            <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-3">
+              <h3 className="text-xs font-black uppercase text-black tracking-wider flex items-center gap-2 font-display">
+                <Shield className="w-4 h-4 text-black stroke-[2.5]" />
                 Vulnerability Risk Clusters
               </h3>
               <div className="space-y-2">
                 {data.stats.top_vulnerabilities.map((v, idx) => (
-                  <div key={idx} className="p-2.5 rounded-lg bg-charcoal-900 border border-border/80 flex items-center justify-between text-xs">
-                    <span className="font-medium text-charcoal-200">{v.name}</span>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  <div key={idx} className="p-3 rounded-xl bg-gray-50 border-2 border-black flex items-center justify-between text-xs">
+                    <span className="font-bold text-black">{v.name}</span>
+                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-black">
                       {v.risk}
                     </span>
                   </div>
@@ -523,4 +521,3 @@ export default function KnowledgePage() {
     </div>
   );
 }
-

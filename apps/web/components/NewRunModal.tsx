@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { 
   Play, X, CheckSquare, Square, Shield, 
-  Coins, Sparkles, AlertCircle, ArrowRight
+  Coins, Sparkles, AlertCircle, ArrowUpRight
 } from "lucide-react";
 
 interface Target {
@@ -52,7 +52,7 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
     if (targets.length > 0 && !selectedTargetId) {
       setSelectedTargetId(targets[0].id);
     }
-  }, [targets]);
+  }, [targets, selectedTargetId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -135,45 +135,47 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-2xl bg-surface border border-gold/40 shadow-2xl overflow-hidden my-8">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="w-full max-w-2xl rounded-2xl bg-white border-3 border-black shadow-[10px_10px_0px_#000000] overflow-hidden my-8">
+        
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border bg-charcoal-900/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gold/20 flex items-center justify-center text-gold">
-              <Play className="w-4 h-4 fill-gold" />
+        <div className="flex items-center justify-between p-6 border-b-2 border-black bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brutal-pink border-2 border-black flex items-center justify-center text-black font-black shadow-[2px_2px_0px_#000]">
+              <Play className="w-4 h-4 fill-black text-black ml-0.5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
+              <h2 className="text-xl font-black uppercase text-black font-display flex items-center gap-2">
                 Launch Voice Benchmark Run
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
-                  Pre-Flight Guard
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-brutal-yellow text-black border border-black shadow-[1px_1px_0px_#000]">
+                  Pre-Flight
                 </span>
               </h2>
-              <p className="text-xs text-charcoal-400">
-                Select target, pick scenarios, and review safety budget before execution
+              <p className="text-xs font-semibold text-gray-600">
+                Select target, pick scenarios, and review safety budget before dialing
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-charcoal-400 hover:text-white hover:bg-surfaceHover transition-colors"
+            className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black text-sm hover:bg-brutal-pink shadow-[1.5px_1.5px_0px_#000] transition-all"
           >
-            <X className="w-5 h-5" />
+            ✕
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto bg-[#faf9f5]">
+          
           {/* Target Selector */}
           <div>
-            <label className="block text-xs font-semibold text-charcoal-200 mb-1.5">
+            <label className="block text-xs font-black uppercase text-black mb-1.5">
               Select Voice Agent Target
             </label>
             <select
               value={selectedTargetId}
               onChange={(e) => setSelectedTargetId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-charcoal-900 border border-border text-white text-xs font-medium focus:outline-none focus:border-gold"
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-black text-black text-xs font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
             >
               {targets.map((t) => (
                 <option key={t.id} value={t.id}>
@@ -185,47 +187,47 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
 
           {/* Suite Title */}
           <div>
-            <label className="block text-xs font-semibold text-charcoal-200 mb-1.5">
+            <label className="block text-xs font-black uppercase text-black mb-1.5">
               Benchmark Suite Title
             </label>
             <input
               type="text"
               value={suiteName}
               onChange={(e) => setSuiteName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs focus:outline-none focus:border-gold"
+              className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
             />
           </div>
 
-          {/* Quick Scenario Preset Helpers */}
+          {/* Scenario Selection Header */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-charcoal-200">
+              <label className="text-xs font-black uppercase text-black">
                 Select Scenarios ({selectedScenarioIds.length} of {scenarios.length} selected)
               </label>
-              <div className="flex items-center gap-2 text-[11px]">
+              <div className="flex items-center gap-2 text-xs font-bold">
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-gold hover:underline font-medium"
+                  className="text-black hover:underline"
                 >
                   Select All
                 </button>
-                <span className="text-charcoal-600">&bull;</span>
+                <span className="text-black/30">&bull;</span>
                 <button
                   type="button"
                   onClick={deselectAll}
-                  className="text-charcoal-400 hover:text-white font-medium"
+                  className="text-gray-500 hover:text-black"
                 >
                   Clear
                 </button>
-                <span className="text-charcoal-600">&bull;</span>
+                <span className="text-black/30">&bull;</span>
                 <button
                   type="button"
                   onClick={() => {
                     const first = scenarios[0];
                     if (first) selectSingleForLiveTest(first.id);
                   }}
-                  className="text-emerald-400 hover:underline font-medium"
+                  className="text-emerald-700 hover:underline font-extrabold"
                   title="Selects 1 scenario to save Bolna credits on live testing"
                 >
                   Single Test (Save Credits)
@@ -240,10 +242,10 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
                   key={lang}
                   type="button"
                   onClick={() => setFilterLang(lang)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                  className={`px-3 py-1 rounded-full text-xs font-black uppercase transition-all ${
                     filterLang === lang
-                      ? "bg-gold text-charcoal-900"
-                      : "bg-charcoal-800 text-charcoal-400 hover:text-charcoal-200 border border-border"
+                      ? "bg-black text-white border-2 border-black shadow-[2px_2px_0px_#ff90e8]"
+                      : "bg-white text-black border-2 border-black shadow-[1.5px_1.5px_0px_#000] hover:bg-gray-100"
                   }`}
                 >
                   {lang}
@@ -253,7 +255,7 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
 
             {/* Scenario Checklist */}
             {fetchingScenarios ? (
-              <div className="p-6 text-center text-xs text-charcoal-400">Loading catalog...</div>
+              <div className="p-6 text-center text-xs font-bold text-gray-500">Loading catalog...</div>
             ) : (
               <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                 {filteredScenarios.map((sc) => {
@@ -262,29 +264,29 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
                     <div
                       key={sc.id}
                       onClick={() => toggleScenario(sc.id)}
-                      className={`flex items-start gap-3 p-3 rounded-xl border text-xs cursor-pointer transition-colors ${
+                      className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                         isChecked
-                          ? "bg-charcoal-800/80 border-gold/40 text-white"
-                          : "bg-charcoal-900/50 border-border/70 text-charcoal-400 hover:bg-charcoal-800/40"
+                          ? "bg-white border-black shadow-[3px_3px_0px_#000]"
+                          : "bg-white/60 border-black/30 text-gray-600 hover:border-black"
                       }`}
                     >
-                      <div className="mt-0.5 text-gold shrink-0">
+                      <div className="mt-0.5 text-black shrink-0">
                         {isChecked ? (
-                          <CheckSquare className="w-4 h-4 fill-gold text-charcoal-900" />
+                          <CheckSquare className="w-4 h-4 fill-black text-white stroke-[2.5]" />
                         ) : (
-                          <Square className="w-4 h-4 text-charcoal-600" />
+                          <Square className="w-4 h-4 text-black/50" />
                         )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold truncate text-white">
+                          <span className="font-black text-xs text-black truncate">
                             {sc.title}
                           </span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-charcoal-700 text-charcoal-200 border border-border shrink-0">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-brutal-purple text-black border border-black shadow-[1px_1px_0px_#000] shrink-0">
                             {sc.language}
                           </span>
                         </div>
-                        <p className="text-[11px] text-charcoal-400 line-clamp-1 mt-0.5">
+                        <p className="text-[11px] font-medium text-gray-600 line-clamp-1 mt-0.5">
                           {sc.goal}
                         </p>
                       </div>
@@ -296,20 +298,20 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
           </div>
 
           {/* Budget & Safety Warning Card */}
-          <div className="p-4 rounded-xl bg-charcoal-900/90 border border-border flex items-center justify-between text-xs">
+          <div className="p-4 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0px_#000] flex items-center justify-between text-xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400">
+              <div className="w-8 h-8 rounded-lg bg-brutal-green border-2 border-black flex items-center justify-center text-black font-black shadow-[1.5px_1.5px_0px_#000]">
                 <Coins className="w-4 h-4" />
               </div>
               <div>
-                <div className="font-bold text-white">Estimated Cost</div>
-                <div className="text-[11px] text-charcoal-400 font-mono">
+                <div className="font-black uppercase text-black">Estimated Cost</div>
+                <div className="text-[11px] text-gray-700 font-mono font-semibold">
                   {selectedScenarioIds.length} calls &bull; ~${estimatedCost} USD estimated
                 </div>
               </div>
             </div>
             <div className="text-right">
-              <span className="text-[11px] font-semibold text-gold bg-gold/10 px-2.5 py-1 rounded-full border border-gold/30">
+              <span className="text-[10px] font-black uppercase text-black bg-brutal-yellow px-2.5 py-1 rounded-full border border-black shadow-[1.5px_1.5px_0px_#000]">
                 Safe Staging Target
               </span>
             </div>
@@ -317,11 +319,11 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-border bg-charcoal-900/60">
+        <div className="flex items-center justify-between p-6 border-t-2 border-black bg-white">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-charcoal-400 hover:text-white"
+            className="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider text-black hover:underline"
           >
             Cancel
           </button>
@@ -329,14 +331,15 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
             type="button"
             onClick={handleLaunch}
             disabled={loading || selectedScenarioIds.length === 0}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-transform active:scale-95 shadow-lg shadow-gold/20 disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#ff90e8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50"
           >
-            <Play className="w-3.5 h-3.5 fill-charcoal-900" />
+            <Play className="w-3.5 h-3.5 fill-white" />
             {loading ? "Launching Call Sequence..." : `Dial & Benchmark (${selectedScenarioIds.length})`}
+            <ArrowUpRight className="w-4 h-4" />
           </button>
         </div>
+
       </div>
     </div>
   );
 };
-
