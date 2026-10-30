@@ -3,7 +3,7 @@
 > **Tagline**: *"Test it like gold before you dial."*  
 > **Target Audience**: Judges, Bolna AI Hackathon evaluators, Enterprise Voice AI engineering teams.  
 > **Speaker/Presenter**: Vatsa (Kasauti Creator)  
-> **Live Production**: [https://kasauti.vercel.app](https://kasauti.vercel.app) | [https://kasauti-api.onrender.com](https://kasauti-api.onrender.com)
+> **Live Production**: [https://kasauti-five.vercel.app](https://kasauti-five.vercel.app) | [https://kasauti-api.onrender.com](https://kasauti-api.onrender.com)
 
 ---
 
@@ -44,7 +44,7 @@
 ## 3-Minute Video Timeline & Camera Actions
 
 ### 0:00 – 0:30: The Hook & Indian Voice AI Reality
-- **Visual**: Screen on Kasauti Dashboard ([https://kasauti.vercel.app](https://kasauti.vercel.app)). Show the minimalist B/W monochrome aesthetic, live Render backend health indicator, and the cryptographic hallmark certificates.
+- **Visual**: Screen on Kasauti Dashboard ([https://kasauti-five.vercel.app](https://kasauti-five.vercel.app)). Show the minimalist B/W monochrome aesthetic, live Render backend health indicator, and the cryptographic hallmark certificates.
 - **Presenter (Vatsa)**:
   > *"Every enterprise in India is rushing to deploy Voice AI agents for sales, collections, KYC, and support. But in Bharat, voice AI is high-risk territory. TRAI regulations are strict: if an AI bot fails to disclose its automated nature in the first few words, or ignores a Hindi DND request, that's heavy statutory penalties and brand disaster. Plus, Indian calls don't happen in quiet studios—they happen in 2G traffic in Bandra or noisy kitchens in Bangalore.*
   >
@@ -111,7 +111,7 @@
 
 ## Pre-Flight Demo Checklist
 1. **Live Deployments Ready**:
-   - Vercel Frontend: `https://kasauti.vercel.app`
+   - Vercel Frontend: `https://kasauti-five.vercel.app`
    - Render Backend: `https://kasauti-api.onrender.com/health` (Status 200)
    - Supabase DB & Storage: Active with 7 tables and `kasauti-audio-artifacts.` bucket
 2. **Local Fallback (if running locally)**:

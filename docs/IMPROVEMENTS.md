@@ -15,7 +15,7 @@ This document outlines the four-part enterprise production refactor completed on
 | **In-Call Guardrail** | Conceptual latency timer | **Sub-45ms Real Sentinel Engine (`time.perf_counter_ns()`)**, word-boundary regex detection, real-time telemetry logging |
 | **Adversarial Fuzzer** | Static list | **Dynamic Tool Fuzzer**, prompt injection sanitization, toxic parameter logging |
 | **Contributor Workflow** | Manual file inspection | **Automated Contributor GitOps CI/CD Gate (`scripts/validate_contributions.py`)**, Pydantic schema validation, anti-mock scanner |
-| **Deployment** | Localhost only | **Live Vercel Frontend** (`https://kasauti.vercel.app`) + **Live Render Docker Backend** (`https://kasauti-api.onrender.com`) |
+| **Deployment** | Localhost only | **Live Vercel Frontend** (`https://kasauti-five.vercel.app`) + **Live Render Docker Backend** (`https://kasauti-api.onrender.com`) |
 | **Test Verification** | 21 basic tests | **33 Comprehensive Production Pytest Fixtures** (100% Pass Rate) |
 
 ---
@@ -69,7 +69,7 @@ This document outlines the four-part enterprise production refactor completed on
   - Multi-stage `apps/api/Dockerfile` with native `ffmpeg` binary.
   - Live at `https://kasauti-api.onrender.com/health` (Status 200).
 - **Frontend on Vercel**:
-  - Next.js 14 deployed at `https://kasauti.vercel.app`.
+  - Next.js 14 deployed at `https://kasauti-five.vercel.app`.
   - Configured edge proxy rewrites and CORS headers.
 
 ---

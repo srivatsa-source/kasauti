@@ -15,7 +15,7 @@ The following capabilities have been fully engineered, validated with 33 test fi
 - [x] **Sub-45ms In-Call Sentinel Guardrail**: Real-time streaming packet interceptor with wall-clock latency measurement (`time.perf_counter_ns()`) and word-boundary regex detection.
 - [x] **Adversarial Tool Fuzzer**: Dynamic voice prompt injection and parameter sanitization defense evaluator.
 - [x] **Contributor GitOps CI/CD Gate**: Automated Pydantic schema validation, anti-mock static code scanner, and automated Supabase dataset synchronization (`validate_contributions.py`, `sync_training_data.py`).
-- [x] **Live Serverless Deployment**: Vercel frontend (`https://kasauti.vercel.app`) connected to Render Docker backend (`https://kasauti-api.onrender.com`).
+- [x] **Live Serverless Deployment**: Vercel frontend (`https://kasauti-five.vercel.app`) connected to Render Docker backend (`https://kasauti-api.onrender.com`).
 - [x] **Cryptographic Hallmark Certification**: Tamper-proof SHA-256 verifiable compliance certificates (`/verify/[id]`).
 
 ---

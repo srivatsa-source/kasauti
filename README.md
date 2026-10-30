@@ -1,9 +1,9 @@
 # Kasauti (कसौटी)
 > *"Test it like gold before you dial."*
 
-[![Kasauti Certified](https://img.shields.io/badge/Kasauti-Gold%2098.4%25-black?style=flat-square&logo=shield)](https://kasauti.vercel.app/verify/KASAUTI-2026-BOLNA-01)
+[![Kasauti Certified](https://img.shields.io/badge/Kasauti-Gold%2098.4%25-black?style=flat-square&logo=shield)](https://kasauti-five.vercel.app/verify/KASAUTI-2026-BOLNA-01)
 [![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passed-black?style=flat-square&logo=pytest)](https://github.com/srivatsa-source/kasauti/actions)
-[![Frontend](https://img.shields.io/badge/Vercel-Live%20Production-black?style=flat-square&logo=vercel)](https://kasauti.vercel.app)
+[![Frontend](https://img.shields.io/badge/Vercel-Live%20Production-black?style=flat-square&logo=vercel)](https://kasauti-five.vercel.app)
 [![Backend](https://img.shields.io/badge/Render-Docker%20Live-black?style=flat-square&logo=render)](https://kasauti-api.onrender.com/health)
 [![Database](https://img.shields.io/badge/Supabase-PostgreSQL%20%2B%20Storage-black?style=flat-square&logo=supabase)](https://supabase.com)
 [![License](https://img.shields.io/badge/License-Apache%202.0-black?style=flat-square)](LICENSE)
@@ -16,7 +16,7 @@ Kasauti is an enterprise-grade automated testing, security fuzzing, and regulato
 
 | Component | Platform | Live URL | Status |
 | :--- | :--- | :--- | :--- |
-| **Frontend Web GUI** | Vercel (Next.js 14) | [https://kasauti.vercel.app](https://kasauti.vercel.app) | **Live & Connected** |
+| **Frontend Web GUI** | Vercel (Next.js 14) | [https://kasauti-five.vercel.app](https://kasauti-five.vercel.app) | **Live & Connected** |
 | **Backend API** | Render (Docker + ffmpeg) | [https://kasauti-api.onrender.com](https://kasauti-api.onrender.com) | **Healthy (Status 200)** |
 | **Database & Object Storage** | Supabase (PostgreSQL) | `yqhtvuxgltapgtrqqgvu.supabase.co` | **Migrated (7 Tables)** |
 | **Audio Artifacts Bucket** | Supabase Storage | `kasauti-audio-artifacts.` | **Active (Public Read)** |
@@ -29,7 +29,7 @@ Kasauti is an enterprise-grade automated testing, security fuzzing, and regulato
                           ┌────────────────────────────────────────────────────────┐
                           │               Vercel Web GUI (apps/web)                │
                           │      Next.js 14, Minimalist B/W Monochrome Theme       │
-                          │              https://kasauti.vercel.app                │
+                          │            https://kasauti-five.vercel.app             │
                           └──────────────────────────┬─────────────────────────────┘
                                                      │ REST / Live Telemetry Stream
                                                      ▼

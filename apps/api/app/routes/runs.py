@@ -128,28 +128,32 @@ async def create_run(
 
 @router.get("", response_model=List[RunDetailResponse])
 async def list_runs(db: AsyncSession = Depends(get_db)):
-    res = await db.execute(select(Run).order_by(Run.created_at.desc()))
-    runs = res.scalars().all()
-    results = []
-    for r in runs:
-        t_res = await db.execute(select(Target).where(Target.id == r.target_id))
-        t = t_res.scalar_one_or_none()
-        results.append(RunDetailResponse(
-            id=r.id,
-            target_id=r.target_id,
-            suite_name=r.suite_name,
-            status=r.status,
-            purity_score=r.purity_score,
-            total_calls=r.total_calls,
-            passed_calls=r.passed_calls,
-            failed_calls=r.failed_calls,
-            created_at=r.created_at,
-            target_name=t.name if t else None,
-            target_phone=t.phone_number if t else None,
-            calls=[],
-            fixes=[]
-        ))
-    return results
+    try:
+        res = await db.execute(select(Run).order_by(Run.created_at.desc()))
+        runs = res.scalars().all()
+        results = []
+        for r in runs:
+            t_res = await db.execute(select(Target).where(Target.id == r.target_id))
+            t = t_res.scalar_one_or_none()
+            results.append(RunDetailResponse(
+                id=r.id,
+                target_id=r.target_id,
+                suite_name=r.suite_name,
+                status=r.status,
+                purity_score=r.purity_score,
+                total_calls=r.total_calls,
+                passed_calls=r.passed_calls,
+                failed_calls=r.failed_calls,
+                created_at=r.created_at,
+                target_name=t.name if t else None,
+                target_phone=t.phone_number if t else None,
+                calls=[],
+                fixes=[]
+            ))
+        return results
+    except Exception as e:
+        logger.warning(f"Error listing runs from database: {e}")
+        return []
 
 @router.get("/{run_id}", response_model=RunDetailResponse)
 async def get_run(run_id: str, db: AsyncSession = Depends(get_db)):

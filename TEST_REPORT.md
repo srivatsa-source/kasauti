@@ -10,7 +10,7 @@
 | **Anti-Mock Static Scanner** | ✅ PASS | 0 forbidden patterns across `apps/api/app` and `apps/web/app` |
 | **Next.js Production Build**| ✅ PASS | 9/9 pages compiled successfully |
 | **Live Backend API (Render)**| ✅ PASS | Status 200 at `https://kasauti-api.onrender.com/health` |
-| **Live Frontend (Vercel)** | ✅ PASS | Live at `https://kasauti.vercel.app` |
+| **Live Frontend (Vercel)** | ✅ PASS | Live at `https://kasauti-five.vercel.app` |
 | **Supabase DB & Storage** | ✅ PASS | Connected (`yqhtvuxgltapgtrqqgvu.supabase.co`), bucket `kasauti-audio-artifacts.` |
 
 ---
@@ -46,6 +46,6 @@ Scanning 15 files in C:\Users\Srinath_veda\Documents\kasauti\apps\web\app...
 - **Bolna.ai Telephony**: Verified live authentication (`HTTP 200`)
 - **Sarvam AI Models**: Verified live authentication (`HTTP 200`)
 - **Render Backend**: `https://kasauti-api.onrender.com`
-- **Vercel Web GUI**: `https://kasauti.vercel.app`
+- **Vercel Web GUI**: `https://kasauti-five.vercel.app`
 - **Supabase PostgreSQL**: Active with 7 relational schema tables
 - **Supabase Storage**: Active with `kasauti-audio-artifacts.` bucket

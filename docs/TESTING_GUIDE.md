@@ -11,7 +11,7 @@ Kasauti runs fully deployed and continuously integrated across modern cloud infr
 
 | Component | Platform | URL / Endpoint | Details |
 | :--- | :--- | :--- | :--- |
-| **Web Frontend** | Vercel (Next.js 14) | [https://kasauti.vercel.app](https://kasauti.vercel.app) | Production App, Zero Mock Data |
+| **Web Frontend** | Vercel (Next.js 14) | [https://kasauti-five.vercel.app](https://kasauti-five.vercel.app) | Production App, Zero Mock Data |
 | **Backend Engine** | Render (Docker + ffmpeg) | [https://kasauti-api.onrender.com](https://kasauti-api.onrender.com) | FastAPI REST & Audio Processing |
 | **Database** | Supabase (PostgreSQL) | `yqhtvuxgltapgtrqqgvu.supabase.co` | 7 Relational Tables (`0001_kasauti_schema.sql`) |
 | **Object Storage** | Supabase Storage | `kasauti-audio-artifacts.` | Indian Regional Audio Samples & Spectra |
