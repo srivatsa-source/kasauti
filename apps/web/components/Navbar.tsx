@@ -87,10 +87,25 @@ export const Navbar: React.FC = () => {
   ];
 
   const secondaryLinks = [
-    { href: "/acoustic", label: "Acoustic Stress", icon: Volume2, badge: "STT" },
+    {
+      href: "/acoustic",
+      label: "Acoustic Stress",
+      icon: Volume2,
+      badge: "STT",
+    },
     { href: "/fuzzer", label: "Tool Fuzzer", icon: Bug, badge: "Security" },
-    { href: "/sentinel", label: "Live Sentinel", icon: Zap, badge: "Guardrail" },
-    { href: "/deployer", label: "CI/CD Deployer", icon: GitPullRequest, badge: "Bolna/Git" },
+    {
+      href: "/sentinel",
+      label: "Live Sentinel",
+      icon: Zap,
+      badge: "Guardrail",
+    },
+    {
+      href: "/deployer",
+      label: "CI/CD Deployer",
+      icon: GitPullRequest,
+      badge: "Bolna/Git",
+    },
   ];
 
   const isSecondaryActive = secondaryLinks.some((l) => pathname === l.href);
@@ -100,7 +115,6 @@ export const Navbar: React.FC = () => {
       <header className="sticky top-0 z-50 bg-white border-b-2 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            
             {/* Left: Brand + Status Pill */}
             <div className="flex items-center gap-2 sm:gap-3">
               <Link href="/" className="flex items-center gap-2 group">
@@ -114,7 +128,9 @@ export const Navbar: React.FC = () => {
 
               {/* Mode Pill */}
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-black text-xs font-bold bg-[#f4f4f0] shadow-[2px_2px_0px_#000]">
-                <span className={`w-2 h-2 rounded-full border border-black ${isReal ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`} />
+                <span
+                  className={`w-2 h-2 rounded-full border border-black ${isReal ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`}
+                />
                 <span className="text-[10px] uppercase tracking-wide">
                   {isReal ? "REAL BOLNA" : "MOCK MODE"}
                 </span>
@@ -191,7 +207,8 @@ export const Navbar: React.FC = () => {
                 <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brutal-bg border-2 border-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000]">
                   <Coins className="w-3.5 h-3.5 text-black" />
                   <span>
-                    ${budget.total_spent_usd.toFixed(2)} / ${budget.budget_limit_usd.toFixed(0)}
+                    ${budget.total_spent_usd.toFixed(2)} / $
+                    {budget.budget_limit_usd.toFixed(0)}
                   </span>
                   {isReal && budget.bolna_wallet_balance !== undefined && (
                     <span className="text-[10px] bg-brutal-mint text-white px-1.5 py-0.5 rounded border border-black font-sans">
@@ -216,10 +233,13 @@ export const Navbar: React.FC = () => {
                 className="lg:hidden p-2 rounded-lg bg-white border-2 border-black text-black shadow-[2px_2px_0px_#000] focus:outline-none"
                 aria-label="Toggle Navigation Menu"
               >
-                {mobileMenuOpen ? <X className="w-5 h-5 stroke-[2.5]" /> : <Menu className="w-5 h-5 stroke-[2.5]" />}
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 stroke-[2.5]" />
+                ) : (
+                  <Menu className="w-5 h-5 stroke-[2.5]" />
+                )}
               </button>
             </div>
-
           </div>
         </div>
 
