@@ -158,30 +158,25 @@ export default function HomePage() {
 
   return (
     <div className="space-y-8">
-      {/* Minimalist Hero Strip */}
-      <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-6 sm:p-8 space-y-4">
+      {/* Minimalist Technical Hero Strip */}
+      <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-5 space-y-4 font-mono">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white" />
-              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-semibold">
-                Voice Agent Touchstone &bull; India
-              </span>
+              <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+              <h1 className="text-xl font-bold tracking-tight text-white uppercase">
+                Kasauti // Touchstone
+              </h1>
             </div>
-            
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-              Test it like gold before you dial.
-            </h1>
-
-            <p className="text-zinc-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
-              Automated adversarial testing for Indian voice agents across <strong className="text-zinc-200">Hindi, Hinglish, Kannada, and Indian English</strong>. Benchmarks TRAI regulatory mandates, diagnoses failures, and auto-patches prompts.
+            <p className="text-zinc-400 text-xs">
+              Automated adversarial testing for Indian voice agents &bull; Hindi, Hinglish, Kannada &bull; TRAI Compliance
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
             <button
               onClick={() => setShowRunModal(true)}
-              className="flex items-center gap-2 px-4 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 shadow-sm"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 shadow-sm"
             >
               <Play className="w-3.5 h-3.5 fill-black" />
               <span>Launch Benchmark</span>
@@ -189,7 +184,7 @@ export default function HomePage() {
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs transition-colors"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add Target</span>
@@ -197,7 +192,7 @@ export default function HomePage() {
 
             <Link
               href="/knowledge"
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs transition-colors"
             >
               <Terminal className="w-3.5 h-3.5" />
               <span>Neural Topology</span>
@@ -205,50 +200,40 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* 4-Column High-Visibility KPI Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-zinc-900">
-          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Registered Targets</span>
-            <span className="text-xl font-bold text-white">{targets.length}</span>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">Active voice endpoints</span>
+        {/* 4-Column KPI Strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-3 border-t border-zinc-900 text-xs">
+          <div className="p-2.5 rounded-lg bg-black border border-zinc-900">
+            <span className="text-[10px] text-zinc-500 uppercase block">Targets</span>
+            <span className="text-lg font-bold text-white mt-0.5 block">{targets.length}</span>
           </div>
 
-          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Total Test Runs</span>
-            <span className="text-xl font-bold text-white">{runs.length}</span>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">{totalCalls} calls benchmarked</span>
+          <div className="p-2.5 rounded-lg bg-black border border-zinc-900">
+            <span className="text-[10px] text-zinc-500 uppercase block">Benchmark Runs</span>
+            <span className="text-lg font-bold text-white mt-0.5 block">{runs.length}</span>
           </div>
 
-          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Aggregate Purity</span>
-            <span className="text-xl font-bold text-white">{avgPurity}%</span>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">Across all scenarios</span>
+          <div className="p-2.5 rounded-lg bg-black border border-zinc-900">
+            <span className="text-[10px] text-zinc-500 uppercase block">Purity Index</span>
+            <span className="text-lg font-bold text-white mt-0.5 block">{avgPurity}%</span>
           </div>
 
-          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
-            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Dialect Coverage</span>
-            <span className="text-xl font-bold text-white">4</span>
-            <span className="text-[10px] text-zinc-600 block mt-0.5">HI &bull; Hinglish &bull; KN &bull; EN</span>
+          <div className="p-2.5 rounded-lg bg-black border border-zinc-900">
+            <span className="text-[10px] text-zinc-500 uppercase block">Dialects</span>
+            <span className="text-lg font-bold text-white mt-0.5 block">HI &bull; HG &bull; KN &bull; EN</span>
           </div>
         </div>
       </div>
 
-      <LegalDisclaimerBanner />
-
       {/* Targets Grid Section */}
-      <section className="space-y-3">
+      <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-tight">Voice Agent Targets</h2>
-            <p className="text-xs text-zinc-500 font-mono">Monitored endpoints with staging-to-prod isolation</p>
-          </div>
-
+          <h2 className="text-xs font-bold font-mono text-white uppercase tracking-tight">Registered Targets ({targets.length})</h2>
           <button
             onClick={() => setShowAddModal(true)}
-            className="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1"
+            className="text-[11px] font-mono text-zinc-400 hover:text-white flex items-center gap-1"
           >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add Target</span>
+            <Plus className="w-3 h-3" />
+            <span>New Target</span>
           </button>
         </div>
 
@@ -372,13 +357,12 @@ export default function HomePage() {
         />
       </section>
 
-      {/* Recent Benchmark Runs Table */}
-      <section className="space-y-3 pt-2">
+      {/* Benchmark Runs Table */}
+      <section className="space-y-2 pt-1 font-mono">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-tight">Recent Benchmark Runs</h2>
-            <p className="text-xs text-zinc-500 font-mono">Purity ratings and compliance pass/fail telemetry</p>
-          </div>
+          <h2 className="text-xs font-bold text-white uppercase tracking-tight">
+            Benchmark Runs ({filteredRuns.length})
+          </h2>
 
           <div className="flex items-center gap-2">
             {/* Search filter input */}

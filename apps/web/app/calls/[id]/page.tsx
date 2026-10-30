@@ -167,8 +167,6 @@ export default function CallDetailPage() {
         </div>
       </div>
 
-      <LegalDisclaimerBanner />
-
       {/* Audio Waveform Player with Compliance Overlay Pins & Realtime Oscilloscope */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">

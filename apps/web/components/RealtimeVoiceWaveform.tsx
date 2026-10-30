@@ -205,3 +205,4 @@ export const RealtimeVoiceWaveform: React.FC<RealtimeVoiceWaveformProps> = ({
     </div>
   );
 };
+

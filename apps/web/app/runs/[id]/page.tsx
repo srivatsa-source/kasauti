@@ -290,8 +290,6 @@ export default function RunDetailPage() {
         </div>
       </div>
 
-      <LegalDisclaimerBanner />
-
       {/* Top Metric Cards (High Data Visibility) */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="md:col-span-1">

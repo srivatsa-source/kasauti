@@ -24,14 +24,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
   const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const [activeMarker, setActiveMarker] = useState<AudioMarker | null>(null);
 
-  const activeMarkers: AudioMarker[] = markers && markers.length > 0 ? markers : [
-    { time: 2.1, label: "AI Identity Disclosure", kind: "disclosure", description: "TRAI mandate in first 5s" },
-    { time: 7.4, label: "Consent Verification", kind: "consent", description: "Customer authorization confirmed" },
-    { time: 18.2, label: "Opt-Out Intercept", kind: "violation", description: "Compliance checkpoint threshold" }
-  ];
+  const activeMarkers: AudioMarker[] = markers || [];
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !recordingUrl) return;
 
     let WaveSurfer: any;
 
@@ -58,9 +54,7 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
         });
 
         wavesurferRef.current = ws;
-
-        const urlToLoad = recordingUrl || "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg";
-        ws.load(urlToLoad);
+        ws.load(recordingUrl);
 
         ws.on("ready", () => {
           setDuration(ws.getDuration());
@@ -94,6 +88,25 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
       }
     };
   }, [recordingUrl]);
+
+  if (!recordingUrl) {
+    return (
+      <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono space-y-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-zinc-600" />
+            <span className="font-bold text-white uppercase tracking-tight">Telephony Recording</span>
+          </div>
+          <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+            Awaiting Telephony Carrier Upload
+          </span>
+        </div>
+        <p className="text-zinc-500 text-[11px] leading-relaxed">
+          No external recording URL was returned for this call. Use the Live Voice Oscilloscope tab above to inspect live speech oscillation dynamics.
+        </p>
+      </div>
+    );
+  }
 
   const togglePlay = () => {
     if (!wavesurferRef.current) return;

@@ -34,16 +34,6 @@ async def lifespan(app: FastAPI):
                 notes="Primary Bolna outbound customer support voice agent."
             )
             session.add(t_live)
-
-            t_demo = Target(
-                name="Bharat FinServe Loan Assistant",
-                phone_number="+919876543210",
-                bolna_agent_id="bolna_agent_bharat_prod",
-                staging_agent_id="kasauti_staging_bharat",
-                languages=["Hindi", "Hinglish", "Kannada", "Indian English"],
-                notes="Outbound customer loan assistance agent."
-            )
-            session.add(t_demo)
             await session.commit()
 
     yield
