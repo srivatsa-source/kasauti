@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: kasauti-api
+    runtime: docker
+    dockerfilePath: apps/api/Dockerfile
+    dockerContext: .
+    plan: free
+    region: singapore
+    healthCheckPath: /health
+    envVars:
+      - key: BOLNA_MODE
+        value: real
+      - key: BOLNA_CALLER_AGENT_ID
+        value: 74bbf2a4-6561-48de-aec3-aafc7153bcd7
+      - key: BOLNA_TARGET_PHONE
+        value: "+919019823296"
+      - key: SUPABASE_BUCKET_NAME
+        value: kasauti-audio-artifacts
+      - key: PORT
+        value: "8000"
+      - key: BOLNA_API_KEY
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: SARVAM_MODE
+        value: mock
+      - key: SARVAM_API_KEY
+        sync: false
