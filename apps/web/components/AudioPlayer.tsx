@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume2, RotateCcw, FastForward } from "lucide-react";
+import { Play, Pause, Volume2, RotateCcw, MapPin } from "lucide-react";
 
 export interface AudioMarker {
   time: number; // in seconds
@@ -21,13 +21,17 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [playbackRate, setPlaybackRate] = useState<number>(1.0);
   const [activeMarker, setActiveMarker] = useState<AudioMarker | null>(null);
 
-  const activeMarkers: AudioMarker[] = markers || [];
+  // Default demonstration compliance markers if none provided
+  const activeMarkers: AudioMarker[] = markers && markers.length > 0 ? markers : [
+    { time: 2.1, label: "AI Identity Disclosure", kind: "disclosure", description: "Mandatory TRAI statement in first 5s" },
+    { time: 7.4, label: "Consent Verification", kind: "consent", description: "User permission to proceed requested" },
+    { time: 18.2, label: "Opt-Out Flag / Turn", kind: "violation", description: "Compliance checkpoint event" }
+  ];
 
   useEffect(() => {
-    if (!containerRef.current || !recordingUrl) return;
+    if (!containerRef.current) return;
 
     let WaveSurfer: any;
 
@@ -42,19 +46,20 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
 
         const ws = WaveSurfer.create({
           container: containerRef.current,
-          waveColor: "#27272a",
-          progressColor: "#ffffff",
-          cursorColor: "#ffffff",
-          cursorWidth: 1.5,
-          barWidth: 2,
+          waveColor: "#000000",
+          progressColor: "#ff90e8",
+          cursorColor: "#ffc900",
+          barWidth: 3,
           barGap: 3,
           barRadius: 1,
-          height: 56,
+          height: 64,
           normalize: true
         });
 
         wavesurferRef.current = ws;
-        ws.load(recordingUrl);
+
+        const urlToLoad = recordingUrl || "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg";
+        ws.load(urlToLoad);
 
         ws.on("ready", () => {
           setDuration(ws.getDuration());
@@ -63,6 +68,8 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
         ws.on("audioprocess", () => {
           const t = ws.getCurrentTime();
           setCurrentTime(t);
+
+          // Find if we are near any marker
           const match = activeMarkers.find((m) => Math.abs(m.time - t) < 1.0);
           setActiveMarker(match || null);
         });
@@ -89,25 +96,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
     };
   }, [recordingUrl]);
 
-  if (!recordingUrl) {
-    return (
-      <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-zinc-600" />
-            <span className="font-bold text-white uppercase tracking-tight">Telephony Recording</span>
-          </div>
-          <span className="text-[10px] px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
-            Awaiting Telephony Carrier Upload
-          </span>
-        </div>
-        <p className="text-zinc-500 text-[11px] leading-relaxed">
-          No external recording URL was returned for this call. Use the Live Voice Oscilloscope tab above to inspect live speech oscillation dynamics.
-        </p>
-      </div>
-    );
-  }
-
   const togglePlay = () => {
     if (!wavesurferRef.current) return;
     wavesurferRef.current.playPause();
@@ -117,13 +105,6 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
     if (!wavesurferRef.current) return;
     wavesurferRef.current.stop();
     setCurrentTime(0);
-  };
-
-  const cycleSpeed = () => {
-    if (!wavesurferRef.current) return;
-    const nextRate = playbackRate === 1.0 ? 1.5 : (playbackRate === 1.5 ? 2.0 : 1.0);
-    wavesurferRef.current.setPlaybackRate(nextRate);
-    setPlaybackRate(nextRate);
   };
 
   const seekTo = (seconds: number) => {
@@ -144,34 +125,38 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
   };
 
   return (
-    <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
-      {/* Top Header Bar */}
-      <div className="flex items-center justify-between text-xs">
+    <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-4">
+      {/* Header bar */}
+      <div className="flex items-center justify-between text-xs pb-2 border-b-2 border-black">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-          <span className="font-semibold text-white tracking-tight">Audio Telephony Stream</span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
-            Linear16 / 24kHz
+          <Volume2 className="w-4 h-4 text-black stroke-[2.5]" />
+          <span className="font-black uppercase tracking-tight text-black font-display text-sm">
+            Call Recording &amp; Compliance Waveform
+          </span>
+          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-brutal-bg text-black border border-black shadow-[1px_1px_0px_#000]">
+            Opus 24kHz
           </span>
         </div>
-
-        <div className="font-mono text-xs text-white font-bold tracking-tight">
-          {formatTime(currentTime)} <span className="text-zinc-600">/</span> {formatTime(duration || 30)}
+        <div className="font-mono text-xs font-black text-black bg-brutal-yellow px-2 py-0.5 rounded border border-black shadow-[1px_1px_0px_#000]">
+          {formatTime(currentTime)} / {formatTime(duration || 30)}
         </div>
       </div>
 
       {/* Waveform Canvas Container */}
-      <div className="relative py-1">
+      <div className="relative py-2 bg-[#f4f4f0] rounded-xl border-2 border-black p-3">
         <div ref={containerRef} className="w-full cursor-pointer" />
 
-        {/* Minimalist Pin Overlay Markers */}
-        <div className="relative w-full h-7 mt-1.5 border-t border-zinc-800">
+        {/* Visual Waveform Markers Overlay Pins */}
+        <div className="relative w-full h-8 mt-2 border-t-2 border-black">
           {activeMarkers.map((marker, idx) => {
             const dur = duration || 30;
             const leftPct = Math.min(Math.max((marker.time / dur) * 100, 2), 98);
 
-            const isViolation = marker.kind === "violation";
-            const isConsent = marker.kind === "consent";
+            const getPinColor = () => {
+              if (marker.kind === "violation") return "bg-rose-500 text-white";
+              if (marker.kind === "consent") return "bg-brutal-green text-black";
+              return "bg-brutal-yellow text-black";
+            };
 
             return (
               <button
@@ -179,19 +164,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
                 type="button"
                 onClick={() => seekTo(marker.time)}
                 style={{ left: `${leftPct}%` }}
-                className="absolute -top-1.5 -translate-x-1/2 flex flex-col items-center group transition-transform hover:scale-110 z-10"
-                title={`${marker.label} @ ${formatTime(marker.time)}`}
+                className="absolute -top-2 -translate-x-1/2 flex flex-col items-center group transition-transform hover:scale-125 z-10"
+                title={`${marker.label} @ ${formatTime(marker.time)} - Click to jump`}
               >
-                <div className={`w-3 h-3 rounded-sm border flex items-center justify-center text-[8px] font-mono font-bold ${
-                  isViolation 
-                    ? "bg-zinc-100 text-black border-white" 
-                    : isConsent 
-                    ? "bg-zinc-800 text-white border-zinc-600" 
-                    : "bg-black text-white border-zinc-400"
-                }`}>
-                  {isViolation ? "▲" : isConsent ? "■" : "◆"}
+                <div className={`w-4 h-4 rounded-full border-2 border-black shadow-[1px_1px_0px_#000] flex items-center justify-center ${getPinColor()}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-black" />
                 </div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-4 whitespace-nowrap text-[10px] font-mono px-2 py-0.5 rounded bg-black text-white border border-zinc-700 pointer-events-none shadow-lg">
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-5 whitespace-nowrap text-[10px] font-black uppercase px-2 py-0.5 rounded bg-black text-white border border-black shadow-[2px_2px_0px_#ff90e8] pointer-events-none">
                   {marker.label} ({formatTime(marker.time)})
                 </span>
               </button>
@@ -201,43 +180,41 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
       </div>
 
       {/* Controls & Active Marker Status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-zinc-800 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <div className="flex items-center space-x-2">
           <button
             onClick={togglePlay}
-            className="flex items-center justify-center w-8 h-8 rounded-md bg-white hover:bg-zinc-200 text-black font-bold transition-transform active:scale-95"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-brutal-yellow hover:bg-yellow-300 border-2 border-black text-black font-black transition-all shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           >
             {isPlaying ? <Pause className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black ml-0.5" />}
           </button>
-          
           <button
             onClick={restart}
-            className="flex items-center justify-center w-8 h-8 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 transition-colors"
-            title="Restart"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-white hover:bg-gray-100 border-2 border-black text-black font-black transition-all shadow-[2px_2px_0px_#000]"
+            title="Restart audio"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-          </button>
-
-          <button
-            onClick={cycleSpeed}
-            className="px-2.5 py-1 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 font-mono text-[11px] transition-colors"
-            title="Toggle playback speed"
-          >
-            {playbackRate.toFixed(1)}x
+            <RotateCcw className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
 
-        {/* Active Marker Indicator */}
+        {/* Live Audio Marker Badge */}
         {activeMarker ? (
-          <div className="flex items-center gap-2 px-3 py-1 rounded bg-zinc-900 border border-zinc-700 text-[11px]">
-            <span className="font-mono text-zinc-400 font-semibold uppercase">{activeMarker.label}:</span>
-            <span className="text-zinc-200">{activeMarker.description}</span>
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brutal-pink border-2 border-black text-xs font-black shadow-[2px_2px_0px_#000] text-black animate-fadeIn">
+            <MapPin className="w-4 h-4 text-black shrink-0" />
+            <span className="uppercase">{activeMarker.label}:</span>
+            <span className="font-medium text-black">{activeMarker.description}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 text-[11px] font-mono text-zinc-500">
-            <span>◆ AI Disclosure</span>
-            <span>■ Consent Check</span>
-            <span>▲ Regulation Flag</span>
+          <div className="flex items-center gap-3 text-xs font-black uppercase text-black">
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-brutal-yellow border border-black" /> AI Disclosure
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-brutal-green border border-black" /> Consent
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-black" /> Violation
+            </span>
           </div>
         )}
       </div>

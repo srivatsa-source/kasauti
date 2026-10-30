@@ -4,9 +4,9 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { 
-  ArrowLeft, Download, RefreshCw, Check, 
-  X, ChevronRight, Copy, Terminal, Shield, 
-  CheckCircle2, XCircle, Search
+  ArrowLeft, Download, Wrench, RefreshCw, CheckCircle2, 
+  XCircle, Clock, FileText, ChevronRight, Sparkles, AlertTriangle,
+  ArrowUpRight
 } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
@@ -14,7 +14,7 @@ import { PromptDiff } from "@/components/PromptDiff";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-interface CheckItem {
+interface Check {
   id: string;
   kind: string;
   rule_id: string;
@@ -40,7 +40,7 @@ interface Call {
   transcript?: string;
   cost: number;
   scenario?: Scenario;
-  checks: CheckItem[];
+  checks: Check[];
 }
 
 interface Fix {
@@ -79,11 +79,26 @@ export default function RunDetailPage() {
   const [selectedFix, setSelectedFix] = useState<Fix | null>(null);
   const [promoting, setPromoting] = useState(false);
   const [promotionResult, setPromotionResult] = useState<any | null>(null);
-  const [syncingBolna, setSyncingBolna] = useState(false);
-  const [creatingPR, setCreatingPR] = useState(false);
   const [filterMode, setFilterMode] = useState<"all" | "passed" | "failed">("all");
-  const [searchScenario, setSearchScenario] = useState("");
-  const [copied, setCopied] = useState(false);
+
+  const handlePromote = async () => {
+    if (!confirm("Are you sure you want to promote this verified staging fix to Production?")) return;
+    setPromoting(true);
+    try {
+      const res = await fetch(`${API_BASE}/runs/${runId}/promote`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setPromotionResult(data);
+      } else {
+        const err = await res.json();
+        alert(err.detail || "Failed to promote fix.");
+      }
+    } catch (err) {
+      alert("Error promoting: " + err);
+    } finally {
+      setPromoting(false);
+    }
+  };
 
   const fetchRun = async () => {
     try {
@@ -107,12 +122,6 @@ export default function RunDetailPage() {
     const interval = setInterval(fetchRun, 3000);
     return () => clearInterval(interval);
   }, [runId]);
-
-  const handleCopyId = () => {
-    navigator.clipboard.writeText(runId);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   const handleAutoFix = async () => {
     setFixing(true);
@@ -154,278 +163,169 @@ export default function RunDetailPage() {
     }
   };
 
-  const handlePromote = async () => {
-    if (!confirm("Promote this verified staging fix to Production target?")) return;
-    setPromoting(true);
-    try {
-      const res = await fetch(`${API_BASE}/runs/${runId}/promote`, { method: "POST" });
-      if (res.ok) {
-        setPromotionResult(await res.json());
-      } else {
-        const err = await res.json();
-        alert(err.detail || "Failed to promote fix.");
-      }
-    } catch (err) {
-      alert("Error promoting: " + err);
-    } finally {
-      setPromoting(false);
-    }
-  };
-
-  const handleBolnaDeploy = async () => {
-    if (!selectedFix || !run) return;
-    setSyncingBolna(true);
-    try {
-      const res = await fetch(`${API_BASE}/deployer/bolna-sync`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          staging_agent_id: "74bbf2a4-6561-48de-aec3-aafc7153bcd7",
-          prompt_patch_text: selectedFix.patched_prompt,
-          reason: `Autonomous regulatory patch for run ${runId.slice(0, 8)}`
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        alert(`Successfully deployed to Bolna Agent Studio: ${data.deploy_message}`);
-      } else {
-        const err = await res.json();
-        alert("Bolna deploy error: " + (err.detail || "Failed"));
-      }
-    } catch (e) {
-      alert("Error deploying to Bolna: " + e);
-    } finally {
-      setSyncingBolna(false);
-    }
-  };
-
-  const handleCreateGitPR = async () => {
-    if (!selectedFix || !run) return;
-    setCreatingPR(true);
-    try {
-      const res = await fetch(`${API_BASE}/deployer/git-pr`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          run_id: run.id,
-          target_name: run.target_name || "Kasauti CSA",
-          rule_id: selectedFix.rule_id || "trai_compliance",
-          purity_score_before: run.purity_score,
-          purity_score_after: Math.min(100.0, run.purity_score + 18.5),
-          prompt_diff: selectedFix.diff || "+ Enforce strict TRAI preamble"
-        })
-      });
-      if (res.ok) {
-        const data = await res.json();
-        window.open(data.github_pr_url, "_blank");
-      }
-    } catch (e) {
-      alert("Error generating PR: " + e);
-    } finally {
-      setCreatingPR(false);
-    }
-  };
-
   if (loading && !run) {
     return (
-      <div className="p-12 text-center text-xs font-mono text-zinc-500">
-        &gt; Loading benchmark run {runId.slice(0, 8)}...
+      <div className="p-12 text-center text-xs font-bold text-black bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+        Loading benchmark run details...
       </div>
     );
   }
 
   if (!run) {
     return (
-      <div className="p-12 text-center text-xs font-mono text-zinc-500">
-        Benchmark run not found.
+      <div className="p-12 text-center text-xs font-bold text-red-600 bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+        Run not found.
       </div>
     );
   }
 
   const allPassed = run.failed_calls === 0 && run.total_calls > 0;
 
-  const filteredCalls = run.calls
-    .filter((call) => {
-      const checks = call.checks || [];
-      const passed = checks.length > 0 && checks.every((c) => c.passed);
-      if (filterMode === "passed") return passed;
-      if (filterMode === "failed") return !passed;
-      return true;
-    })
-    .filter((call) => {
-      if (!searchScenario) return true;
-      const q = searchScenario.toLowerCase();
-      const title = call.scenario?.title || call.scenario_id;
-      return title.toLowerCase().includes(q) || (call.scenario?.language || "").toLowerCase().includes(q);
-    });
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-12">
       {/* Header Bar */}
-      <div>
-        <Link
-          href="/"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white mb-2 transition-colors"
-        >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Overview
-        </Link>
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
-                {run.target_name || "Voice Target"}
-              </h1>
-              <span className={`px-2.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider ${
-                run.status === "completed"
-                  ? "bg-zinc-900 text-zinc-200 border border-zinc-700"
-                  : "bg-white text-black animate-pulse"
-              }`}>
-                {run.status === "completed" ? "● Completed" : "◌ Running"}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 mt-1">
-              <span>Suite: {run.suite_name}</span>
-              <span className="text-zinc-700">&bull;</span>
-              <span>ID: {run.id.slice(0, 8)}...</span>
-              <button
-                onClick={handleCopyId}
-                className="text-zinc-600 hover:text-white"
-                title="Copy Full Run ID"
-              >
-                {copied ? <Check className="w-3 h-3 text-white" /> : <Copy className="w-3 h-3" />}
-              </button>
-            </div>
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs text-black hover:underline mb-2 font-black uppercase"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 stroke-[3]" /> Back to Targets
+          </Link>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display">
+              {run.target_name || "Voice Target"}
+            </h1>
+            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_#000] ${
+              run.status === "completed"
+                ? "bg-brutal-green text-black"
+                : "bg-brutal-yellow text-black animate-pulse"
+            }`}>
+              {run.status}
+            </span>
           </div>
+          <p className="text-xs font-mono font-bold text-gray-700 mt-1">
+            Suite: {run.suite_name} &bull; Run ID: {run.id.slice(0, 8)}...
+          </p>
+        </div>
 
-          {/* Action Controls */}
-          <div className="flex flex-wrap items-center gap-2">
-            <a
-              href={`${API_BASE}/runs/${run.id}/report.pdf`}
-              download
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-mono transition-colors"
+        {/* Action Controls */}
+        <div className="flex flex-wrap items-center gap-3">
+          <a
+            href={`${API_BASE}/runs/${run.id}/report.pdf`}
+            download
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-gray-100 border-2 border-black text-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+          >
+            <Download className="w-4 h-4 stroke-[2.5]" />
+            Export PDF
+          </a>
+
+          {/* 1-Click Promote Staging Fix to Production */}
+          {selectedFix && (
+            <button
+              onClick={handlePromote}
+              disabled={promoting}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brutal-pink text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+              title="Promote verified staging prompt to production agent"
             >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export PDF</span>
-            </a>
+              <Sparkles className="w-4 h-4 fill-black" />
+              {promoting ? "Promoting..." : "Promote Fix to Prod"}
+            </button>
+          )}
 
-            {/* 1-Click Promote & Autonomous Bolna / Git Actions */}
-            {selectedFix && (
-              <>
-                <button
-                  onClick={handleBolnaDeploy}
-                  disabled={syncingBolna}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50"
-                  title="Directly deploy to Bolna Agent Studio"
-                >
-                  <span>{syncingBolna ? "Deploying..." : "Deploy to Bolna"}</span>
-                </button>
+          {!allPassed && (
+            <button
+              onClick={handleAutoFix}
+              disabled={fixing}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brutal-yellow text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+            >
+              <Wrench className="w-4 h-4 stroke-[2.5]" />
+              {fixing ? "Generating Fix..." : "Auto-Fix Prompt"}
+            </button>
+          )}
 
-                <button
-                  onClick={handleCreateGitPR}
-                  disabled={creatingPR}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-mono transition-colors disabled:opacity-50"
-                  title="Open GitHub PR with compliance diff"
-                >
-                  <span>{creatingPR ? "Generating PR..." : "GitHub PR"}</span>
-                </button>
-              </>
-            )}
-
-            {!allPassed && (
-              <button
-                onClick={handleAutoFix}
-                disabled={fixing}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50"
-              >
-                <Terminal className="w-3.5 h-3.5" />
-                <span>{fixing ? "Synthesizing Fix..." : "Auto-Fix Prompt"}</span>
-              </button>
-            )}
-
-            {run.failed_calls > 0 && selectedFix && (
-              <button
-                onClick={handleRerunFailed}
-                disabled={rerunning}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-mono transition-colors disabled:opacity-50"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${rerunning ? "animate-spin" : ""}`} />
-                <span>Rerun {run.failed_calls} Failed</span>
-              </button>
-            )}
-          </div>
+          {run.failed_calls > 0 && selectedFix && (
+            <button
+              onClick={handleRerunFailed}
+              disabled={rerunning}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#ff90e8] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+            >
+              <RefreshCw className={`w-4 h-4 stroke-[2.5] ${rerunning ? "animate-spin" : ""}`} />
+              {rerunning ? "Rerunning..." : `Rerun ${run.failed_calls} Failed`}
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Top Metric Cards (High Data Visibility) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <LegalDisclaimerBanner />
+
+      {/* Top Metric Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-1">
           <PurityScoreBadge score={run.purity_score} size="lg" />
         </div>
 
-        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col justify-between font-mono">
-            <span className="text-[10px] uppercase tracking-wider text-zinc-500">
-              Scenarios Executed
+        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000] flex flex-col justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-black font-black">
+              Scenarios Tested
             </span>
-            <div className="text-3xl font-black text-white mt-1">
+            <div className="text-4xl font-black text-black font-display mt-2">
               {run.total_calls}
             </div>
-            <span className="text-[10px] text-zinc-500 mt-1">
-              Hindi &bull; Hinglish &bull; Kannada &bull; English
+            <span className="text-[11px] font-semibold text-gray-600 mt-1">
+              Hindi, Hinglish, Kannada & English
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col justify-between font-mono">
-            <span className="text-[10px] uppercase tracking-wider text-zinc-500">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000] flex flex-col justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-black font-black">
               Passing Calls
             </span>
-            <div className="text-3xl font-black text-white mt-1 flex items-center gap-2">
-              <span>{run.passed_calls}</span>
-              <span className="text-xs font-normal text-zinc-500">/ {run.total_calls}</span>
+            <div className="text-4xl font-black text-emerald-600 font-display mt-2 flex items-center gap-2">
+              <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
+              {run.passed_calls}
             </div>
-            <span className="text-[10px] text-zinc-400 mt-1">
-              Satisfied all regulatory checkpoints
+            <span className="text-[11px] font-semibold text-gray-600 mt-1">
+              Satisfied all rules and rubric checks
             </span>
           </div>
 
-          <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 flex flex-col justify-between font-mono">
-            <span className="text-[10px] uppercase tracking-wider text-zinc-500">
-              Failed Regressions
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000] flex flex-col justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-black font-black">
+              Failed Calls
             </span>
-            <div className="text-3xl font-black text-zinc-300 mt-1 flex items-center gap-2">
-              <span>{run.failed_calls}</span>
-              <span className="text-xs font-normal text-zinc-500">failed</span>
+            <div className="text-4xl font-black text-rose-600 font-display mt-2 flex items-center gap-2">
+              <XCircle className="w-8 h-8 stroke-[2.5]" />
+              {run.failed_calls}
             </div>
-            <span className="text-[10px] text-zinc-500 mt-1">
-              Auto-fix patches these specific breaches
+            <span className="text-[11px] font-semibold text-gray-600 mt-1">
+              Auto-fix patches these regressions
             </span>
           </div>
         </div>
       </div>
 
-      {/* Proposed Fix Diff Section */}
+      {/* Fix Diff Section (if available) */}
       {selectedFix && (
-        <section className="space-y-3 p-5 rounded-xl bg-zinc-950 border border-zinc-800">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <section className="space-y-3 p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-bold text-white uppercase tracking-tight flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-zinc-400" />
+              <h2 className="text-xl font-black uppercase text-black font-display flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-black fill-brutal-yellow" />
                 Proposed Surgical Prompt Fix
               </h2>
-              <p className="text-xs text-zinc-400 font-mono mt-0.5">
-                Minimal diff addressing failures, safely applied to staging agent copy.
+              <p className="text-xs font-semibold text-gray-600 mt-0.5">
+                Minimal diff generated to address the failing checks, staged for testing.
               </p>
             </div>
-
             <button
               onClick={handleRerunFailed}
               disabled={rerunning}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black text-xs font-semibold self-start"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brutal-yellow text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] self-start"
             >
-              <RefreshCw className={`w-3 h-3 ${rerunning ? "animate-spin" : ""}`} />
-              <span>Rerun Failed Scenarios</span>
+              <RefreshCw className={`w-3.5 h-3.5 stroke-[2.5] ${rerunning ? "animate-spin" : ""}`} />
+              Rerun Failed Scenarios Now
             </button>
           </div>
 
@@ -433,49 +333,41 @@ export default function RunDetailPage() {
         </section>
       )}
 
-      {/* Calls Grid Section */}
-      <section className="space-y-3">
+      {/* Calls Grid */}
+      <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-tight">Scenario Calls &amp; Checks</h2>
-            <p className="text-xs text-zinc-500 font-mono">Live multi-turn call progression with evaluated rubrics</p>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-black font-display">
+              Scenario Calls & Checks
+            </h2>
+            <p className="text-xs font-semibold text-gray-600">
+              Live call progression with rule verifications
+            </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Filter Input */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
-              <input
-                type="text"
-                placeholder="Filter scenarios..."
-                value={searchScenario}
-                onChange={(e) => setSearchScenario(e.target.value)}
-                className="pl-8 pr-3 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-white transition-colors w-40 sm:w-48"
-              />
-            </div>
-
-            {/* Filter Pills */}
-            <div className="flex rounded-md bg-zinc-950 border border-zinc-800 p-0.5 text-xs font-mono">
+          {/* Filter Pills */}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex rounded-xl bg-white border-2 border-black p-1 text-xs shadow-[2px_2px_0px_#000]">
               <button
                 onClick={() => setFilterMode("all")}
-                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  filterMode === "all" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+                className={`px-3 py-1 rounded-lg font-black uppercase text-[11px] transition-all ${
+                  filterMode === "all" ? "bg-black text-white shadow-[1px_1px_0px_#ff90e8]" : "text-black hover:bg-gray-100"
                 }`}
               >
                 All ({run.calls.length})
               </button>
               <button
                 onClick={() => setFilterMode("passed")}
-                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  filterMode === "passed" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+                className={`px-3 py-1 rounded-lg font-black uppercase text-[11px] transition-all ${
+                  filterMode === "passed" ? "bg-brutal-green text-black border border-black" : "text-black hover:bg-gray-100"
                 }`}
               >
                 Pass ({run.passed_calls})
               </button>
               <button
                 onClick={() => setFilterMode("failed")}
-                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
-                  filterMode === "failed" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+                className={`px-3 py-1 rounded-lg font-black uppercase text-[11px] transition-all ${
+                  filterMode === "failed" ? "bg-rose-500 text-white border border-black" : "text-black hover:bg-gray-100"
                 }`}
               >
                 Fail ({run.failed_calls})
@@ -484,89 +376,105 @@ export default function RunDetailPage() {
           </div>
         </div>
 
-        {/* Calls Table */}
-        <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950">
-          <table className="w-full text-left text-xs font-mono">
-            <thead className="bg-black border-b border-zinc-800 text-zinc-500 uppercase tracking-wider text-[11px]">
+        <div className="overflow-x-auto rounded-2xl border-3 border-black bg-white shadow-[6px_6px_0px_#000000]">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-[#f4f4f0] border-b-2 border-black text-black uppercase tracking-wider font-black">
               <tr>
-                <th className="px-5 py-3">Scenario / Persona</th>
-                <th className="px-5 py-3">Language</th>
-                <th className="px-5 py-3">Status</th>
-                <th className="px-5 py-3">Outcome</th>
-                <th className="px-5 py-3">Evaluated Checks</th>
-                <th className="px-5 py-3 text-right">Details</th>
+                <th className="px-6 py-4">Scenario / Persona</th>
+                <th className="px-6 py-4">Language</th>
+                <th className="px-6 py-4">Call Status</th>
+                <th className="px-6 py-4">Purity Outcome</th>
+                <th className="px-6 py-4">Rule / Rubric Evidence</th>
+                <th className="px-6 py-4 text-right">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-900">
-              {filteredCalls.map((call) => {
-                const checks = call.checks || [];
-                const passed = checks.length > 0 && checks.every((c) => c.passed);
-                const title = call.scenario?.title || call.scenario_id;
+            <tbody className="divide-y-2 divide-black/10 font-medium">
+              {run.calls
+                .filter((call) => {
+                  const checks = call.checks || [];
+                  const passed = checks.length > 0 && checks.every((c) => c.passed);
+                  if (filterMode === "passed") return passed;
+                  if (filterMode === "failed") return !passed;
+                  return true;
+                })
+                .map((call) => {
+                  const checks = call.checks || [];
+                  const passed = checks.length > 0 && checks.every((c) => c.passed);
+                  const title = call.scenario?.title || call.scenario_id;
 
-                return (
-                  <tr key={call.id} className="hover:bg-zinc-900/40 transition-colors">
-                    <td className="px-5 py-3.5">
-                      <div className="font-semibold text-white">{title}</div>
-                      <div className="text-[11px] text-zinc-500 line-clamp-1 max-w-xs mt-0.5 font-sans">
-                        {call.scenario?.persona}
-                      </div>
-                    </td>
+                  return (
+                    <tr key={call.id} className="hover:bg-yellow-50/60 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-black text-black">{title}</div>
+                        <div className="text-[11px] font-semibold text-gray-600 line-clamp-1 max-w-xs mt-0.5">
+                          {call.scenario?.persona}
+                        </div>
+                      </td>
 
-                    <td className="px-5 py-3.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] bg-zinc-900 text-zinc-400 border border-zinc-800">
-                        {call.scenario?.language || "N/A"}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-3.5">
-                      <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-zinc-900 text-zinc-300 border border-zinc-800">
-                        {call.status}
-                      </span>
-                    </td>
-
-                    <td className="px-5 py-3.5">
-                      {passed ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-900 text-white border border-zinc-600">
-                          ● PASS
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-brutal-bg text-black border border-black shadow-[1px_1px_0px_#000]">
+                          {call.scenario?.language || "N/A"}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-black text-zinc-400 border border-zinc-800">
-                          ○ FAIL
-                        </span>
-                      )}
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-3.5 max-w-md">
-                      <div className="space-y-1">
-                        {checks.slice(0, 2).map((chk) => (
-                          <div key={chk.id} className="text-[11px] flex items-center gap-1.5 truncate">
-                            <span className={chk.passed ? "text-white" : "text-zinc-600"}>
-                              {chk.passed ? "✓" : "✕"}
-                            </span>
-                            <span className="font-semibold text-zinc-300">{chk.rule_id}:</span>
-                            <span className="text-zinc-500 truncate">{chk.evidence}</span>
-                          </div>
-                        ))}
-                        {checks.length > 2 && (
-                          <span className="text-[10px] text-zinc-600 italic">
-                            +{checks.length - 2} more checks
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border border-black ${
+                          call.status === "completed"
+                            ? "bg-gray-100 text-black"
+                            : "bg-brutal-yellow text-black animate-pulse"
+                        }`}>
+                          {call.status}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {passed ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brutal-green text-black border border-black shadow-[1px_1px_0px_#000]">
+                            <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                            PASS
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#ff6b6b] text-white border border-black shadow-[1px_1px_0px_#000]">
+                            <XCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                            FAIL
                           </span>
                         )}
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-5 py-3.5 text-right">
-                      <Link
-                        href={`/calls/${call.id}`}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 transition-colors text-[11px]"
-                      >
-                        Audio &amp; Turns
-                        <ChevronRight className="w-3 h-3 text-zinc-500" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
+                      <td className="px-6 py-4 max-w-md">
+                        <div className="space-y-1">
+                          {checks.slice(0, 2).map((chk) => (
+                            <div key={chk.id} className="text-[11px] flex items-center gap-1.5 truncate">
+                              {chk.passed ? (
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 stroke-[2.5] shrink-0" />
+                              ) : (
+                                <XCircle className="w-3 h-3 text-rose-600 stroke-[2.5] shrink-0" />
+                              )}
+                              <span className="font-bold text-black">{chk.rule_id}:</span>
+                              <span className="text-gray-700 truncate">{chk.evidence}</span>
+                              {chk.kind === "rule" && <UnverifiedRuleBadge showTooltip={false} />}
+                            </div>
+                          ))}
+                          {checks.length > 2 && (
+                            <span className="text-[10px] text-gray-500 font-bold italic">
+                              +{checks.length - 2} more checks
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          href={`/calls/${call.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+                        >
+                          <span>Audio &amp; Turns</span>
+                          <ArrowUpRight className="w-3 h-3 text-brutal-yellow" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
@@ -574,48 +482,48 @@ export default function RunDetailPage() {
 
       {/* 1-Click Promotion Hallmark Modal */}
       {promotionResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
-          <div className="w-full max-w-md rounded-xl bg-black border border-zinc-800 p-6 shadow-2xl relative">
-            <div className="text-center space-y-2">
-              <div className="w-12 h-12 mx-auto rounded-lg bg-white text-black flex items-center justify-center font-bold text-xl">
-                ✓
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white border-3 border-black p-8 shadow-[12px_12px_0px_#000000] relative">
+            <div className="text-center space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-brutal-yellow border-3 border-black flex items-center justify-center text-black shadow-[4px_4px_0px_#000]">
+                <Sparkles className="w-8 h-8 fill-black" />
               </div>
 
-              <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-semibold">
+              <div className="inline-block px-3.5 py-1 rounded-full bg-brutal-green text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000]">
                 Certified Production Ready
               </div>
 
-              <h3 className="text-lg font-bold text-white uppercase tracking-tight">
-                Prompt Promoted to Production
+              <h3 className="text-2xl font-black text-black uppercase font-display tracking-tight">
+                Prompt Promoted to Production!
               </h3>
               
-              <p className="text-xs text-zinc-400 font-mono">
+              <p className="text-xs font-semibold text-gray-700">
                 The surgical fix tested in this benchmark has been safely deployed to target{" "}
-                <strong className="text-white">{promotionResult.target_name}</strong>.
+                <strong className="text-black">{promotionResult.target_name}</strong>.
               </p>
             </div>
 
-            <div className="mt-5 p-3.5 rounded-lg bg-zinc-950 border border-zinc-800 space-y-1.5 text-xs font-mono">
-              <div className="flex justify-between text-zinc-500">
-                <span>Hallmark Hash:</span>
-                <span className="text-white font-bold">{promotionResult.certification_hash}</span>
+            <div className="mt-6 p-4 rounded-xl bg-gray-50 border-2 border-black space-y-2 text-xs font-mono">
+              <div className="flex justify-between text-gray-700">
+                <span className="font-bold">Hallmark Hash:</span>
+                <span className="text-black font-extrabold">{promotionResult.certification_hash}</span>
               </div>
-              <div className="flex justify-between text-zinc-500">
-                <span>Purity Verified:</span>
-                <span className="text-white font-bold">{promotionResult.purity_score}% Purity</span>
+              <div className="flex justify-between text-gray-700">
+                <span className="font-bold">Purity Verified:</span>
+                <span className="text-emerald-700 font-extrabold">{promotionResult.purity_score}% Purity</span>
               </div>
-              <div className="flex justify-between text-zinc-500">
-                <span>Timestamp:</span>
-                <span className="text-zinc-300">{new Date(promotionResult.promoted_at).toLocaleTimeString()}</span>
+              <div className="flex justify-between text-gray-700">
+                <span className="font-bold">Promoted At:</span>
+                <span className="text-black">{new Date(promotionResult.promoted_at).toLocaleTimeString()}</span>
               </div>
             </div>
 
-            <div className="mt-5">
+            <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setPromotionResult(null)}
-                className="w-full py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors"
+                className="w-full py-3 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-xs uppercase tracking-wider shadow-[4px_4px_0px_#ff90e8] transition-all"
               >
-                Close Hallmark
+                Done
               </button>
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Info } from "lucide-react";
+import { AlertTriangle, ShieldAlert } from "lucide-react";
 
 interface UnverifiedRuleBadgeProps {
   showTooltip?: boolean;
@@ -8,24 +8,25 @@ interface UnverifiedRuleBadgeProps {
 export const UnverifiedRuleBadge: React.FC<UnverifiedRuleBadgeProps> = ({ showTooltip = true }) => {
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-700 tracking-wider uppercase cursor-help"
-      title={showTooltip ? "Community Rule: Derived from TRAI guidelines. Kasauti is a simulation tool and not formal legal advice." : undefined}
+      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brutal-yellow text-black border-2 border-black shadow-[1.5px_1.5px_0px_#000] tracking-wide uppercase cursor-help hover:translate-x-0.5 transition-transform"
+      title={showTooltip ? "Unverified Rule: Needs verification against official TRAI Gazette text. Kasauti is not legal advice." : undefined}
     >
-      <span className="w-1 h-1 rounded-full bg-zinc-400" />
-      TRAI Benchmark
+      <AlertTriangle className="w-3 h-3 text-black shrink-0 stroke-[2.5]" />
+      Unverified Rule
     </span>
   );
 };
 
 export const LegalDisclaimerBanner: React.FC = () => {
   return (
-    <div className="p-3.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-400 flex items-start gap-3">
-      <div className="w-4 h-4 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-300 shrink-0 mt-0.5 text-[10px] font-mono">
-        i
+    <div className="p-4 rounded-xl bg-white border-2 border-black shadow-[4px_4px_0px_#000000] text-xs text-black flex items-start gap-3">
+      <div className="w-7 h-7 rounded-lg bg-brutal-yellow border-2 border-black flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#000]">
+        <ShieldAlert className="w-4 h-4 text-black stroke-[2.5]" />
       </div>
-      <div className="leading-relaxed">
-        <span className="font-semibold text-zinc-200">Regulatory Touchstone: </span>
-        Kasauti benchmarks voice agents against TRAI-style telecom rules and regional Indian linguistic criteria. Community-verified simulation test pack; not formal statutory counsel.
+      <div>
+        <span className="font-black uppercase tracking-wide text-black">Regulatory Notice: </span>
+        Kasauti benchmarks voice agent conversational behavior against regulatory and compliance packs and is <strong>not formal legal advice</strong>.
+        Rules tagged with <span className="bg-brutal-yellow px-1 py-0.2 border border-black font-black text-[10px] rounded">Unverified Rule</span> are pending confirmation against official TRAI Gazette publications.
       </div>
     </div>
   );

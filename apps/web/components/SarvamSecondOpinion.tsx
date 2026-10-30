@@ -1,9 +1,16 @@
 "use client";
 
 import React, { useState } from "react";
-import { 
-  Check, RefreshCw, Terminal, 
-  ArrowRight, Shield, Layers, FileText
+import {
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Languages,
+  RefreshCw,
+  Globe,
+  Shield,
+  ArrowRight,
+  BookOpen,
 } from "lucide-react";
 
 interface TurnComparison {
@@ -39,16 +46,20 @@ interface SarvamSecondOpinionProps {
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId }) => {
+export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({
+  callId,
+}) => {
   const [data, setData] = useState<SarvamVerificationData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<"diff" | "translation" | "culture">("diff");
+  const [activeTab, setActiveTab] = useState<
+    "diff" | "translation" | "culture"
+  >("diff");
 
   const runVerification = async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/calls/${callId}/sarvam-verify`, {
-        method: "POST"
+        method: "POST",
       });
       if (res.ok) {
         setData(await res.json());
@@ -63,145 +74,161 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
   };
 
   return (
-    <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
+    <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-4">
+      {/* Title & Action */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b-2 border-black pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-white" />
-            <h2 className="text-sm font-bold text-white uppercase tracking-tight">
-              Sarvam AI Indic Second Opinion
+            <h2 className="text-xl font-black uppercase text-black font-display flex items-center gap-2">
+              <Languages className="w-5 h-5 text-black stroke-[2.5]" />
+              Sarvam AI Indic &ldquo;Second Opinion&rdquo;
             </h2>
-            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-300 border border-zinc-800 uppercase">
-              Saarika STT &bull; Mayura
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brutal-purple text-black border border-black shadow-[1px_1px_0px_#000] uppercase tracking-wider">
+              Mayura &bull; Saarika
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
-            Independent vernacular audit verifying regional phonetics, code-mixed Hinglish/Kannada, and etiquette.
+          <p className="text-xs font-semibold text-gray-600 mt-1">
+            Independent vernacular audit checking regional phonetics, code-mixed
+            nuances, and English translation.
           </p>
         </div>
 
         <button
           onClick={runVerification}
           disabled={loading}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50 shrink-0"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brutal-yellow hover:bg-yellow-300 text-black border-2 border-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all shrink-0 disabled:opacity-50"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          {loading ? "Auditing Indic Stream..." : data ? "Re-Run Audit" : "Run Sarvam Audit"}
+          <RefreshCw
+            className={`w-3.5 h-3.5 stroke-[2.5] ${loading ? "animate-spin" : ""}`}
+          />
+          {loading
+            ? "Auditing Indic Nuances..."
+            : data
+              ? "Re-Run Sarvam Audit"
+              : "Run Sarvam Audit"}
         </button>
       </div>
 
       {!data && !loading && (
-        <div className="p-8 text-center rounded-lg bg-black border border-zinc-900 space-y-2">
-          <Terminal className="w-6 h-6 text-zinc-600 mx-auto" />
-          <h3 className="text-xs font-semibold text-zinc-300">
-            Awaiting Vernacular Verification
+        <div className="p-8 text-center rounded-xl bg-gray-50 border-2 border-dashed border-black">
+          <Globe className="w-10 h-10 text-black mx-auto mb-2 stroke-[1.5]" />
+          <h3 className="text-sm font-black uppercase text-black">
+            Audit Bharat-First Nuances &amp; Phonetics
           </h3>
-          <p className="text-[11px] text-zinc-500 max-w-sm mx-auto">
-            Run an independent cross-reference of this audio against Sarvam AI Saarika v2 Indic speech models.
+          <p className="text-xs font-semibold text-gray-600 max-w-md mx-auto mt-1">
+            Click above to cross-reference this call with Sarvam AI&apos;s
+            models for Hindi, Hinglish, and Kannada speech verification.
           </p>
         </div>
       )}
 
       {loading && (
-        <div className="p-8 text-center text-xs text-zinc-400 font-mono animate-pulse">
-          &gt; Querying Sarvam Indic STT and Translation API endpoints...
+        <div className="p-8 text-center text-xs font-black uppercase text-black bg-yellow-50 rounded-xl border-2 border-black shadow-[2px_2px_0px_#000] animate-pulse">
+          Connecting to Sarvam AI Mayura &amp; Saarika engines...
         </div>
       )}
 
       {data && (
         <div className="space-y-4">
-          {/* Quick Stats Grid */}
+          {/* Top Quick Stats */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3 rounded-lg bg-black border border-zinc-800">
-              <span className="text-[10px] font-mono uppercase text-zinc-500 block mb-1">
+            <div className="p-3.5 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000]">
+              <span className="text-[10px] uppercase font-black text-gray-600">
                 Detected Dialect
               </span>
-              <div className="text-xs font-semibold text-white">
+              <div className="text-sm font-black text-black mt-0.5">
                 {data.detected_dialect}
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-black border border-zinc-800">
-              <span className="text-[10px] font-mono uppercase text-zinc-500 block mb-1">
-                Phonetic Confidence
+            <div className="p-3.5 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000]">
+              <span className="text-[10px] uppercase font-black text-gray-600">
+                Indic Phonetic Confidence
               </span>
-              <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5">
-                <Check className="w-3.5 h-3.5 text-white" />
+              <div className="text-sm font-black text-emerald-700 mt-0.5 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 stroke-[2.5]" />
                 {data.indic_confidence_pct}% Accurate
               </div>
             </div>
 
-            <div className="p-3 rounded-lg bg-black border border-zinc-800">
-              <span className="text-[10px] font-mono uppercase text-zinc-500 block mb-1">
-                Etiquette (Tehzeeb)
+            <div className="p-3.5 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000]">
+              <span className="text-[10px] uppercase font-black text-gray-600">
+                Etiquette &amp; Respect Index
               </span>
-              <div className="text-xs font-mono text-zinc-200">
-                {data.cultural_etiquette_audit.respectful_greeting ? "Pass (Formal Respect)" : "Direct Register"}
+              <div className="text-sm font-black text-black mt-0.5">
+                {data.cultural_etiquette_audit.respectful_greeting
+                  ? "Pass (Tehzeeb Verified)"
+                  : "Direct Tone"}
               </div>
             </div>
           </div>
 
-          {/* Sub Navigation */}
-          <div className="flex border-b border-zinc-800 text-xs gap-4 font-mono">
+          {/* Sub-tabs */}
+          <div className="flex border-b-2 border-black text-xs gap-3">
             <button
               onClick={() => setActiveTab("diff")}
-              className={`pb-2 transition-colors ${
+              className={`pb-2 font-black uppercase tracking-wider transition-all ${
                 activeTab === "diff"
-                  ? "border-b-2 border-white text-white font-bold"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "border-b-4 border-black text-black"
+                  : "text-gray-500 hover:text-black"
               }`}
             >
-              [ Turn-by-Turn Diff ]
+              Turn-by-Turn Indic Diff
             </button>
             <button
               onClick={() => setActiveTab("translation")}
-              className={`pb-2 transition-colors ${
+              className={`pb-2 font-black uppercase tracking-wider transition-all ${
                 activeTab === "translation"
-                  ? "border-b-2 border-white text-white font-bold"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "border-b-4 border-black text-black"
+                  : "text-gray-500 hover:text-black"
               }`}
             >
-              [ English Translation ]
+              Sarvam English Translation
             </button>
             <button
               onClick={() => setActiveTab("culture")}
-              className={`pb-2 transition-colors ${
+              className={`pb-2 font-black uppercase tracking-wider transition-all ${
                 activeTab === "culture"
-                  ? "border-b-2 border-white text-white font-bold"
-                  : "text-zinc-500 hover:text-zinc-300"
+                  ? "border-b-4 border-black text-black"
+                  : "text-gray-500 hover:text-black"
               }`}
             >
-              [ Cultural Etiquette Audit ]
+              Cultural Etiquette &amp; Honorifics
             </button>
           </div>
 
-          {/* Tab 1: Diff View */}
+          {/* Tab 1: Diff */}
           {activeTab === "diff" && (
-            <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
               {data.turn_comparisons.map((turn) => (
                 <div
                   key={turn.turn_index}
-                  className="p-3 rounded-lg bg-black border border-zinc-800/80 space-y-2"
+                  className="p-3.5 rounded-xl bg-white border-2 border-black shadow-[2px_2px_0px_#000] text-xs space-y-2"
                 >
-                  <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 border-b border-zinc-900 pb-1.5">
-                    <span className="uppercase text-white font-semibold">Turn {turn.turn_index} &bull; {turn.speaker}</span>
-                    <span className="text-zinc-400">{turn.indic_features_detected}</span>
+                  <div className="flex items-center justify-between text-[11px] font-mono">
+                    <span className="font-black uppercase text-black">
+                      Turn {turn.turn_index} ({turn.speaker})
+                    </span>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-brutal-bg text-black border border-black shadow-[1px_1px_0px_#000]">
+                      {turn.indic_features_detected}
+                    </span>
                   </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
-                    <div className="p-2.5 rounded bg-zinc-950 border border-zinc-800/60">
-                      <span className="text-[10px] uppercase text-zinc-500 block mb-1">
-                        Primary ASR (Deepgram / Bolna)
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <div className="p-2.5 rounded-lg bg-gray-50 border border-black">
+                      <span className="text-[10px] uppercase font-black text-gray-600 block mb-1">
+                        Primary ASR (Deepgram/Bolna)
                       </span>
-                      <p className="text-zinc-300 leading-relaxed">{turn.bolna_text}</p>
+                      <p className="text-black text-xs font-medium">
+                        {turn.bolna_text}
+                      </p>
                     </div>
-
-                    <div className="p-2.5 rounded bg-zinc-900/60 border border-zinc-700/60">
-                      <span className="text-[10px] uppercase text-zinc-300 block mb-1 font-semibold">
-                        Sarvam Saarika Indic Audit
+                    <div className="p-2.5 rounded-lg bg-yellow-50 border border-black">
+                      <span className="text-[10px] uppercase font-black text-black block mb-1">
+                        Sarvam Indic Verification
                       </span>
-                      <p className="text-white leading-relaxed">{turn.sarvam_gloss}</p>
+                      <p className="text-black text-xs font-bold">
+                        {turn.sarvam_gloss}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -211,11 +238,12 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
 
           {/* Tab 2: Translation */}
           {activeTab === "translation" && (
-            <div className="p-4 rounded-lg bg-black border border-zinc-800 space-y-2 font-mono text-xs">
-              <span className="text-[10px] uppercase text-zinc-500 block">
-                Sarvam Mayura v1 Translation
-              </span>
-              <p className="text-zinc-200 leading-relaxed whitespace-pre-wrap p-3 rounded bg-zinc-950 border border-zinc-800">
+            <div className="p-4 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0px_#000] space-y-2">
+              <div className="flex items-center gap-2 text-xs font-black uppercase text-black">
+                <BookOpen className="w-4 h-4 text-black stroke-[2.5]" />
+                English Translation by Sarvam Mayura v1
+              </div>
+              <p className="text-xs text-black leading-relaxed whitespace-pre-wrap font-mono p-3 rounded-lg bg-gray-50 border border-black font-semibold">
                 {data.english_translation || "No translated text available."}
               </p>
             </div>
@@ -223,29 +251,42 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
 
           {/* Tab 3: Cultural Etiquette */}
           {activeTab === "culture" && (
-            <div className="p-4 rounded-lg bg-black border border-zinc-800 space-y-3 font-mono text-xs">
-              <span className="text-[10px] uppercase text-zinc-500 block">
-                Indian Telecom Behavioral Checks
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="p-3 rounded bg-zinc-950 border border-zinc-800">
-                  <span className="text-zinc-500 block text-[10px] mb-1">Greeting Disclosure</span>
-                  <span className="text-white font-bold">
-                    {data.cultural_etiquette_audit.respectful_greeting ? "PASS [Namaste / Ji]" : "FAIL [Missing]"}
+            <div className="p-4 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0px_#000] space-y-3">
+              <div className="flex items-center gap-2 text-xs font-black uppercase text-black">
+                <Shield className="w-4 h-4 text-black stroke-[2.5]" />
+                Indian Telephone Etiquette &amp; Code-Mixing Audit
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                <div className="p-3 rounded-lg bg-gray-50 border border-black">
+                  <span className="text-gray-600 font-bold block mb-1">
+                    Namaste / Greeting
+                  </span>
+                  <span className="font-black text-emerald-700">
+                    {data.cultural_etiquette_audit.respectful_greeting
+                      ? "✓ Present in Turn 1"
+                      : "✗ Missing"}
                   </span>
                 </div>
-                <div className="p-3 rounded bg-zinc-950 border border-zinc-800">
-                  <span className="text-zinc-500 block text-[10px] mb-1">Honorific Register</span>
-                  <span className="text-white font-bold">
-                    {data.cultural_etiquette_audit.honorific_usage ? "PASS [Aap / Ji]" : "NEUTRAL [Tum / Direct]"}
+                <div className="p-3 rounded-lg bg-gray-50 border border-black">
+                  <span className="text-gray-600 font-bold block mb-1">
+                    Honorifics (&apos;Ji&apos; / &apos;Aap&apos;)
+                  </span>
+                  <span className="font-black text-emerald-700">
+                    {data.cultural_etiquette_audit.honorific_usage
+                      ? "✓ Polite Register"
+                      : "Neutral Register"}
                   </span>
                 </div>
-                <div className="p-3 rounded bg-zinc-950 border border-zinc-800">
-                  <span className="text-zinc-500 block text-[10px] mb-1">Code-Switching</span>
-                  <span className="text-white font-bold">PASS [Natural Mix]</span>
+                <div className="p-3 rounded-lg bg-gray-50 border border-black">
+                  <span className="text-gray-600 font-bold block mb-1">
+                    Code-Switching Intact
+                  </span>
+                  <span className="font-black text-emerald-700">
+                    ✓ No Translation Artifacts
+                  </span>
                 </div>
               </div>
-              <p className="text-[11px] text-zinc-400 mt-2">
+              <p className="text-xs text-gray-700 font-semibold italic">
                 {data.cultural_etiquette_audit.verdict}
               </p>
             </div>

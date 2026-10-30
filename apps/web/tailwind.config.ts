@@ -9,48 +9,55 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#000000",
-        surface: "#09090b",
-        surfaceHover: "#121215",
-        surfaceActive: "#18181b",
-        border: "#27272a",
-        borderSubtle: "#18181b",
-        borderStrong: "#3f3f46",
-        // Minimalist monochrome mappings
-        mono: {
-          50: "#fafafa",
-          100: "#f4f4f5",
-          200: "#e4e4e7",
-          300: "#d4d4d8",
-          400: "#a1a1aa",
-          500: "#71717a",
-          600: "#52525b",
-          700: "#3f3f46",
-          800: "#27272a",
-          900: "#18181b",
-          950: "#09090b",
+        background: "#f4f4f0",
+        surface: "#ffffff",
+        surfaceHover: "#f8f8f6",
+        border: "#000000",
+        // Gumroad Neo-Brutalist Palette
+        brutal: {
+          bg: "#f4f4f0",
+          card: "#ffffff",
+          black: "#000000",
+          pink: "#ff90e8",
+          "pink-light": "#ffb8f1",
+          yellow: "#ffc900",
+          "yellow-light": "#ffea79",
+          purple: "#90a8ed",
+          "purple-light": "#b9caff",
+          lavender: "#b2a8fd",
+          mint: "#23a094",
+          green: "#7fe382",
+          gray: "#f0f0eb",
+          muted: "#666666",
         },
-        // Backward-compatible aliases mapped cleanly to monochrome
         gold: {
-          DEFAULT: "#ffffff",
-          light: "#fafafa",
-          dark: "#a1a1aa",
-          glow: "rgba(255, 255, 255, 0.12)"
+          DEFAULT: "#ffc900",
+          light: "#ffea79",
+          dark: "#e0b000",
+          glow: "rgba(255, 201, 0, 0.25)"
         },
         charcoal: {
-          900: "#09090b",
-          800: "#121215",
-          700: "#1c1c20",
-          600: "#27272a",
-          500: "#52525b",
-          400: "#a1a1aa",
-          200: "#e4e4e7",
-          100: "#f4f4f5"
+          900: "#000000",
+          800: "#1a1a1a",
+          700: "#333333",
+          600: "#555555",
+          400: "#777777",
+          200: "#222222"
         }
       },
+      boxShadow: {
+        brutal: "4px 4px 0px 0px #000000",
+        "brutal-sm": "2px 2px 0px 0px #000000",
+        "brutal-lg": "6px 6px 0px 0px #000000",
+        "brutal-xl": "8px 8px 0px 0px #000000",
+        "brutal-pink": "4px 4px 0px 0px #ff90e8",
+        "brutal-yellow": "4px 4px 0px 0px #ffc900",
+        "brutal-purple": "4px 4px 0px 0px #90a8ed",
+      },
       fontFamily: {
-        sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
-        mono: ["JetBrains Mono", "SF Mono", "Menlo", "Consolas", "Courier New", "monospace"]
+        sans: ["var(--font-inter)", "Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
+        display: ["var(--font-space-grotesk)", "Impact", "Cabinet Grotesk", "Arial Black", "sans-serif"],
+        mono: ["JetBrains Mono", "Courier New", "monospace"]
       }
     },
   },

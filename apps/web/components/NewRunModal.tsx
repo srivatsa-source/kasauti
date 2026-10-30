@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { 
-  Play, X, CheckSquare, Square, 
-  Terminal, ShieldCheck, ArrowRight, Phone, Plus, Check
+  Play, X, CheckSquare, Square, Shield, 
+  Coins, Sparkles, AlertCircle, ArrowUpRight
 } from "lucide-react";
 
 interface Target {
@@ -29,7 +29,6 @@ interface NewRunModalProps {
   isOpen: boolean;
   onClose: () => void;
   targets: Target[];
-  initialTargetId?: string;
   onRunLaunched?: (runId: string) => void;
 }
 
@@ -38,51 +37,22 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 export const NewRunModal: React.FC<NewRunModalProps> = ({
   isOpen,
   onClose,
-  targets: propTargets,
-  initialTargetId,
+  targets,
   onRunLaunched
 }) => {
-  const [targets, setTargets] = useState<Target[]>(propTargets || []);
-  const [selectedTargetId, setSelectedTargetId] = useState<string>(initialTargetId || "");
+  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
-  const [suiteName, setSuiteName] = useState("TRAI Regulatory & Behavioral Pack");
+  const [suiteName, setSuiteName] = useState("Custom TRAI Compliance Benchmark");
   const [loading, setLoading] = useState(false);
   const [fetchingScenarios, setFetchingScenarios] = useState(true);
   const [filterLang, setFilterLang] = useState<string>("All");
 
-  // Inline quick target creation
-  const [showInlineAdd, setShowInlineAdd] = useState(false);
-  const [newTargetName, setNewTargetName] = useState("");
-  const [newTargetPhone, setNewTargetPhone] = useState("+919019823296");
-  const [newTargetStaging, setNewTargetStaging] = useState("74bbf2a4-6561-48de-aec3-aafc7153bcd7");
-  const [creatingTarget, setCreatingTarget] = useState(false);
-
-  // Sync prop targets or fetch fresh from API
   useEffect(() => {
-    if (propTargets && propTargets.length > 0) {
-      setTargets(propTargets);
-      if (!selectedTargetId) {
-        setSelectedTargetId(initialTargetId || propTargets[0].id);
-      }
-    } else if (isOpen) {
-      fetch(`${API_BASE}/targets`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data) && data.length > 0) {
-            setTargets(data);
-            setSelectedTargetId(initialTargetId || data[0].id);
-          }
-        })
-        .catch(() => {});
+    if (targets.length > 0 && !selectedTargetId) {
+      setSelectedTargetId(targets[0].id);
     }
-  }, [propTargets, isOpen, initialTargetId]);
-
-  useEffect(() => {
-    if (initialTargetId) {
-      setSelectedTargetId(initialTargetId);
-    }
-  }, [initialTargetId]);
+  }, [targets, selectedTargetId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -93,6 +63,7 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
         if (res.ok) {
           const data: Scenario[] = await res.json();
           setScenarios(data);
+          // By default, select all scenarios
           setSelectedScenarioIds(data.map((s) => s.id));
         }
       } catch (err) {
@@ -121,36 +92,6 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   );
 
   const estimatedCost = (selectedScenarioIds.length * 0.03).toFixed(2);
-
-  const handleCreateInlineTarget = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTargetName) return;
-    setCreatingTarget(true);
-    try {
-      const res = await fetch(`${API_BASE}/targets`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: newTargetName,
-          phone_number: newTargetPhone,
-          bolna_agent_id: newTargetStaging,
-          staging_agent_id: newTargetStaging,
-          languages: ["Hindi", "Hinglish", "Kannada", "Indian English"]
-        })
-      });
-      if (res.ok) {
-        const created = await res.json();
-        setTargets((prev) => [created, ...prev]);
-        setSelectedTargetId(created.id);
-        setShowInlineAdd(false);
-        setNewTargetName("");
-      }
-    } catch (err) {
-      alert("Failed to save target");
-    } finally {
-      setCreatingTarget(false);
-    }
-  };
 
   const handleLaunch = async () => {
     if (!selectedTargetId) {
@@ -194,209 +135,117 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-xl bg-black border border-zinc-800 shadow-2xl overflow-hidden my-6">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-5 border-b border-zinc-800 bg-zinc-950">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white" />
-              <h2 className="text-sm font-bold text-white uppercase tracking-tight">
-                Benchmark Run Dispatcher
-              </h2>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
-                Pre-Flight Guard
-              </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
+      <div className="w-full max-w-2xl rounded-2xl bg-white border-3 border-black shadow-[10px_10px_0px_#000000] overflow-hidden my-8">
+        
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b-2 border-black bg-white">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-brutal-pink border-2 border-black flex items-center justify-center text-black font-black shadow-[2px_2px_0px_#000]">
+              <Play className="w-4 h-4 fill-black text-black ml-0.5" />
             </div>
-            <p className="text-xs text-zinc-400 mt-0.5 font-mono">
-              Target configuration, scenario checklist, and budget verification
-            </p>
+            <div>
+              <h2 className="text-xl font-black uppercase text-black font-display flex items-center gap-2">
+                Launch Voice Benchmark Run
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-brutal-yellow text-black border border-black shadow-[1px_1px_0px_#000]">
+                  Pre-Flight
+                </span>
+              </h2>
+              <p className="text-xs font-semibold text-gray-600">
+                Select target, pick scenarios, and review safety budget before dialing
+              </p>
+            </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors"
+            className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black text-sm hover:bg-brutal-pink shadow-[1.5px_1.5px_0px_#000] transition-all"
           >
-            <X className="w-4 h-4" />
+            ✕
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-5 space-y-5 max-h-[72vh] overflow-y-auto">
-          {/* Target Selection Section */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-mono uppercase text-zinc-300 font-semibold flex items-center gap-1.5">
-                <span>Select Voice Agent Target</span>
-                <span className="text-zinc-600">({targets.length} available)</span>
-              </label>
-
-              <button
-                type="button"
-                onClick={() => setShowInlineAdd(!showInlineAdd)}
-                className="text-[11px] font-mono text-zinc-400 hover:text-white flex items-center gap-1"
-              >
-                <Plus className="w-3 h-3" />
-                <span>{showInlineAdd ? "Cancel" : "Add Target"}</span>
-              </button>
-            </div>
-
-            {/* Inline Quick Add Form if opened */}
-            {showInlineAdd && (
-              <form onSubmit={handleCreateInlineTarget} className="p-3 rounded-lg bg-zinc-950 border border-zinc-700 space-y-2.5 font-mono text-xs">
-                <span className="text-[10px] uppercase text-white font-bold block">Quick Add New Agent Endpoint</span>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    required
-                    placeholder="Agent Name (e.g. Kasauti CSA)"
-                    value={newTargetName}
-                    onChange={(e) => setNewTargetName(e.target.value)}
-                    className="px-2.5 py-1.5 rounded bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-white"
-                  />
-                  <input
-                    type="text"
-                    required
-                    placeholder="Recipient Phone (+91...)"
-                    value={newTargetPhone}
-                    onChange={(e) => setNewTargetPhone(e.target.value)}
-                    className="px-2.5 py-1.5 rounded bg-black border border-zinc-800 text-white text-xs focus:outline-none focus:border-white"
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowInlineAdd(false)}
-                    className="px-2.5 py-1 rounded text-[11px] text-zinc-400"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={creatingTarget}
-                    className="px-3 py-1 rounded bg-white text-black font-semibold text-[11px]"
-                  >
-                    {creatingTarget ? "Saving..." : "Save & Select"}
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Visual Interactive Target Selection Cards */}
-            {targets.length === 0 ? (
-              <div className="p-4 rounded-lg bg-zinc-950 border border-zinc-800 text-center space-y-2">
-                <p className="text-xs font-mono text-zinc-400">No voice targets currently registered.</p>
-                <button
-                  type="button"
-                  onClick={() => setShowInlineAdd(true)}
-                  className="px-3 py-1 rounded bg-white text-black text-xs font-semibold"
-                >
-                  Create First Target
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {targets.map((t) => {
-                  const isSelected = selectedTargetId === t.id;
-                  return (
-                    <div
-                      key={t.id}
-                      onClick={() => setSelectedTargetId(t.id)}
-                      className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                        isSelected
-                          ? "bg-zinc-900 border-white text-white shadow-sm"
-                          : "bg-zinc-950 border-zinc-800/80 text-zinc-400 hover:border-zinc-700"
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-1">
-                        <div className="min-w-0">
-                          <div className="font-semibold text-xs text-white truncate flex items-center gap-1.5">
-                            <span className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-white" : "bg-zinc-600"}`} />
-                            <span className="truncate">{t.name}</span>
-                          </div>
-                          <div className="text-[11px] font-mono text-zinc-400 mt-0.5 flex items-center gap-1">
-                            <Phone className="w-2.5 h-2.5 text-zinc-500" />
-                            <span>{t.phone_number}</span>
-                          </div>
-                        </div>
-
-                        {isSelected && (
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-white text-black font-bold uppercase shrink-0">
-                            SELECTED
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="mt-2 text-[10px] font-mono text-zinc-500 truncate">
-                        Staging: {t.staging_agent_id ? t.staging_agent_id.slice(0, 16) + "..." : "default"}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+        {/* Body */}
+        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto bg-[#faf9f5]">
+          
+          {/* Target Selector */}
+          <div>
+            <label className="block text-xs font-black uppercase text-black mb-1.5">
+              Select Voice Agent Target
+            </label>
+            <select
+              value={selectedTargetId}
+              onChange={(e) => setSelectedTargetId(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-black text-black text-xs font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+            >
+              {targets.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name} ({t.phone_number}) — Staging: {t.staging_agent_id || "default"}
+                </option>
+              ))}
+            </select>
           </div>
 
-          {/* Suite Title Input */}
+          {/* Suite Title */}
           <div>
-            <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">
+            <label className="block text-xs font-black uppercase text-black mb-1.5">
               Benchmark Suite Title
             </label>
             <input
               type="text"
               value={suiteName}
               onChange={(e) => setSuiteName(e.target.value)}
-              className="w-full px-3 py-1.5 rounded-md bg-zinc-950 border border-zinc-800 text-white text-xs font-mono focus:outline-none focus:border-white transition-colors"
+              className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
             />
           </div>
 
-          {/* Scenarios Header & Filter Controls */}
-          <div className="pt-2 border-t border-zinc-900 space-y-2">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <label className="text-xs font-mono uppercase text-zinc-300 font-semibold">
-                Scenarios ({selectedScenarioIds.length} of {scenarios.length} selected)
+          {/* Scenario Selection Header */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-black uppercase text-black">
+                Select Scenarios ({selectedScenarioIds.length} of {scenarios.length} selected)
               </label>
-
-              <div className="flex items-center gap-2 text-[11px] font-mono">
+              <div className="flex items-center gap-2 text-xs font-bold">
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-zinc-300 hover:text-white underline"
+                  className="text-black hover:underline"
                 >
-                  All
+                  Select All
                 </button>
-                <span className="text-zinc-700">&bull;</span>
+                <span className="text-black/30">&bull;</span>
                 <button
                   type="button"
                   onClick={deselectAll}
-                  className="text-zinc-500 hover:text-zinc-300"
+                  className="text-gray-500 hover:text-black"
                 >
                   Clear
                 </button>
-                <span className="text-zinc-700">&bull;</span>
+                <span className="text-black/30">&bull;</span>
                 <button
                   type="button"
                   onClick={() => {
-                    if (scenarios.length > 0) selectSingleForLiveTest(scenarios[0].id);
+                    const first = scenarios[0];
+                    if (first) selectSingleForLiveTest(first.id);
                   }}
-                  className="text-white font-semibold underline"
-                  title="Selects 1 call to minimize credit burn"
+                  className="text-emerald-700 hover:underline font-extrabold"
+                  title="Selects 1 scenario to save Bolna credits on live testing"
                 >
-                  [ 1 Live Test ]
+                  Single Test (Save Credits)
                 </button>
               </div>
             </div>
 
             {/* Language Filter Pills */}
-            <div className="flex flex-wrap gap-1 font-mono text-[10px]">
+            <div className="flex flex-wrap gap-1.5 mb-3">
               {["All", "Hindi", "Hinglish", "Kannada", "English"].map((lang) => (
                 <button
                   key={lang}
                   type="button"
                   onClick={() => setFilterLang(lang)}
-                  className={`px-2 py-0.5 rounded transition-colors ${
+                  className={`px-3 py-1 rounded-full text-xs font-black uppercase transition-all ${
                     filterLang === lang
-                      ? "bg-white text-black font-bold"
-                      : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
+                      ? "bg-black text-white border-2 border-black shadow-[2px_2px_0px_#ff90e8]"
+                      : "bg-white text-black border-2 border-black shadow-[1.5px_1.5px_0px_#000] hover:bg-gray-100"
                   }`}
                 >
                   {lang}
@@ -404,45 +253,40 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
               ))}
             </div>
 
-            {/* Scenarios List */}
+            {/* Scenario Checklist */}
             {fetchingScenarios ? (
-              <div className="p-6 text-center text-xs font-mono text-zinc-500">
-                &gt; Loading scenario catalog...
-              </div>
+              <div className="p-6 text-center text-xs font-bold text-gray-500">Loading catalog...</div>
             ) : (
-              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
                 {filteredScenarios.map((sc) => {
                   const isChecked = selectedScenarioIds.includes(sc.id);
                   return (
                     <div
                       key={sc.id}
                       onClick={() => toggleScenario(sc.id)}
-                      className={`flex items-start gap-2.5 p-2.5 rounded-md border text-xs cursor-pointer transition-colors ${
+                      className={`flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
                         isChecked
-                          ? "bg-zinc-900/90 border-zinc-600 text-white"
-                          : "bg-zinc-950/60 border-zinc-900 text-zinc-500 hover:bg-zinc-900/40"
+                          ? "bg-white border-black shadow-[3px_3px_0px_#000]"
+                          : "bg-white/60 border-black/30 text-gray-600 hover:border-black"
                       }`}
                     >
-                      <div className="mt-0.5 shrink-0">
+                      <div className="mt-0.5 text-black shrink-0">
                         {isChecked ? (
-                          <div className="w-3.5 h-3.5 rounded-sm bg-white text-black flex items-center justify-center text-[10px] font-bold">
-                            ✓
-                          </div>
+                          <CheckSquare className="w-4 h-4 fill-black text-white stroke-[2.5]" />
                         ) : (
-                          <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 bg-zinc-950" />
+                          <Square className="w-4 h-4 text-black/50" />
                         )}
                       </div>
-
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-semibold truncate text-zinc-200">
+                          <span className="font-black text-xs text-black truncate">
                             {sc.title}
                           </span>
-                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 shrink-0">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-brutal-purple text-black border border-black shadow-[1px_1px_0px_#000] shrink-0">
                             {sc.language}
                           </span>
                         </div>
-                        <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5">
+                        <p className="text-[11px] font-medium text-gray-600 line-clamp-1 mt-0.5">
                           {sc.goal}
                         </p>
                       </div>
@@ -453,43 +297,48 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
             )}
           </div>
 
-          {/* Telemetry Footer Card */}
-          <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-between font-mono text-xs">
-            <div>
-              <span className="text-[10px] text-zinc-500 block uppercase">Estimated Spend</span>
-              <span className="text-white font-bold">
-                ${estimatedCost} USD <span className="text-zinc-600 font-normal">({selectedScenarioIds.length} calls)</span>
-              </span>
+          {/* Budget & Safety Warning Card */}
+          <div className="p-4 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0px_#000] flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-brutal-green border-2 border-black flex items-center justify-center text-black font-black shadow-[1.5px_1.5px_0px_#000]">
+                <Coins className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="font-black uppercase text-black">Estimated Cost</div>
+                <div className="text-[11px] text-gray-700 font-mono font-semibold">
+                  {selectedScenarioIds.length} calls &bull; ~${estimatedCost} USD estimated
+                </div>
+              </div>
             </div>
             <div className="text-right">
-              <span className="text-[10px] text-zinc-500 block uppercase">Target Selected</span>
-              <span className="text-zinc-300">
-                {targets.find((t) => t.id === selectedTargetId)?.name || "None Selected"}
+              <span className="text-[10px] font-black uppercase text-black bg-brutal-yellow px-2.5 py-1 rounded-full border border-black shadow-[1.5px_1.5px_0px_#000]">
+                Safe Staging Target
               </span>
             </div>
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div className="flex items-center justify-between p-4 border-t border-zinc-800 bg-zinc-950">
+        {/* Footer */}
+        <div className="flex items-center justify-between p-6 border-t-2 border-black bg-white">
           <button
             type="button"
             onClick={onClose}
-            className="px-3 py-1.5 rounded-md text-xs font-mono text-zinc-400 hover:text-white"
+            className="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider text-black hover:underline"
           >
             Cancel
           </button>
-          
           <button
             type="button"
             onClick={handleLaunch}
-            disabled={loading || selectedScenarioIds.length === 0 || !selectedTargetId}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50"
+            disabled={loading || selectedScenarioIds.length === 0}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#ff90e8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-50"
           >
-            <Play className="w-3 h-3 fill-black" />
-            <span>{loading ? "Dispatching..." : `Execute Benchmark (${selectedScenarioIds.length})`}</span>
+            <Play className="w-3.5 h-3.5 fill-white" />
+            {loading ? "Launching Call Sequence..." : `Dial & Benchmark (${selectedScenarioIds.length})`}
+            <ArrowUpRight className="w-4 h-4" />
           </button>
         </div>
+
       </div>
     </div>
   );
