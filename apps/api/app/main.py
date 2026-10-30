@@ -19,28 +19,34 @@ from app.routes.marketplace import router as marketplace_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize database tables
-    await init_db()
+    try:
+        await init_db()
+    except Exception as e:
+        print(f"Warning: init_db failed ({e})")
 
     # Auto-seed default targets if table is empty
-    from app.db.session import AsyncSessionLocal
-    from app.db.models import Target
-    from sqlalchemy import select
-    async with AsyncSessionLocal() as session:
-        t_res = await session.execute(select(Target))
-        existing = t_res.scalars().all()
-        if not existing:
-            live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
-            live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
-            t_live = Target(
-                name="Kasauti CSA (Bolna Telephony Agent)",
-                phone_number=live_phone,
-                bolna_agent_id=live_agent_id,
-                staging_agent_id=settings.BOLNA_STAGING_AGENT_ID or live_agent_id,
-                languages=["Hindi", "Hinglish", "Kannada", "Indian English"],
-                notes="Primary Bolna outbound customer support voice agent."
-            )
-            session.add(t_live)
-            await session.commit()
+    try:
+        from app.db.session import AsyncSessionLocal
+        from app.db.models import Target
+        from sqlalchemy import select
+        async with AsyncSessionLocal() as session:
+            t_res = await session.execute(select(Target))
+            existing = t_res.scalars().all()
+            if not existing:
+                live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
+                live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
+                t_live = Target(
+                    name="Kasauti CSA (Bolna Telephony Agent)",
+                    phone_number=live_phone,
+                    bolna_agent_id=live_agent_id,
+                    staging_agent_id=settings.BOLNA_STAGING_AGENT_ID or live_agent_id,
+                    languages=["Hindi", "Hinglish", "Kannada", "Indian English"],
+                    notes="Primary Bolna outbound customer support voice agent."
+                )
+                session.add(t_live)
+                await session.commit()
+    except Exception as e:
+        print(f"Warning: seeding targets encountered: {e}")
 
     yield
 

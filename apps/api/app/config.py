@@ -17,6 +17,24 @@ class Settings(BaseSettings):
         v = v.strip()
         if " #" in v:
             v = v.split(" #")[0].strip()
+        if v.startswith("postgres://"):
+            v = "postgresql+asyncpg://" + v[len("postgres://"):]
+        elif v.startswith("postgresql://"):
+            v = "postgresql+asyncpg://" + v[len("postgresql://"):]
+        # Clean user/pass formatting e.g. [pass] or unencoded @
+        if "@" in v and "://" in v:
+            parts = v.split("://", 1)
+            if len(parts) == 2:
+                scheme, rest = parts
+                if "@" in rest:
+                    auth, host_part = rest.rsplit("@", 1)
+                    if ":" in auth:
+                        user, password = auth.split(":", 1)
+                        if password.startswith("[") and password.endswith("]"):
+                            password = password[1:-1]
+                        import urllib.parse
+                        password = urllib.parse.quote(password, safe="")
+                        v = f"{scheme}://{user}:{password}@{host_part}"
         if v in ("sqlite+aiosqlite:///./kasauti.db", "sqlite+aiosqlite:///kasauti.db"):
             return f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}"
         return v
