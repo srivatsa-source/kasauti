@@ -107,3 +107,4 @@ class CertificationRegistry:
         return list(self._certificates.values())
 
 marketplace_instance = CertificationRegistry()
+

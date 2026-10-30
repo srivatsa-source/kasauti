@@ -25,3 +25,4 @@ async def simulate_acoustic_stress(payload: AcousticSimulateRequest):
         profile_id=payload.profile_id,
         transcript=payload.sample_transcript
     )
+

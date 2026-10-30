@@ -97,3 +97,4 @@ async def get_live_execution(agent_id: Optional[str] = None):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch Bolna execution telemetry: {str(e)}")
+

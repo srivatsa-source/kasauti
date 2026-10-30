@@ -38,3 +38,4 @@ async def issue_new_certificate(payload: IssueCertRequest):
         purity_score=payload.purity_score,
         dialects=payload.dialect_coverage
     )
+

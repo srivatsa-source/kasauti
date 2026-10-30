@@ -34,3 +34,4 @@ async def get_fuzz_summary():
 async def list_fuzz_results():
     """History of executed tool fuzz tests."""
     return fuzzer_instance.list_results()
+

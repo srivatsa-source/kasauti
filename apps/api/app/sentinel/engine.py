@@ -170,3 +170,4 @@ class KasautiSentinel:
         return self._history[:limit]
 
 sentinel_instance = KasautiSentinel()
+

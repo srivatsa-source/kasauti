@@ -158,3 +158,4 @@ class ToolFuzzingEngine:
         return self._results
 
 fuzzer_instance = ToolFuzzingEngine()
+

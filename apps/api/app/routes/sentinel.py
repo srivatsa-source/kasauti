@@ -37,3 +37,4 @@ async def get_sentinel_metrics():
 async def get_sentinel_logs(limit: int = 20):
     """Real-time audit log of prevented violations and modified audio packets."""
     return sentinel_instance.get_logs(limit=limit)
+
