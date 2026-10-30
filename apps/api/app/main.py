@@ -9,11 +9,39 @@ from app.routes.calls import router as calls_router
 from app.routes.webhooks import router as webhooks_router
 from app.routes.budget import router as budget_router
 from app.routes.knowledge import router as knowledge_router
+from app.routes.telemetry import router as telemetry_router
+from app.routes.sentinel import router as sentinel_router
+from app.routes.fuzzer import router as fuzzer_router
+from app.routes.acoustic import router as acoustic_router
+from app.routes.deployer import router as deployer_router
+from app.routes.marketplace import router as marketplace_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Initialize database tables
     await init_db()
+
+    # Auto-seed default targets if table is empty
+    from app.db.session import AsyncSessionLocal
+    from app.db.models import Target
+    from sqlalchemy import select
+    async with AsyncSessionLocal() as session:
+        t_res = await session.execute(select(Target))
+        existing = t_res.scalars().all()
+        if not existing:
+            live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
+            live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
+            t_live = Target(
+                name="Kasauti CSA (Bolna Telephony Agent)",
+                phone_number=live_phone,
+                bolna_agent_id=live_agent_id,
+                staging_agent_id=settings.BOLNA_STAGING_AGENT_ID or live_agent_id,
+                languages=["Hindi", "Hinglish", "Kannada", "Indian English"],
+                notes="Primary Bolna outbound customer support voice agent."
+            )
+            session.add(t_live)
+            await session.commit()
+
     yield
 
 app = FastAPI(
@@ -38,6 +66,12 @@ app.include_router(calls_router)
 app.include_router(webhooks_router)
 app.include_router(budget_router)
 app.include_router(knowledge_router)
+app.include_router(telemetry_router)
+app.include_router(sentinel_router)
+app.include_router(fuzzer_router)
+app.include_router(acoustic_router)
+app.include_router(deployer_router)
+app.include_router(marketplace_router)
 
 @app.get("/health")
 async def health_check():

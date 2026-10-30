@@ -10,8 +10,8 @@ from app.engine.scenario_compiler import ScenarioCompiler
 from app.db.models import Run, Call, Check, Target, Scenario
 
 class RunOrchestrator:
-    def __init__(self):
-        self.bolna = get_bolna_client()
+    def __init__(self, confirmed_by_user: bool = True):
+        self.bolna = get_bolna_client(confirmed_by_user=confirmed_by_user)
         self.rule_engine = RuleEngine()
         self.rubric_judge = RubricJudge()
         self.compiler = ScenarioCompiler()
@@ -137,21 +137,29 @@ class RunOrchestrator:
             call.bolna_execution_id = exec_id
             await db.commit()
 
-            # 2. Wait for completion (MockBolnaClient completes in ~1.2s; Real client polls)
+            # 2. Wait for completion (RealBolnaClient polls until terminal or MAX_CALL_SECONDS timeout)
             execution_data = None
-            for _ in range(30):
-                await asyncio.sleep(0.4)
-                data = await self.bolna.get_execution(exec_id)
-                if data.get("status") in ("completed", "failed", "canceled", "stopped"):
-                    execution_data = data
-                    break
+            if hasattr(self.bolna, "poll_until_terminal"):
+                from app.config import settings
+                execution_data = await self.bolna.poll_until_terminal(
+                    exec_id,
+                    max_wait_seconds=settings.MAX_CALL_SECONDS
+                )
+            else:
+                for _ in range(30):
+                    await asyncio.sleep(0.4)
+                    data = await self.bolna.get_execution(exec_id)
+                    if data.get("status") in ("completed", "failed", "canceled", "stopped"):
+                        execution_data = data
+                        break
 
             if not execution_data:
                 execution_data = await self.bolna.get_execution(exec_id)
 
             call.status = execution_data.get("status", "completed")
             call.transcript = execution_data.get("transcript", "")
-            call.recording_url = execution_data.get("recording_url") or (execution_data.get("telephony_data") or {}).get("recording_url")
+            telephony = execution_data.get("telephony_data") or {}
+            call.recording_url = execution_data.get("recording_url") or telephony.get("recording_url") or None
             call.cost = float(execution_data.get("total_cost", 0.03))
             call.ended_at = datetime.now(timezone.utc)
             await db.commit()
