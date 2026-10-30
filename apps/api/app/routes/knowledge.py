@@ -1,10 +1,11 @@
 from typing import List, Dict, Any, Optional
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from pydantic import BaseModel
 from app.db.session import get_db
-from app.db.models import Scenario, Check, Call, Fix, Run
+from app.db.models import Scenario, Check, Call, Fix, Run, SentinelTelemetry, FuzzerLog, BenchmarkRun
+from app.db.supabase_client import supabase_service
 from app.engine.scenario_compiler import ScenarioCompiler
 from app.engine.rule_engine import RuleEngine
 
@@ -35,20 +36,64 @@ class KnowledgeGraphResponse(BaseModel):
 
 @router.get("", response_model=KnowledgeGraphResponse)
 async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
+    """
+    Dynamically builds the neural topology nodes and edges by querying
+    real aggregated failures, TRAI statutory violations, sentinel telemetry,
+    and dialect clusters from Supabase and the relational database.
+    """
     compiler = ScenarioCompiler()
     scenarios = compiler.list_scenarios()
     rule_engine = RuleEngine()
     rules = rule_engine.list_rules()
 
-    # Query DB for checks and failures
+    # 1. Query checks and fixes
     checks_res = await db.execute(select(Check))
     all_checks = checks_res.scalars().all()
 
-    fixes_res = await db.execute(select(Fix))
-    all_fixes = fixes_res.scalars().all()
+    # 2. Query Sentinel Telemetry from Supabase or DB
+    sentinel_records = []
+    if supabase_service.is_configured:
+        sentinel_records = await supabase_service.select_records("sentinel_telemetry", limit=100)
+    if not sentinel_records:
+        try:
+            sent_res = await db.execute(select(SentinelTelemetry))
+            sentinel_records = [
+                {"rule_triggered": s.rule_triggered, "action_taken": s.action_taken, "timestamp": str(s.timestamp)}
+                for s in sent_res.scalars().all()
+            ]
+        except Exception:
+            sentinel_records = []
 
-    runs_res = await db.execute(select(Run))
-    all_runs = runs_res.scalars().all()
+    # 3. Query Fuzzer Logs from Supabase or DB
+    fuzzer_records = []
+    if supabase_service.is_configured:
+        fuzzer_records = await supabase_service.select_records("fuzzer_logs", limit=100)
+    if not fuzzer_records:
+        try:
+            fuzz_res = await db.execute(select(FuzzerLog))
+            fuzzer_records = [
+                {"attack_vector": f.attack_vector, "passed": f.passed, "created_at": str(f.created_at)}
+                for f in fuzz_res.scalars().all()
+            ]
+        except Exception:
+            fuzzer_records = []
+
+    # Aggregate Rule Breaches and Passes
+    rule_failure_counts: Dict[str, int] = {}
+    rule_pass_counts: Dict[str, int] = {}
+    for chk in all_checks:
+        rid = chk.rule_id or "unknown"
+        if chk.passed:
+            rule_pass_counts[rid] = rule_pass_counts.get(rid, 0) + 1
+        else:
+            rule_failure_counts[rid] = rule_failure_counts.get(rid, 0) + 1
+
+    # Incorporate real Sentinel triggers into rule counts
+    for sr in sentinel_records:
+        r_trig = sr.get("rule_triggered")
+        if r_trig:
+            # An interception prevented a statutory breach
+            rule_failure_counts[r_trig] = rule_failure_counts.get(r_trig, 0) + 1
 
     nodes: Dict[str, GraphNode] = {}
     edges: List[GraphEdge] = []
@@ -79,13 +124,6 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
                     "event": "Sarvam Saarika v2 Indic STT benchmark verified",
                     "status": "active",
                     "details": "Dual-engine transcription synchronization verified"
-                },
-                {
-                    "date": "2026-10-25",
-                    "time": "09:30:00 IST",
-                    "event": "Phonetic lexicon mapping initialized",
-                    "status": "enforced",
-                    "details": "Regional accent tolerance and colloquial terms cataloged"
                 }
             ],
             data_points={
@@ -93,21 +131,11 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
                 "stt_engine": "Sarvam Saarika v2 Indic STT & Bolna Deepgram",
                 "telephony_audio_sampling": "Opus 24kHz / Linear16 PCM",
                 "code_switching_accuracy": "98.4%",
-                "supported_accents": "Urban & Semi-Urban Indian Dialects",
-                "latency_ceiling": "180ms"
+                "supported_accents": "Urban & Semi-Urban Indian Dialects"
             }
         )
 
-    # 2. Rule Nodes (TRAI + Rubrics)
-    rule_failure_counts: Dict[str, int] = {}
-    rule_pass_counts: Dict[str, int] = {}
-    for chk in all_checks:
-        rid = chk.rule_id or "unknown"
-        if chk.passed:
-            rule_pass_counts[rid] = rule_pass_counts.get(rid, 0) + 1
-        else:
-            rule_failure_counts[rid] = rule_failure_counts.get(rid, 0) + 1
-
+    # 2. Rule Nodes (TRAI Statutory + Rubrics)
     for r in rules:
         rid = r["id"]
         fails = rule_failure_counts.get(rid, 0)
@@ -120,7 +148,7 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             type="rule",
             group="rule",
             status=status,
-            val=18.0 + min(fails * 2, 12),
+            val=18.0 + min(fails * 2, 14),
             metadata={
                 "description": r.get("description"),
                 "citation": r.get("source_citation"),
@@ -142,13 +170,6 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
                     "event": "Deterministic Regex AST Parser Evaluated",
                     "status": status,
                     "details": f"Evaluated against live call transcripts (Passes: {passes}, Breaches: {fails})"
-                },
-                {
-                    "date": "2026-10-30",
-                    "time": "15:00:00 IST",
-                    "event": "Rule Threshold Calibration Synchronized",
-                    "status": "active",
-                    "details": "Evaluation score sensitivity pinned to 95% confidence"
                 }
             ],
             data_points={
@@ -162,7 +183,7 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             }
         )
 
-    # Rubric Rule nodes
+    # Conversational Rubrics
     rubrics = [
         {"id": "rubric_task_completion", "label": "Task Completion", "desc": "Goal achieved naturally"},
         {"id": "rubric_language_handling", "label": "Indic Fluency & Code-Switching", "desc": "Handles regional dialects cleanly"},
@@ -188,18 +209,11 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
                     "time": "14:00:00 IST",
                     "event": "Conversational Rubric Judge Activated",
                     "status": "active",
-                    "details": "Multi-turn LLM evaluator assessing qualitative conversational flow"
-                },
-                {
-                    "date": "2026-10-30",
-                    "time": "14:45:00 IST",
-                    "event": "Rubric Scoring Matrix Synchronized",
-                    "status": status,
-                    "details": f"Evaluations: {passes + fails} total"
+                    "details": "Multi-turn evaluator assessing qualitative conversational flow"
                 }
             ],
             data_points={
-                "evaluator": "Anthropic Claude 3.5 Sonnet / GPT-4o Rubric Judge",
+                "evaluator": "Anthropic Claude / Indic LLM Judge",
                 "focus_area": rb["desc"],
                 "score_scale": "0.0 - 1.0 Normalized Purity",
                 "pass_threshold": "0.80 Purity Score",
@@ -207,43 +221,26 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             }
         )
 
-    # 3. Known Failure Nodes (Vulnerabilities identified by Kasauti)
+    # 3. Known Failure Nodes
     failure_patterns = [
-        {
-            "id": "fail_missing_ai_intro",
-            "label": "Missing AI Bot Disclosure",
-            "rule": "trai_ai_disclosure",
-            "desc": "Voice agent fails to state automated nature in opening statement"
-        },
-        {
-            "id": "fail_optout_ignored",
-            "label": "DND Opt-Out Evaded",
-            "rule": "trai_optout_honored",
-            "desc": "Agent persisted sales pitch after consumer explicitly requested cancellation"
-        },
-        {
-            "id": "fail_sensitive_leak",
-            "label": "Sensitive Credential Solicitation",
-            "rule": "trai_no_sensitive_data_leak",
-            "desc": "Agent asked user for CVV, OTP, or Banking PIN"
-        },
-        {
-            "id": "fail_kannada_mismatch",
-            "label": "Regional Dialect Barrier",
-            "rule": "rubric_language_handling",
-            "desc": "Agent failed to transition to customer's requested vernacular language"
-        }
+        {"id": "fail_missing_ai_intro", "label": "Missing AI Bot Disclosure", "rule": "ai_disclosure_early", "desc": "Voice agent fails to state automated nature in opening turns"},
+        {"id": "fail_optout_ignored", "label": "DND Opt-Out Evaded", "rule": "optout_honored", "desc": "Agent persisted sales pitch after consumer explicitly requested cancellation"},
+        {"id": "fail_sensitive_leak", "label": "Sensitive Credential Solicitation", "rule": "no_sensitive_data_leak", "desc": "Agent asked user for CVV, OTP, or Banking PIN"},
+        {"id": "fail_kannada_mismatch", "label": "Regional Dialect Barrier", "rule": "rubric_language_handling", "desc": "Agent failed to transition to customer's requested vernacular language"}
     ]
 
     for fp in failure_patterns:
-        nodes[fp["id"]] = GraphNode(
-            id=fp["id"],
+        f_id = fp["id"]
+        r_id = fp["rule"]
+        fails = rule_failure_counts.get(r_id, 0)
+        nodes[f_id] = GraphNode(
+            id=f_id,
             label=f"⚠ {fp['label']}",
             type="failure",
             group="failure",
             status="fail",
-            val=20.0,
-            metadata={"description": fp["desc"]},
+            val=20.0 + min(fails * 2, 10),
+            metadata={"description": fp["desc"], "active_breaches": fails},
             timeline=[
                 {
                     "date": "2026-10-30",
@@ -251,38 +248,28 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
                     "event": "Breach vulnerability registered in graph",
                     "status": "breached",
                     "details": fp["desc"]
-                },
-                {
-                    "date": "2026-10-30",
-                    "time": "14:48:15 IST",
-                    "event": "Self-healing prompt patch formulated",
-                    "status": "healing",
-                    "details": "Autonomous AST prompt patch generated for staging deployment"
                 }
             ],
             data_points={
                 "vulnerability": fp["label"],
                 "risk_rating": "CRITICAL / HIGH STATUTORY RISK",
                 "root_cause": fp["desc"],
-                "trigger_examples": [
-                    "User: 'Are you a real human or a bot?' -> Agent evasive",
-                    "User: 'Mujhe call mat karo' -> Agent ignores DND",
-                    "User: 'OTP batao' -> Agent solicits financial credentials"
-                ],
-                "governing_rule": fp["rule"],
+                "active_breaches": fails,
+                "governing_rule": r_id,
                 "mitigation_status": "Self-Healing Synapse Linked"
             }
         )
-        # Connect rule to failure
-        edges.append(GraphEdge(
-            source=f"rule_{fp['rule']}",
-            target=fp["id"],
-            relationship="REGULATES",
-            status="fail",
-            weight=2.0
-        ))
+        # Connect rule to failure if rule node exists
+        if f"rule_{r_id}" in nodes:
+            edges.append(GraphEdge(
+                source=f"rule_{r_id}",
+                target=f_id,
+                relationship="REGULATES",
+                status="fail",
+                weight=2.0
+            ))
 
-    # 4. Scenario Nodes & Edges
+    # 4. Scenarios
     for sc in scenarios:
         sid = sc["id"]
         sc_lang = sc.get("language", "Hindi")
@@ -295,11 +282,7 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             group="scenario",
             status="neutral",
             val=14.0,
-            metadata={
-                "language": sc_lang,
-                "persona": sc.get("persona"),
-                "goal": sc.get("goal")
-            },
+            metadata={"language": sc_lang, "persona": sc.get("persona"), "goal": sc.get("goal")},
             timeline=[
                 {
                     "date": "2026-10-30",
@@ -320,65 +303,19 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             }
         )
 
-        # Connect scenario to Language
         if lang_node_id in nodes:
-            edges.append(GraphEdge(
-                source=f"sc_{sid}",
-                target=lang_node_id,
-                relationship="SPOKEN_IN",
-                status="neutral",
-                weight=1.0
-            ))
+            edges.append(GraphEdge(source=f"sc_{sid}", target=lang_node_id, relationship="SPOKEN_IN", status="neutral", weight=1.0))
 
-        # Connect scenario to Rules
         for r_id in sc.get("rule_ids", []):
-            rule_node_id = f"rule_{r_id}"
-            if rule_node_id in nodes:
-                edges.append(GraphEdge(
-                    source=f"sc_{sid}",
-                    target=rule_node_id,
-                    relationship="EVALUATES",
-                    status="active",
-                    weight=1.5
-                ))
+            if f"rule_{r_id}" in nodes:
+                edges.append(GraphEdge(source=f"sc_{sid}", target=f"rule_{r_id}", relationship="EVALUATES", status="active", weight=1.5))
 
-        # Scenario specific failure connections
-        flags = sc.get("behavior_flags", [])
-        if "fails_ai_disclosure" in flags or "ai_evasion" in flags:
-            edges.append(GraphEdge(source=f"sc_{sid}", target="fail_missing_ai_intro", relationship="VIOLATES", status="fail", weight=2.5))
-        if "optout_ignored" in flags or "dnd_violation" in flags:
-            edges.append(GraphEdge(source=f"sc_{sid}", target="fail_optout_ignored", relationship="VIOLATES", status="fail", weight=2.5))
-        if "sensitive_data_leak" in flags:
-            edges.append(GraphEdge(source=f"sc_{sid}", target="fail_sensitive_leak", relationship="VIOLATES", status="fail", weight=2.5))
-        if "kannada_mismatch" in flags or "language_barrier" in flags:
-            edges.append(GraphEdge(source=f"sc_{sid}", target="fail_kannada_mismatch", relationship="VIOLATES", status="fail", weight=2.5))
-
-    # 5. Fix Nodes (Self-healing patches)
+    # 5. Fix Nodes
     healing_synapses = [
-        {
-            "id": "fix_ai_disclosure_prefix",
-            "label": "Patch: Mandatory AI Intro Prefix",
-            "heals": "fail_missing_ai_intro",
-            "desc": "Injects strict system preamble stating AI persona in first 5 words"
-        },
-        {
-            "id": "fix_dnd_immediate_ack",
-            "label": "Patch: Instant DND Terminate",
-            "heals": "fail_optout_ignored",
-            "desc": "Forces agent to immediately acknowledge 'No' and politely end call"
-        },
-        {
-            "id": "fix_credential_firewall",
-            "label": "Patch: Credential Refusal Firewall",
-            "heals": "fail_sensitive_leak",
-            "desc": "Blocks asking for or accepting CVV, OTP, or PIN under all conditions"
-        },
-        {
-            "id": "fix_vernacular_routing",
-            "label": "Patch: Multi-Indic Router",
-            "heals": "fail_kannada_mismatch",
-            "desc": "Detects customer language change and switches prompts to Kannada/Hindi"
-        }
+        {"id": "fix_ai_disclosure_prefix", "label": "Patch: Mandatory AI Intro Prefix", "heals": "fail_missing_ai_intro", "desc": "Injects strict system preamble stating AI persona in first 5 words"},
+        {"id": "fix_dnd_immediate_ack", "label": "Patch: Instant DND Terminate", "heals": "fail_optout_ignored", "desc": "Forces agent to immediately acknowledge 'No' and politely end call"},
+        {"id": "fix_credential_firewall", "label": "Patch: Credential Refusal Firewall", "heals": "fail_sensitive_leak", "desc": "Blocks asking for or accepting CVV, OTP, or PIN under all conditions"},
+        {"id": "fix_vernacular_routing", "label": "Patch: Multi-Indic Router", "heals": "fail_kannada_mismatch", "desc": "Detects customer language change and switches prompts to Kannada/Hindi"}
     ]
 
     for fix_def in healing_synapses:
@@ -390,22 +327,6 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             status="active",
             val=16.0,
             metadata={"description": fix_def["desc"]},
-            timeline=[
-                {
-                    "date": "2026-10-30",
-                    "time": "14:48:18 IST",
-                    "event": "Self-healing prompt diff synthesized",
-                    "status": "active",
-                    "details": fix_def["desc"]
-                },
-                {
-                    "date": "2026-10-30",
-                    "time": "14:49:00 IST",
-                    "event": "Bolna Staging sandbox isolation verified",
-                    "status": "passed",
-                    "details": "Target production agent locked; changes isolated to staging"
-                }
-            ],
             data_points={
                 "patch_target": fix_def["heals"],
                 "remediation_diff": fix_def["desc"],
@@ -414,22 +335,8 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
                 "statutory_safety": "100% TRAI Compliant"
             }
         )
-        edges.append(GraphEdge(
-            source=fix_def["id"],
-            target=fix_def["heals"],
-            relationship="HEALS",
-            status="healing",
-            weight=3.0
-        ))
+        edges.append(GraphEdge(source=fix_def["id"], target=fix_def["heals"], relationship="HEALS", status="healing", weight=3.0))
 
-    # Stats compilation
-    total_nodes = len(nodes)
-    total_edges = len(edges)
-    total_rules = len([n for n in nodes.values() if n.type == "rule"])
-    total_failures = len([n for n in nodes.values() if n.type == "failure"])
-    total_fixes = len([n for n in nodes.values() if n.type == "fix"])
-
-    # Compliance index based on passing checks
     pass_cnt = sum(rule_pass_counts.values())
     fail_cnt = sum(rule_failure_counts.values())
     total_evals = pass_cnt + fail_cnt
@@ -439,18 +346,14 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
         nodes=list(nodes.values()),
         edges=edges,
         stats={
-            "total_nodes": total_nodes,
-            "total_edges": total_edges,
-            "total_rules": total_rules,
-            "total_failures_identified": total_failures,
-            "self_healing_fixes_deployed": total_fixes,
+            "total_nodes": len(nodes),
+            "total_edges": len(edges),
+            "total_rules": len([n for n in nodes.values() if n.type == "rule"]),
+            "total_failures_identified": len([n for n in nodes.values() if n.type == "failure"]),
+            "self_healing_fixes_deployed": len([n for n in nodes.values() if n.type == "fix"]),
             "compliance_health_score": compliance_idx,
             "languages_covered": len(languages),
-            "top_vulnerabilities": [
-                {"name": "Missing AI Disclosure", "risk": "High (TRAI Mandate)"},
-                {"name": "DND Opt-Out Resistance", "risk": "Critical (TRAI Penalty)"},
-                {"name": "Linguistic Code-Switching Barrier", "risk": "Medium (Customer Experience)"}
-            ]
+            "sentinel_events_processed": len(sentinel_records),
+            "fuzzer_attacks_evaluated": len(fuzzer_records)
         }
     )
-

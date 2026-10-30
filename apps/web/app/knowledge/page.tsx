@@ -77,10 +77,11 @@ export default function KnowledgePage() {
           else if (node.type === "failure") radius = 170;
           else if (node.type === "fix") radius = 260;
 
+          const deterministicJitter = ((i * 19) % 37 - 18) * 1.2;
           return {
             ...node,
-            x: centerX + radius * Math.cos(angle) + (Math.random() - 0.5) * 40,
-            y: centerY + radius * Math.sin(angle) + (Math.random() - 0.5) * 40,
+            x: centerX + radius * Math.cos(angle) + deterministicJitter,
+            y: centerY + radius * Math.sin(angle) + deterministicJitter,
             vx: 0,
             vy: 0
           };

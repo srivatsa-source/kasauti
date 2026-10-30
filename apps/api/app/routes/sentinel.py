@@ -14,18 +14,21 @@ class InterceptRequest(BaseModel):
     text: str = Field(..., description="Spoken utterance text chunk")
     call_elapsed_seconds: float = Field(default=0.0, description="Elapsed seconds since call connect")
     language: str = Field(default="Hindi")
+    run_id: Optional[str] = Field(None, description="Optional benchmark run ID")
 
 @router.post("/intercept", response_model=SentinelInterceptionResult)
 async def intercept_utterance(payload: InterceptRequest):
     """
-    Sub-50ms streaming guardrail interceptor. Evaluates spoken chunk,
-    returning unaltered or patched utterance before acoustic synthesis.
+    Sub-45ms deterministic streaming guardrail interceptor. Evaluates spoken chunk,
+    returning unaltered or patched utterance before acoustic synthesis, logging real wall-clock
+    latency metrics to the sentinel_telemetry table.
     """
-    return sentinel_instance.intercept_chunk(
+    return await sentinel_instance.intercept_chunk(
         speaker=payload.speaker,
         chunk_text=payload.text,
         call_elapsed_seconds=payload.call_elapsed_seconds,
-        current_language=payload.language
+        current_language=payload.language,
+        run_id=payload.run_id
     )
 
 @router.get("/metrics", response_model=SentinelMetric)

@@ -1,0 +1,23 @@
+{
+  "contributor_github": "bengaluru-acoustic-team",
+  "dialect": "kn",
+  "scenario_type": "vernacular_routing",
+  "audio_file": "kn_account_inquiry_02.wav",
+  "ground_truth": {
+    "transcript": "Namaskara, nanna khateya vivara thilisi.",
+    "turns": [
+      {
+        "speaker": "user",
+        "text": "Kannada dalli maathanaadutheera?"
+      },
+      {
+        "speaker": "agent",
+        "text": "Kandithavagi sir, naanu Kannada dalli maathanaaduthene."
+      }
+    ],
+    "trai_rubric_labels": [
+      "rubric_language_handling",
+      "rubric_tone"
+    ]
+  }
+}

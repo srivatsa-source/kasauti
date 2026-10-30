@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     @field_validator(
         "BOLNA_API_KEY", "BOLNA_TARGET_AGENT_ID", "BOLNA_STAGING_AGENT_ID",
         "BOLNA_CALLER_AGENT_ID", "BOLNA_TARGET_PHONE", "PUBLIC_WEBHOOK_URL",
-        "SARVAM_API_KEY", "ANTHROPIC_API_KEY",
+        "SARVAM_API_KEY", "ANTHROPIC_API_KEY", "SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY",
         mode="before"
     )
     @classmethod
@@ -59,6 +59,11 @@ class Settings(BaseSettings):
     # LLM Integration
     ANTHROPIC_API_KEY: Optional[str] = Field(default=None)
     ANTHROPIC_MODEL: str = Field(default="claude-sonnet-4-20250514")
+
+    # Supabase PostgreSQL & Object Storage
+    SUPABASE_URL: Optional[str] = Field(default=None)
+    SUPABASE_SERVICE_ROLE_KEY: Optional[str] = Field(default=None)
+    SUPABASE_BUCKET_NAME: str = Field(default="kasauti-audio-artifacts")
 
     # Database
     DATABASE_URL: str = Field(default=f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}")

@@ -1,0 +1,55 @@
+name: Kasauti CI Production Gate
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  validate-and-test:
+    name: Validate Contributions & Run Test Suite
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r apps/api/requirements.txt
+          pip install pytest pytest-asyncio Levenshtein scipy supabase
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install Frontend Dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Run Contributor Data & Anti-Mock Validation Gate
+        run: |
+          python scripts/validate_contributions.py
+
+      - name: Run Pytest Suite
+        env:
+          DATABASE_URL: "sqlite+aiosqlite:///./kasauti.db"
+          BOLNA_MODE: "mock"
+          SARVAM_MODE: "mock"
+        run: |
+          pytest tests/ -v
+
+      - name: Compile Next.js Production Build
+        working-directory: apps/web
+        run: npm run build
+

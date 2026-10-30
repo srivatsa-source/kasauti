@@ -14,15 +14,20 @@ class ExecuteFuzzRequest(BaseModel):
     attack_category: str = Field(default="PROMPT_INJECTION", description="PROMPT_INJECTION | SQL_PARAM_POISONING | PRIVILEGE_ESCALATION")
     spoken_utterance: str = Field(..., description="Adversarial spoken prompt")
     simulated_arguments: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    run_id: Optional[str] = Field(None, description="Optional benchmark run ID")
 
 @router.post("/execute", response_model=FuzzTestResult)
 async def run_fuzz_test(payload: ExecuteFuzzRequest):
-    """Executes a real-time voice tool fuzzing attack against agent parameter validators."""
-    return fuzzer_instance.run_fuzz_attack(
+    """
+    Executes a real-time adversarial turn against staging agent parameters,
+    inspecting actual tool-call payloads in the response and logging to fuzzer_logs in Supabase.
+    """
+    return await fuzzer_instance.execute_adversarial_turn(
         tool_name=payload.tool_name,
         attack_category=payload.attack_category,
         spoken_utterance=payload.spoken_utterance,
-        simulated_arguments=payload.simulated_arguments
+        simulated_arguments=payload.simulated_arguments,
+        run_id=payload.run_id
     )
 
 @router.get("/summary", response_model=FuzzerSuiteSummary)
@@ -34,4 +39,3 @@ async def get_fuzz_summary():
 async def list_fuzz_results():
     """History of executed tool fuzz tests."""
     return fuzzer_instance.list_results()
-

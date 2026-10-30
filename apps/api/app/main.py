@@ -75,11 +75,13 @@ app.include_router(marketplace_router)
 
 @app.get("/health")
 async def health_check():
+    from app.db.supabase_client import supabase_service
     return {
         "status": "healthy",
         "app": "Kasauti",
         "tagline": "Test it like gold before you dial.",
         "bolna_mode": settings.BOLNA_MODE,
+        "supabase_configured": supabase_service.is_configured,
         "llm_mode": "anthropic" if settings.ANTHROPIC_API_KEY else "mock"
     }
 

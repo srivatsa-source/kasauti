@@ -1,0 +1,23 @@
+{
+  "contributor_github": "indic-voice-lead",
+  "dialect": "hi",
+  "scenario_type": "dnd_opt_out",
+  "audio_file": "hi_dnd_optout_01.wav",
+  "ground_truth": {
+    "transcript": "Kripya mera number DND list mein daal dijiye, mujhe dobara call mat karna.",
+    "turns": [
+      {
+        "speaker": "agent",
+        "text": "Namaste, main Bolna automated assistant bol raha hoon."
+      },
+      {
+        "speaker": "user",
+        "text": "Kripya mera number DND list mein daal dijiye, mujhe dobara call mat karna."
+      }
+    ],
+    "trai_rubric_labels": [
+      "optout_honored",
+      "ai_disclosure_early"
+    ]
+  }
+}

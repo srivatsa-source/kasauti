@@ -38,6 +38,9 @@ interface AcousticResult {
   sarvam_indic_confidence: number;
   resilience_rating: string;
   recommendation: string;
+  audio_artifact_url?: string;
+  baseline_transcript?: string;
+  degraded_transcript?: string;
   timestamp: string;
 }
 
@@ -263,6 +266,33 @@ export default function AcousticPage() {
                 </span>
               </div>
             </div>
+
+            {/* Transcripts and Degraded Audio Artifact Player */}
+            {result.audio_artifact_url && (
+              <div className="p-3.5 rounded-lg bg-black border border-zinc-800 text-xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold text-zinc-400">
+                    Degraded Acoustic Audio Artifact (Supabase Storage)
+                  </span>
+                  <span className="text-[10px] text-zinc-500 font-mono">16-bit PCM WAV</span>
+                </div>
+                <audio controls className="w-full h-8 opacity-90 invert brightness-0 contrast-200" src={result.audio_artifact_url}>
+                  Your browser does not support audio element.
+                </audio>
+                {result.degraded_transcript && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 border-t border-zinc-900 text-[11px]">
+                    <div>
+                      <span className="text-[10px] text-zinc-500 uppercase block">Baseline Clean</span>
+                      <p className="text-zinc-300 font-mono">{result.baseline_transcript}</p>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-zinc-500 uppercase block">Degraded Hypothesis</span>
+                      <p className="text-zinc-400 font-mono">{result.degraded_transcript}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Recommendation Box */}
             <div className="p-5 rounded-xl bg-yellow-50 border-2 border-black shadow-[3px_3px_0px_#000] text-xs space-y-1">
