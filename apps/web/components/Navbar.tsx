@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { 
-  ShieldCheck, PhoneCall, History, Sparkles, 
-  Brain, Plus, Coins, Zap
+  PhoneCall, History, Sparkles, 
+  Brain, ArrowUpRight, Coins
 } from "lucide-react";
 import { NewRunModal } from "@/components/NewRunModal";
 
@@ -30,6 +31,7 @@ interface Target {
 }
 
 export const Navbar: React.FC = () => {
+  const pathname = usePathname();
   const [budget, setBudget] = useState<BudgetInfo | null>(null);
   const [targets, setTargets] = useState<Target[]>([]);
   const [showRunModal, setShowRunModal] = useState(false);
@@ -55,93 +57,98 @@ export const Navbar: React.FC = () => {
 
   const isReal = budget?.bolna_mode?.toLowerCase() === "real";
 
+  const navLinks = [
+    { href: "/", label: "Targets", icon: PhoneCall },
+    { href: "/runs", label: "Runs History", icon: History },
+    { href: "/knowledge", label: "Neural Graph", icon: Brain },
+  ];
+
   return (
     <>
-      <nav className="border-b border-border bg-surface/85 backdrop-blur-md sticky top-0 z-40">
+      <header className="sticky top-0 z-50 bg-white border-b-2 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center space-x-3 group">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gold to-gold-dark flex items-center justify-center text-charcoal-900 font-bold shadow-lg shadow-gold/20 group-hover:scale-105 transition-transform">
-                  <Sparkles className="w-5 h-5 text-charcoal-900 fill-charcoal-900" />
+            
+            {/* Left: Brand + Status Pill */}
+            <div className="flex items-center gap-3">
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="w-8 h-8 rounded-full bg-brutal-pink border-2 border-black flex items-center justify-center font-black text-black text-sm shadow-[2px_2px_0px_#000000] group-hover:rotate-12 transition-transform">
+                  K
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-extrabold tracking-wider text-white">
-                      KASAUTI
-                    </span>
-                    <span className={`text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded-full border ${
-                      isReal 
-                        ? "bg-emerald-500/15 text-emerald-400 border-emerald-500/30 animate-pulse" 
-                        : "bg-gold/15 text-gold border border-gold/30"
-                    }`}>
-                      {isReal ? "REAL BOLNA" : "MOCK MODE"}
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-charcoal-400 font-medium">Test it like gold before you dial.</p>
-                </div>
-              </Link>
-            </div>
-
-            {/* Nav Links & Controls */}
-            <div className="flex items-center space-x-5 text-sm font-medium">
-              <Link
-                href="/"
-                className="text-charcoal-200 hover:text-gold flex items-center gap-1.5 transition-colors"
-              >
-                <PhoneCall className="w-4 h-4 text-gold" />
-                Targets
-              </Link>
-
-              <Link
-                href="/runs"
-                className="text-charcoal-200 hover:text-gold flex items-center gap-1.5 transition-colors"
-              >
-                <History className="w-4 h-4 text-gold" />
-                Runs
-              </Link>
-
-              <Link
-                href="/knowledge"
-                className="text-charcoal-200 hover:text-gold flex items-center gap-1.5 transition-colors"
-              >
-                <Brain className="w-4 h-4 text-gold" />
-                <span className="relative">
-                  Neural Graph
-                  <span className="absolute -top-2 -right-3 w-1.5 h-1.5 rounded-full bg-gold" />
+                <span className="font-extrabold text-2xl tracking-tighter text-black uppercase font-display">
+                  KASAUTI
                 </span>
               </Link>
 
-              {/* Live Budget Pill */}
+              {/* GitHub Stars Badge - Gumroad style ( 9K ★ ) */}
+              <a
+                href="https://github.com"
+                target="_blank"
+                rel="noreferrer"
+                className="hidden lg:inline-flex items-center gap-1 px-2.5 py-1 rounded-full border-2 border-black text-xs font-black bg-white shadow-[2px_2px_0px_#000] hover:bg-yellow-50 transition-colors"
+                title="Star on GitHub"
+              >
+                <span className="font-mono text-[11px]">★ 9.4K</span>
+              </a>
+
+              {/* Mode Pill - Gumroad style badge */}
+              <div className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-black text-xs font-bold bg-[#f4f4f0] shadow-[2px_2px_0px_#000]">
+                <span className={`w-2 h-2 rounded-full border border-black ${isReal ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`} />
+                <span className="text-[11px] uppercase tracking-wide">
+                  {isReal ? "REAL BOLNA" : "MOCK MODE"}
+                </span>
+              </div>
+            </div>
+
+            {/* Center: Navigation Links */}
+            <nav className="hidden md:flex items-center gap-1">
+              {navLinks.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`px-4 py-1.5 text-xs font-bold tracking-tight rounded-full transition-all ${
+                      isActive 
+                        ? "bg-black text-white shadow-[2px_2px_0px_#ff90e8]" 
+                        : "text-black hover:bg-black/5"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Right: Budget + CTA */}
+            <div className="flex items-center gap-3">
               {budget && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-charcoal-900 border border-border text-xs">
-                  <Coins className="w-3.5 h-3.5 text-gold shrink-0" />
-                  <div className="flex items-center gap-1.5 font-mono">
-                    <span className="text-white font-bold">${budget.total_spent_usd.toFixed(2)}</span>
-                    <span className="text-charcoal-600">/</span>
-                    <span className="text-charcoal-400">${budget.budget_limit_usd.toFixed(0)}</span>
-                  </div>
+                <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brutal-bg border-2 border-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000]">
+                  <Coins className="w-3.5 h-3.5 text-black" />
+                  <span>
+                    ${budget.total_spent_usd.toFixed(2)} / ${budget.budget_limit_usd.toFixed(0)}
+                  </span>
                   {isReal && budget.bolna_wallet_balance !== undefined && (
-                    <span className="text-[10px] font-mono text-emerald-400 pl-1 border-l border-border/80">
-                      Bal: {budget.bolna_wallet_balance.toFixed(0)} cr
+                    <span className="text-[10px] bg-brutal-mint text-white px-1.5 py-0.5 rounded border border-black font-sans">
+                      {budget.bolna_wallet_balance.toFixed(0)} cr
                     </span>
                   )}
                 </div>
               )}
 
-              {/* Quick Launch Button */}
+              {/* Launch Run CTA - Matches Gumroad "Start selling ↗" */}
               <button
                 onClick={() => setShowRunModal(true)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-transform active:scale-95 shadow-md shadow-gold/20"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-black text-white hover:bg-[#222222] border-2 border-black text-xs font-extrabold uppercase tracking-wide shadow-[3px_3px_0px_#ff90e8] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0px_#ff90e8] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all"
               >
-                <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                <span className="hidden sm:inline">New Benchmark</span>
+                <span>Launch Benchmark</span>
+                <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
               </button>
             </div>
+
           </div>
         </div>
-      </nav>
+      </header>
 
       {/* Modal Launcher */}
       <NewRunModal

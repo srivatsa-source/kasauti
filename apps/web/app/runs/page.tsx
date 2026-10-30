@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, History } from "lucide-react";
+import { ArrowLeft, ExternalLink, History, ArrowUpRight } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -44,60 +44,68 @@ export default function RunsHistoryPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-12">
       <div>
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-xs text-charcoal-400 hover:text-gold mb-2 font-medium"
+          className="inline-flex items-center gap-1.5 text-xs text-black hover:underline mb-3 font-black uppercase"
         >
-          <ArrowLeft className="w-3.5 h-3.5" /> Back to Targets
+          <ArrowLeft className="w-3.5 h-3.5 stroke-[3]" /> Back to Targets
         </Link>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-white flex items-center gap-2.5">
-          <History className="w-7 h-7 text-gold" />
-          Benchmark Run History
-        </h1>
-        <p className="text-xs text-charcoal-400 mt-1">
-          Historical record of automated voice agent test runs and purity scores.
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-brutal-yellow border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
+            <History className="w-5 h-5 text-black stroke-[2.5]" />
+          </div>
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display">
+              Benchmark Run History
+            </h1>
+            <p className="text-xs font-semibold text-gray-700">
+              Historical record of automated voice agent test runs and purity scores.
+            </p>
+          </div>
+        </div>
       </div>
 
       {loading && runs.length === 0 ? (
-        <div className="p-12 text-center text-charcoal-400">Loading history...</div>
+        <div className="p-12 text-center text-xs font-bold text-black bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+          Loading history from Kasauti engine...
+        </div>
       ) : runs.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl bg-surface border border-border text-charcoal-400">
-          No runs recorded yet.
+        <div className="p-12 text-center rounded-2xl bg-white border-3 border-black text-black font-bold shadow-[6px_6px_0px_#000]">
+          No runs recorded yet. Launch a benchmark run from the home page.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+        <div className="overflow-x-auto rounded-2xl border-3 border-black bg-white shadow-[6px_6px_0px_#000000]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-charcoal-900 border-b border-border text-charcoal-400 uppercase tracking-wider font-semibold">
+            <thead className="bg-[#f4f4f0] border-b-2 border-black text-black uppercase tracking-wider font-black">
               <tr>
-                <th className="px-6 py-3.5">Run ID</th>
-                <th className="px-6 py-3.5">Target</th>
-                <th className="px-6 py-3.5">Suite</th>
-                <th className="px-6 py-3.5">Status</th>
-                <th className="px-6 py-3.5">Purity Score</th>
-                <th className="px-6 py-3.5">Pass / Total</th>
-                <th className="px-6 py-3.5 text-right">Action</th>
+                <th className="px-6 py-4">Run ID</th>
+                <th className="px-6 py-4">Target</th>
+                <th className="px-6 py-4">Suite</th>
+                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Purity Score</th>
+                <th className="px-6 py-4">Pass / Total</th>
+                <th className="px-6 py-4 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y-2 divide-black/10 font-medium">
               {runs.map((run) => (
-                <tr key={run.id} className="hover:bg-surfaceHover/50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-gold">
+                <tr key={run.id} className="hover:bg-yellow-50/60 transition-colors">
+                  <td className="px-6 py-4 font-mono font-bold text-black">
                     {run.id.slice(0, 8)}...
                   </td>
-                  <td className="px-6 py-4 font-semibold text-white">
+                  <td className="px-6 py-4 font-black text-black">
                     {run.target_name || "Voice Target"}
                   </td>
-                  <td className="px-6 py-4 text-charcoal-200">
+                  <td className="px-6 py-4 text-gray-800 font-semibold">
                     {run.suite_name}
                   </td>
                   <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border-2 border-black shadow-[1.5px_1.5px_0px_#000] ${
                       run.status === "completed" 
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                        : "bg-gold/15 text-gold border border-gold/30 animate-pulse"
+                        ? "bg-brutal-green text-black" 
+                        : "bg-brutal-yellow text-black animate-pulse"
                     }`}>
                       {run.status}
                     </span>
@@ -105,16 +113,16 @@ export default function RunsHistoryPage() {
                   <td className="px-6 py-4">
                     <PurityScoreBadge score={run.purity_score} size="sm" />
                   </td>
-                  <td className="px-6 py-4 font-mono text-charcoal-200">
-                    <span className="text-emerald-400 font-bold">{run.passed_calls}</span> / {run.total_calls}
+                  <td className="px-6 py-4 font-mono font-bold text-black">
+                    <span className="text-emerald-700 font-black">{run.passed_calls}</span> / {run.total_calls}
                   </td>
                   <td className="px-6 py-4 text-right">
                     <Link
                       href={`/runs/${run.id}`}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surfaceHover hover:bg-charcoal-600 text-charcoal-200 hover:text-white font-semibold transition-colors"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
                     >
-                      Inspect
-                      <ExternalLink className="w-3.5 h-3.5 text-gold" />
+                      <span>Inspect</span>
+                      <ArrowUpRight className="w-3.5 h-3.5 text-brutal-yellow" />
                     </Link>
                   </td>
                 </tr>

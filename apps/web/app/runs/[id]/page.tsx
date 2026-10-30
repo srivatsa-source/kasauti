@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { 
   ArrowLeft, Download, Wrench, RefreshCw, CheckCircle2, 
-  XCircle, Clock, FileText, ChevronRight, Sparkles, AlertTriangle
+  XCircle, Clock, FileText, ChevronRight, Sparkles, AlertTriangle,
+  ArrowUpRight
 } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
@@ -79,7 +80,6 @@ export default function RunDetailPage() {
   const [promoting, setPromoting] = useState(false);
   const [promotionResult, setPromotionResult] = useState<any | null>(null);
   const [filterMode, setFilterMode] = useState<"all" | "passed" | "failed">("all");
-  const [filterLang, setFilterLang] = useState<string>("all");
 
   const handlePromote = async () => {
     if (!confirm("Are you sure you want to promote this verified staging fix to Production?")) return;
@@ -119,7 +119,6 @@ export default function RunDetailPage() {
 
   useEffect(() => {
     fetchRun();
-    // Live polling every 3 seconds as required by specification
     const interval = setInterval(fetchRun, 3000);
     return () => clearInterval(interval);
   }, [runId]);
@@ -165,40 +164,48 @@ export default function RunDetailPage() {
   };
 
   if (loading && !run) {
-    return <div className="p-12 text-center text-charcoal-400">Loading benchmark run details...</div>;
+    return (
+      <div className="p-12 text-center text-xs font-bold text-black bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+        Loading benchmark run details...
+      </div>
+    );
   }
 
   if (!run) {
-    return <div className="p-12 text-center text-red-400">Run not found.</div>;
+    return (
+      <div className="p-12 text-center text-xs font-bold text-red-600 bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000]">
+        Run not found.
+      </div>
+    );
   }
 
   const allPassed = run.failed_calls === 0 && run.total_calls > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
       {/* Header Bar */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs text-charcoal-400 hover:text-gold mb-2 font-medium"
+            className="inline-flex items-center gap-1.5 text-xs text-black hover:underline mb-2 font-black uppercase"
           >
-            <ArrowLeft className="w-3.5 h-3.5" /> Back to Targets
+            <ArrowLeft className="w-3.5 h-3.5 stroke-[3]" /> Back to Targets
           </Link>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
+            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display">
               {run.target_name || "Voice Target"}
             </h1>
-            <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+            <span className={`px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border-2 border-black shadow-[2px_2px_0px_#000] ${
               run.status === "completed"
-                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                : "bg-gold/15 text-gold border border-gold/30 animate-pulse"
+                ? "bg-brutal-green text-black"
+                : "bg-brutal-yellow text-black animate-pulse"
             }`}>
               {run.status}
             </span>
           </div>
-          <p className="text-xs text-charcoal-400 mt-1 font-mono">
-            Suite: {run.suite_name} &bull; Run ID: {run.id}
+          <p className="text-xs font-mono font-bold text-gray-700 mt-1">
+            Suite: {run.suite_name} &bull; Run ID: {run.id.slice(0, 8)}...
           </p>
         </div>
 
@@ -207,10 +214,10 @@ export default function RunDetailPage() {
           <a
             href={`${API_BASE}/runs/${run.id}/report.pdf`}
             download
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-surfaceHover hover:bg-charcoal-600 border border-border text-charcoal-200 hover:text-white text-xs font-semibold transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-gray-100 border-2 border-black text-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
           >
-            <Download className="w-4 h-4 text-gold" />
-            Export PDF Report
+            <Download className="w-4 h-4 stroke-[2.5]" />
+            Export PDF
           </a>
 
           {/* 1-Click Promote Staging Fix to Production */}
@@ -218,10 +225,10 @@ export default function RunDetailPage() {
             <button
               onClick={handlePromote}
               disabled={promoting}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-gold to-gold-dark hover:brightness-110 text-charcoal-900 text-xs font-bold transition-transform active:scale-95 shadow-lg shadow-gold/30"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brutal-pink text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
               title="Promote verified staging prompt to production agent"
             >
-              <Sparkles className="w-4 h-4 fill-charcoal-900" />
+              <Sparkles className="w-4 h-4 fill-black" />
               {promoting ? "Promoting..." : "Promote Fix to Prod"}
             </button>
           )}
@@ -230,9 +237,9 @@ export default function RunDetailPage() {
             <button
               onClick={handleAutoFix}
               disabled={fixing}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 text-xs font-bold transition-transform active:scale-95 shadow-lg shadow-gold/20"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brutal-yellow text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
             >
-              <Wrench className="w-4 h-4" />
+              <Wrench className="w-4 h-4 stroke-[2.5]" />
               {fixing ? "Generating Fix..." : "Auto-Fix Prompt"}
             </button>
           )}
@@ -241,10 +248,10 @@ export default function RunDetailPage() {
             <button
               onClick={handleRerunFailed}
               disabled={rerunning}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-transform active:scale-95 shadow-lg shadow-emerald-600/20"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#ff90e8] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
             >
-              <RefreshCw className={`w-4 h-4 ${rerunning ? "animate-spin" : ""}`} />
-              {rerunning ? "Rerunning..." : `Rerun ${run.failed_calls} Failed Only`}
+              <RefreshCw className={`w-4 h-4 stroke-[2.5] ${rerunning ? "animate-spin" : ""}`} />
+              {rerunning ? "Rerunning..." : `Rerun ${run.failed_calls} Failed`}
             </button>
           )}
         </div>
@@ -259,41 +266,41 @@ export default function RunDetailPage() {
         </div>
 
         <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between">
-            <span className="text-xs uppercase tracking-wider text-charcoal-400 font-semibold">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000] flex flex-col justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-black font-black">
               Scenarios Tested
             </span>
-            <div className="text-3xl font-extrabold text-white mt-2">
+            <div className="text-4xl font-black text-black font-display mt-2">
               {run.total_calls}
             </div>
-            <span className="text-[11px] text-charcoal-400 mt-1">
-              Hindi, Hinglish, Kannada, Indian English
+            <span className="text-[11px] font-semibold text-gray-600 mt-1">
+              Hindi, Hinglish, Kannada & English
             </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between">
-            <span className="text-xs uppercase tracking-wider text-charcoal-400 font-semibold">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000] flex flex-col justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-black font-black">
               Passing Calls
             </span>
-            <div className="text-3xl font-extrabold text-emerald-400 mt-2 flex items-center gap-2">
-              <CheckCircle2 className="w-7 h-7" />
+            <div className="text-4xl font-black text-emerald-600 font-display mt-2 flex items-center gap-2">
+              <CheckCircle2 className="w-8 h-8 stroke-[2.5]" />
               {run.passed_calls}
             </div>
-            <span className="text-[11px] text-charcoal-400 mt-1">
+            <span className="text-[11px] font-semibold text-gray-600 mt-1">
               Satisfied all rules and rubric checks
             </span>
           </div>
 
-          <div className="p-5 rounded-2xl bg-surface border border-border flex flex-col justify-between">
-            <span className="text-xs uppercase tracking-wider text-charcoal-400 font-semibold">
+          <div className="p-5 rounded-2xl bg-white border-3 border-black shadow-[4px_4px_0px_#000] flex flex-col justify-between">
+            <span className="text-[11px] uppercase tracking-wider text-black font-black">
               Failed Calls
             </span>
-            <div className="text-3xl font-extrabold text-rose-400 mt-2 flex items-center gap-2">
-              <XCircle className="w-7 h-7" />
+            <div className="text-4xl font-black text-rose-600 font-display mt-2 flex items-center gap-2">
+              <XCircle className="w-8 h-8 stroke-[2.5]" />
               {run.failed_calls}
             </div>
-            <span className="text-[11px] text-charcoal-400 mt-1">
-              Auto-fix patches these specific regressions
+            <span className="text-[11px] font-semibold text-gray-600 mt-1">
+              Auto-fix patches these regressions
             </span>
           </div>
         </div>
@@ -301,23 +308,23 @@ export default function RunDetailPage() {
 
       {/* Fix Diff Section (if available) */}
       {selectedFix && (
-        <section className="space-y-3 p-6 rounded-2xl bg-surface border border-gold/40 shadow-xl">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <section className="space-y-3 p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-gold" />
+              <h2 className="text-xl font-black uppercase text-black font-display flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-black fill-brutal-yellow" />
                 Proposed Surgical Prompt Fix
               </h2>
-              <p className="text-xs text-charcoal-400 mt-0.5">
-                Minimal diff generated to address the failing checks, applied to staging agent.
+              <p className="text-xs font-semibold text-gray-600 mt-0.5">
+                Minimal diff generated to address the failing checks, staged for testing.
               </p>
             </div>
             <button
               onClick={handleRerunFailed}
               disabled={rerunning}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 text-xs font-bold self-start"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brutal-yellow text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] self-start"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${rerunning ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-3.5 h-3.5 stroke-[2.5] ${rerunning ? "animate-spin" : ""}`} />
               Rerun Failed Scenarios Now
             </button>
           </div>
@@ -330,33 +337,37 @@ export default function RunDetailPage() {
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-white">Scenario Calls & Checks</h2>
-            <p className="text-xs text-charcoal-400">Live call progression with rule verifications</p>
+            <h2 className="text-2xl font-black uppercase tracking-tight text-black font-display">
+              Scenario Calls & Checks
+            </h2>
+            <p className="text-xs font-semibold text-gray-600">
+              Live call progression with rule verifications
+            </p>
           </div>
 
           {/* Filter Pills */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="flex rounded-lg bg-charcoal-900 border border-border p-0.5 text-xs">
+            <div className="flex rounded-xl bg-white border-2 border-black p-1 text-xs shadow-[2px_2px_0px_#000]">
               <button
                 onClick={() => setFilterMode("all")}
-                className={`px-3 py-1 rounded-md font-semibold transition-colors ${
-                  filterMode === "all" ? "bg-gold text-charcoal-900" : "text-charcoal-400 hover:text-white"
+                className={`px-3 py-1 rounded-lg font-black uppercase text-[11px] transition-all ${
+                  filterMode === "all" ? "bg-black text-white shadow-[1px_1px_0px_#ff90e8]" : "text-black hover:bg-gray-100"
                 }`}
               >
                 All ({run.calls.length})
               </button>
               <button
                 onClick={() => setFilterMode("passed")}
-                className={`px-3 py-1 rounded-md font-semibold transition-colors ${
-                  filterMode === "passed" ? "bg-emerald-600 text-white" : "text-charcoal-400 hover:text-white"
+                className={`px-3 py-1 rounded-lg font-black uppercase text-[11px] transition-all ${
+                  filterMode === "passed" ? "bg-brutal-green text-black border border-black" : "text-black hover:bg-gray-100"
                 }`}
               >
                 Pass ({run.passed_calls})
               </button>
               <button
                 onClick={() => setFilterMode("failed")}
-                className={`px-3 py-1 rounded-md font-semibold transition-colors ${
-                  filterMode === "failed" ? "bg-rose-600 text-white" : "text-charcoal-400 hover:text-white"
+                className={`px-3 py-1 rounded-lg font-black uppercase text-[11px] transition-all ${
+                  filterMode === "failed" ? "bg-rose-500 text-white border border-black" : "text-black hover:bg-gray-100"
                 }`}
               >
                 Fail ({run.failed_calls})
@@ -365,19 +376,19 @@ export default function RunDetailPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+        <div className="overflow-x-auto rounded-2xl border-3 border-black bg-white shadow-[6px_6px_0px_#000000]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-charcoal-900 border-b border-border text-charcoal-400 uppercase tracking-wider font-semibold">
+            <thead className="bg-[#f4f4f0] border-b-2 border-black text-black uppercase tracking-wider font-black">
               <tr>
-                <th className="px-6 py-3.5">Scenario / Persona</th>
-                <th className="px-6 py-3.5">Language</th>
-                <th className="px-6 py-3.5">Call Status</th>
-                <th className="px-6 py-3.5">Purity Outcome</th>
-                <th className="px-6 py-3.5">Rule / Rubric Evidence</th>
-                <th className="px-6 py-3.5 text-right">Details</th>
+                <th className="px-6 py-4">Scenario / Persona</th>
+                <th className="px-6 py-4">Language</th>
+                <th className="px-6 py-4">Call Status</th>
+                <th className="px-6 py-4">Purity Outcome</th>
+                <th className="px-6 py-4">Rule / Rubric Evidence</th>
+                <th className="px-6 py-4 text-right">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/60">
+            <tbody className="divide-y-2 divide-black/10 font-medium">
               {run.calls
                 .filter((call) => {
                   const checks = call.checks || [];
@@ -387,83 +398,83 @@ export default function RunDetailPage() {
                   return true;
                 })
                 .map((call) => {
-                const checks = call.checks || [];
-                const passed = checks.length > 0 && checks.every((c) => c.passed);
-                const title = call.scenario?.title || call.scenario_id;
+                  const checks = call.checks || [];
+                  const passed = checks.length > 0 && checks.every((c) => c.passed);
+                  const title = call.scenario?.title || call.scenario_id;
 
-                return (
-                  <tr key={call.id} className="hover:bg-surfaceHover/50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-white">{title}</div>
-                      <div className="text-[11px] text-charcoal-400 line-clamp-1 max-w-xs mt-0.5">
-                        {call.scenario?.persona}
-                      </div>
-                    </td>
+                  return (
+                    <tr key={call.id} className="hover:bg-yellow-50/60 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="font-black text-black">{title}</div>
+                        <div className="text-[11px] font-semibold text-gray-600 line-clamp-1 max-w-xs mt-0.5">
+                          {call.scenario?.persona}
+                        </div>
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-charcoal-700 text-charcoal-200 border border-border">
-                        {call.scenario?.language || "N/A"}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
-                        call.status === "completed"
-                          ? "bg-charcoal-700 text-charcoal-200 border border-border"
-                          : "bg-gold/15 text-gold border border-gold/30 animate-pulse"
-                      }`}>
-                        {call.status}
-                      </span>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      {passed ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          PASS
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase bg-brutal-bg text-black border border-black shadow-[1px_1px_0px_#000]">
+                          {call.scenario?.language || "N/A"}
                         </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
-                          <XCircle className="w-3.5 h-3.5" />
-                          FAIL
-                        </span>
-                      )}
-                    </td>
+                      </td>
 
-                    <td className="px-6 py-4 max-w-md">
-                      <div className="space-y-1">
-                        {checks.slice(0, 2).map((chk) => (
-                          <div key={chk.id} className="text-[11px] flex items-center gap-1.5 truncate">
-                            {chk.passed ? (
-                              <CheckCircle2 className="w-3 h-3 text-emerald-400 shrink-0" />
-                            ) : (
-                              <XCircle className="w-3 h-3 text-rose-400 shrink-0" />
-                            )}
-                            <span className="font-semibold text-charcoal-200">{chk.rule_id}:</span>
-                            <span className="text-charcoal-400 truncate">{chk.evidence}</span>
-                            {chk.kind === "rule" && <UnverifiedRuleBadge showTooltip={false} />}
-                          </div>
-                        ))}
-                        {checks.length > 2 && (
-                          <span className="text-[10px] text-charcoal-400 italic">
-                            +{checks.length - 2} more checks
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border border-black ${
+                          call.status === "completed"
+                            ? "bg-gray-100 text-black"
+                            : "bg-brutal-yellow text-black animate-pulse"
+                        }`}>
+                          {call.status}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        {passed ? (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-brutal-green text-black border border-black shadow-[1px_1px_0px_#000]">
+                            <CheckCircle2 className="w-3.5 h-3.5 stroke-[2.5]" />
+                            PASS
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-[#ff6b6b] text-white border border-black shadow-[1px_1px_0px_#000]">
+                            <XCircle className="w-3.5 h-3.5 stroke-[2.5]" />
+                            FAIL
                           </span>
                         )}
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="px-6 py-4 text-right">
-                      <Link
-                        href={`/calls/${call.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surfaceHover hover:bg-charcoal-600 text-charcoal-200 hover:text-white font-semibold transition-colors"
-                      >
-                        Audio &amp; Turns
-                        <ChevronRight className="w-3.5 h-3.5 text-gold" />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
+                      <td className="px-6 py-4 max-w-md">
+                        <div className="space-y-1">
+                          {checks.slice(0, 2).map((chk) => (
+                            <div key={chk.id} className="text-[11px] flex items-center gap-1.5 truncate">
+                              {chk.passed ? (
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600 stroke-[2.5] shrink-0" />
+                              ) : (
+                                <XCircle className="w-3 h-3 text-rose-600 stroke-[2.5] shrink-0" />
+                              )}
+                              <span className="font-bold text-black">{chk.rule_id}:</span>
+                              <span className="text-gray-700 truncate">{chk.evidence}</span>
+                              {chk.kind === "rule" && <UnverifiedRuleBadge showTooltip={false} />}
+                            </div>
+                          ))}
+                          {checks.length > 2 && (
+                            <span className="text-[10px] text-gray-500 font-bold italic">
+                              +{checks.length - 2} more checks
+                            </span>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4 text-right">
+                        <Link
+                          href={`/calls/${call.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-[11px] uppercase tracking-wider shadow-[2px_2px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+                        >
+                          <span>Audio &amp; Turns</span>
+                          <ArrowUpRight className="w-3 h-3 text-brutal-yellow" />
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
@@ -471,48 +482,46 @@ export default function RunDetailPage() {
 
       {/* 1-Click Promotion Hallmark Modal */}
       {promotionResult && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
-          <div className="w-full max-w-lg rounded-3xl bg-surface border-2 border-gold p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute -right-12 -top-12 w-48 h-48 bg-gold/15 rounded-full blur-3xl pointer-events-none" />
-            
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white border-3 border-black p-8 shadow-[12px_12px_0px_#000000] relative">
             <div className="text-center space-y-3">
-              <div className="w-16 h-16 mx-auto rounded-2xl bg-gold/20 border border-gold flex items-center justify-center text-gold shadow-lg shadow-gold/20">
-                <Sparkles className="w-8 h-8 fill-gold" />
+              <div className="w-16 h-16 mx-auto rounded-full bg-brutal-yellow border-3 border-black flex items-center justify-center text-black shadow-[4px_4px_0px_#000]">
+                <Sparkles className="w-8 h-8 fill-black" />
               </div>
 
-              <div className="inline-block px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-bold uppercase tracking-widest">
+              <div className="inline-block px-3.5 py-1 rounded-full bg-brutal-green text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000]">
                 Certified Production Ready
               </div>
 
-              <h3 className="text-2xl font-black text-white tracking-tight">
+              <h3 className="text-2xl font-black text-black uppercase font-display tracking-tight">
                 Prompt Promoted to Production!
               </h3>
               
-              <p className="text-xs text-charcoal-400">
+              <p className="text-xs font-semibold text-gray-700">
                 The surgical fix tested in this benchmark has been safely deployed to target{" "}
-                <strong className="text-white">{promotionResult.target_name}</strong>.
+                <strong className="text-black">{promotionResult.target_name}</strong>.
               </p>
             </div>
 
-            <div className="mt-6 p-4 rounded-xl bg-charcoal-900 border border-border space-y-2 text-xs font-mono">
-              <div className="flex justify-between text-charcoal-400">
-                <span>Hallmark Hash:</span>
-                <span className="text-gold font-bold">{promotionResult.certification_hash}</span>
+            <div className="mt-6 p-4 rounded-xl bg-gray-50 border-2 border-black space-y-2 text-xs font-mono">
+              <div className="flex justify-between text-gray-700">
+                <span className="font-bold">Hallmark Hash:</span>
+                <span className="text-black font-extrabold">{promotionResult.certification_hash}</span>
               </div>
-              <div className="flex justify-between text-charcoal-400">
-                <span>Purity Verified:</span>
-                <span className="text-emerald-400 font-bold">{promotionResult.purity_score}% Purity</span>
+              <div className="flex justify-between text-gray-700">
+                <span className="font-bold">Purity Verified:</span>
+                <span className="text-emerald-700 font-extrabold">{promotionResult.purity_score}% Purity</span>
               </div>
-              <div className="flex justify-between text-charcoal-400">
-                <span>Promoted At:</span>
-                <span className="text-charcoal-200">{new Date(promotionResult.promoted_at).toLocaleTimeString()}</span>
+              <div className="flex justify-between text-gray-700">
+                <span className="font-bold">Promoted At:</span>
+                <span className="text-black">{new Date(promotionResult.promoted_at).toLocaleTimeString()}</span>
               </div>
             </div>
 
             <div className="mt-6 flex justify-end">
               <button
                 onClick={() => setPromotionResult(null)}
-                className="w-full py-2.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-colors shadow-lg shadow-gold/20"
+                className="w-full py-3 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-xs uppercase tracking-wider shadow-[4px_4px_0px_#ff90e8] transition-all"
               >
                 Done
               </button>

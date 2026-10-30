@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume2, RotateCcw, AlertTriangle, ShieldCheck, Sparkles, MapPin } from "lucide-react";
+import { Play, Pause, Volume2, RotateCcw, MapPin } from "lucide-react";
 
 export interface AudioMarker {
   time: number; // in seconds
@@ -46,12 +46,12 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
 
         const ws = WaveSurfer.create({
           container: containerRef.current,
-          waveColor: "#272a38",
-          progressColor: "#E5B842",
-          cursorColor: "#FFFFFF",
+          waveColor: "#000000",
+          progressColor: "#ff90e8",
+          cursorColor: "#ffc900",
           barWidth: 3,
           barGap: 3,
-          barRadius: 2,
+          barRadius: 1,
           height: 64,
           normalize: true
         });
@@ -125,35 +125,37 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
   };
 
   return (
-    <div className="p-5 rounded-2xl bg-surface border border-border space-y-3">
+    <div className="p-6 rounded-2xl bg-white border-3 border-black shadow-[6px_6px_0px_#000000] space-y-4">
       {/* Header bar */}
-      <div className="flex items-center justify-between text-xs">
+      <div className="flex items-center justify-between text-xs pb-2 border-b-2 border-black">
         <div className="flex items-center gap-2">
-          <Volume2 className="w-4 h-4 text-gold" />
-          <span className="font-bold text-white">Call Recording &amp; Compliance Waveform</span>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-charcoal-700 text-charcoal-200 border border-border">
-            Opus 24kHz / Linear16
+          <Volume2 className="w-4 h-4 text-black stroke-[2.5]" />
+          <span className="font-black uppercase tracking-tight text-black font-display text-sm">
+            Call Recording &amp; Compliance Waveform
+          </span>
+          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-brutal-bg text-black border border-black shadow-[1px_1px_0px_#000]">
+            Opus 24kHz
           </span>
         </div>
-        <div className="font-mono text-xs text-gold font-bold">
+        <div className="font-mono text-xs font-black text-black bg-brutal-yellow px-2 py-0.5 rounded border border-black shadow-[1px_1px_0px_#000]">
           {formatTime(currentTime)} / {formatTime(duration || 30)}
         </div>
       </div>
 
       {/* Waveform Canvas Container */}
-      <div className="relative py-2">
+      <div className="relative py-2 bg-[#f4f4f0] rounded-xl border-2 border-black p-3">
         <div ref={containerRef} className="w-full cursor-pointer" />
 
         {/* Visual Waveform Markers Overlay Pins */}
-        <div className="relative w-full h-8 mt-1 border-t border-border/40">
+        <div className="relative w-full h-8 mt-2 border-t-2 border-black">
           {activeMarkers.map((marker, idx) => {
             const dur = duration || 30;
             const leftPct = Math.min(Math.max((marker.time / dur) * 100, 2), 98);
 
             const getPinColor = () => {
-              if (marker.kind === "violation") return "bg-rose-500 text-rose-300 border-rose-400";
-              if (marker.kind === "consent") return "bg-emerald-500 text-emerald-300 border-emerald-400";
-              return "bg-gold text-charcoal-900 border-gold-light";
+              if (marker.kind === "violation") return "bg-rose-500 text-white";
+              if (marker.kind === "consent") return "bg-brutal-green text-black";
+              return "bg-brutal-yellow text-black";
             };
 
             return (
@@ -162,13 +164,13 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
                 type="button"
                 onClick={() => seekTo(marker.time)}
                 style={{ left: `${leftPct}%` }}
-                className="absolute -top-1 -translate-x-1/2 flex flex-col items-center group transition-transform hover:scale-110 z-10"
+                className="absolute -top-2 -translate-x-1/2 flex flex-col items-center group transition-transform hover:scale-125 z-10"
                 title={`${marker.label} @ ${formatTime(marker.time)} - Click to jump`}
               >
-                <div className={`w-3 h-3 rounded-full border shadow-md flex items-center justify-center ${getPinColor()}`}>
-                  <span className="w-1 h-1 rounded-full bg-current" />
+                <div className={`w-4 h-4 rounded-full border-2 border-black shadow-[1px_1px_0px_#000] flex items-center justify-center ${getPinColor()}`}>
+                  <span className="w-1.5 h-1.5 rounded-full bg-black" />
                 </div>
-                <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-4 whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded bg-charcoal-900 text-white border border-border shadow-xl pointer-events-none">
+                <span className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-5 whitespace-nowrap text-[10px] font-black uppercase px-2 py-0.5 rounded bg-black text-white border border-black shadow-[2px_2px_0px_#ff90e8] pointer-events-none">
                   {marker.label} ({formatTime(marker.time)})
                 </span>
               </button>
@@ -178,40 +180,40 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
       </div>
 
       {/* Controls & Active Marker Status */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-border/60">
+      <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
         <div className="flex items-center space-x-2">
           <button
             onClick={togglePlay}
-            className="flex items-center justify-center w-9 h-9 rounded-full bg-gold hover:bg-gold-dark text-charcoal-900 font-bold transition-transform active:scale-95 shadow-md shadow-gold/20"
+            className="flex items-center justify-center w-10 h-10 rounded-xl bg-brutal-yellow hover:bg-yellow-300 border-2 border-black text-black font-black transition-all shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
           >
-            {isPlaying ? <Pause className="w-4 h-4 fill-charcoal-900" /> : <Play className="w-4 h-4 fill-charcoal-900 ml-0.5" />}
+            {isPlaying ? <Pause className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black ml-0.5" />}
           </button>
           <button
             onClick={restart}
-            className="flex items-center justify-center w-8 h-8 rounded-full bg-surfaceHover hover:bg-charcoal-600 text-charcoal-200 transition-colors"
+            className="flex items-center justify-center w-9 h-9 rounded-xl bg-white hover:bg-gray-100 border-2 border-black text-black font-black transition-all shadow-[2px_2px_0px_#000]"
             title="Restart audio"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-4 h-4 stroke-[2.5]" />
           </button>
         </div>
 
         {/* Live Audio Marker Badge */}
         {activeMarker ? (
-          <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-charcoal-900 border border-gold/30 text-[11px] animate-fadeIn">
-            <MapPin className="w-3.5 h-3.5 text-gold shrink-0" />
-            <span className="font-semibold text-white">{activeMarker.label}:</span>
-            <span className="text-charcoal-300">{activeMarker.description}</span>
+          <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-brutal-pink border-2 border-black text-xs font-black shadow-[2px_2px_0px_#000] text-black animate-fadeIn">
+            <MapPin className="w-4 h-4 text-black shrink-0" />
+            <span className="uppercase">{activeMarker.label}:</span>
+            <span className="font-medium text-black">{activeMarker.description}</span>
           </div>
         ) : (
-          <div className="flex items-center gap-3 text-[11px] text-charcoal-400">
+          <div className="flex items-center gap-3 text-xs font-black uppercase text-black">
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-gold" /> AI Disclosure
+              <span className="w-2.5 h-2.5 rounded-full bg-brutal-yellow border border-black" /> AI Disclosure
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500" /> Consent
+              <span className="w-2.5 h-2.5 rounded-full bg-brutal-green border border-black" /> Consent
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-rose-500" /> Compliance Check
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-black" /> Violation
             </span>
           </div>
         )}
