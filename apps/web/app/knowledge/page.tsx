@@ -42,7 +42,7 @@ interface GraphData {
     self_healing_fixes_deployed: number;
     compliance_health_score: number;
     languages_covered: number;
-    top_vulnerabilities: Array<{ name: string; risk: string }>;
+    top_vulnerabilities?: Array<{ name: string; risk: string }>;
   };
 }
 
@@ -506,7 +506,7 @@ export default function KnowledgePage() {
                 Vulnerability Risk Clusters
               </h3>
               <div className="space-y-2">
-                {data.stats.top_vulnerabilities.map((v, idx) => (
+                {(data.stats.top_vulnerabilities ?? []).map((v, idx) => (
                   <div key={idx} className="p-3 rounded-xl bg-gray-50 border-2 border-black flex items-center justify-between text-xs">
                     <span className="font-bold text-black">{v.name}</span>
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-black">
