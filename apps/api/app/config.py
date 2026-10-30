@@ -9,6 +9,18 @@ ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
 class Settings(BaseSettings):
     model_config = ConfigDict(env_file=".env", extra="ignore")
 
+    @field_validator("DATABASE_URL", mode="before")
+    @classmethod
+    def resolve_db_url(cls, v):
+        if not v or not isinstance(v, str):
+            return f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}"
+        v = v.strip()
+        if " #" in v:
+            v = v.split(" #")[0].strip()
+        if v in ("sqlite+aiosqlite:///./kasauti.db", "sqlite+aiosqlite:///kasauti.db"):
+            return f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}"
+        return v
+
     @field_validator(
         "BOLNA_API_KEY", "BOLNA_TARGET_AGENT_ID", "BOLNA_STAGING_AGENT_ID",
         "BOLNA_CALLER_AGENT_ID", "BOLNA_TARGET_PHONE", "PUBLIC_WEBHOOK_URL",
@@ -49,7 +61,7 @@ class Settings(BaseSettings):
     ANTHROPIC_MODEL: str = Field(default="claude-sonnet-4-20250514")
 
     # Database
-    DATABASE_URL: str = Field(default="sqlite+aiosqlite:///./kasauti.db")
+    DATABASE_URL: str = Field(default=f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}")
 
     # Budget & Safety limits
     BUDGET_USD: float = Field(default=8.0, description="Hard cap on total spend across calls")

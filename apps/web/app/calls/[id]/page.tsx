@@ -8,6 +8,7 @@ import {
   Terminal, Search, Bot, User
 } from "lucide-react";
 import { AudioPlayer, AudioMarker } from "@/components/AudioPlayer";
+import { RealtimeVoiceWaveform } from "@/components/RealtimeVoiceWaveform";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
 import { SarvamSecondOpinion } from "@/components/SarvamSecondOpinion";
 
@@ -52,6 +53,7 @@ export default function CallDetailPage() {
   const [loading, setLoading] = useState(true);
   const [copiedTranscript, setCopiedTranscript] = useState(false);
   const [searchTranscript, setSearchTranscript] = useState("");
+  const [audioViewMode, setAudioViewMode] = useState<"timeline" | "oscilloscope">("timeline");
 
   useEffect(() => {
     const fetchCall = async () => {
@@ -167,8 +169,40 @@ export default function CallDetailPage() {
 
       <LegalDisclaimerBanner />
 
-      {/* Audio Waveform Player with Compliance Overlay Pins */}
-      <AudioPlayer recordingUrl={call.recording_url} markers={markers} />
+      {/* Audio Waveform Player with Compliance Overlay Pins & Realtime Oscilloscope */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-mono uppercase text-zinc-400">Audio Telemetry View</span>
+          <div className="flex rounded-md bg-zinc-950 border border-zinc-800 p-0.5 text-xs font-mono">
+            <button
+              onClick={() => setAudioViewMode("timeline")}
+              className={`px-3 py-1 rounded text-xs transition-colors ${
+                audioViewMode === "timeline" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+              }`}
+            >
+              Timeline Audio Player
+            </button>
+            <button
+              onClick={() => setAudioViewMode("oscilloscope")}
+              className={`px-3 py-1 rounded text-xs transition-colors ${
+                audioViewMode === "oscilloscope" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+              }`}
+            >
+              Live Voice Oscilloscope
+            </button>
+          </div>
+        </div>
+
+        {audioViewMode === "timeline" ? (
+          <AudioPlayer recordingUrl={call.recording_url} markers={markers} />
+        ) : (
+          <RealtimeVoiceWaveform
+            isActive={true}
+            statusText={`Telephony Audio - Call #${call.id.slice(0, 8)}`}
+            currentTurnText={rawTurns[0] || "Active stream audio playback"}
+          />
+        )}
+      </div>
 
       {/* Sarvam AI Indic Second Opinion & Translation Audit */}
       <SarvamSecondOpinion callId={call.id} />

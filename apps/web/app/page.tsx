@@ -9,6 +9,7 @@ import {
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
 import { NewRunModal } from "@/components/NewRunModal";
+import { RealtimeVoiceWaveform } from "@/components/RealtimeVoiceWaveform";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -45,6 +46,13 @@ export default function HomePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [runFilter, setRunFilter] = useState<"all" | "passed" | "failed">("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
+
+  useEffect(() => {
+    if (targets.length > 0 && !selectedTargetId) {
+      setSelectedTargetId(targets[0].id);
+    }
+  }, [targets, selectedTargetId]);
 
   // New target form state
   const [name, setName] = useState("");
@@ -262,69 +270,106 @@ export default function HomePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {targets.map((target) => (
-              <div
-                key={target.id}
-                className="rounded-xl bg-zinc-950 border border-zinc-800 p-5 hover:border-zinc-600 transition-all flex flex-col justify-between group space-y-4"
-              >
-                <div>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-bold text-white text-sm group-hover:text-zinc-200 transition-colors">
-                        {target.name}
-                      </h3>
-                      <div className="text-xs font-mono text-zinc-400 mt-1 flex items-center gap-1.5">
-                        <Phone className="w-3 h-3 text-zinc-500" />
-                        <span>{target.phone_number}</span>
-                        <button
-                          onClick={() => handleCopy(target.phone_number, target.id)}
-                          className="text-zinc-600 hover:text-white"
-                          title="Copy phone"
-                        >
-                          {copiedId === target.id ? (
-                            <Check className="w-3 h-3 text-white" />
-                          ) : (
-                            <Copy className="w-3 h-3" />
-                          )}
-                        </button>
+            {targets.map((target) => {
+              const isSelected = selectedTargetId === target.id;
+              return (
+                <div
+                  key={target.id}
+                  onClick={() => setSelectedTargetId(target.id)}
+                  className={`rounded-xl border p-5 transition-all flex flex-col justify-between group space-y-4 cursor-pointer ${
+                    isSelected
+                      ? "bg-zinc-900 border-white shadow-lg"
+                      : "bg-zinc-950 border-zinc-800 hover:border-zinc-600"
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? "bg-white" : "bg-zinc-600"}`} />
+                          <h3 className="font-bold text-white text-sm truncate">
+                            {target.name}
+                          </h3>
+                        </div>
+
+                        <div className="text-xs font-mono text-zinc-400 mt-1 flex items-center gap-1.5">
+                          <Phone className="w-3 h-3 text-zinc-500" />
+                          <span>{target.phone_number}</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopy(target.phone_number, target.id);
+                            }}
+                            className="text-zinc-600 hover:text-white"
+                            title="Copy phone"
+                          >
+                            {copiedId === target.id ? (
+                              <Check className="w-3 h-3 text-white" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </button>
+                        </div>
                       </div>
+
+                      {isSelected ? (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-white text-black font-bold uppercase shrink-0">
+                          SELECTED
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-500 border border-zinc-800 uppercase shrink-0">
+                          Click to Select
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Languages Tags */}
+                    <div className="mt-3 flex flex-wrap gap-1">
+                      {target.languages?.map((lang) => (
+                        <span
+                          key={lang}
+                          className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-400 border border-zinc-800"
+                        >
+                          {lang}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="mt-3 p-2.5 rounded bg-black border border-zinc-900 text-[11px] font-mono text-zinc-500 truncate">
+                      Staging: {target.staging_agent_id || "kasauti_staging_default"}
                     </div>
                   </div>
 
-                  {/* Languages Tags */}
-                  <div className="mt-3 flex flex-wrap gap-1">
-                    {target.languages?.map((lang) => (
-                      <span
-                        key={lang}
-                        className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-400 border border-zinc-800"
-                      >
-                        {lang}
-                      </span>
-                    ))}
-                  </div>
+                  <div className="pt-3 border-t border-zinc-900 flex items-center justify-between">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTargetId(target.id);
+                        setShowRunModal(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-transform active:scale-95"
+                    >
+                      <Play className="w-3 h-3 fill-black" />
+                      <span>Benchmark Agent</span>
+                    </button>
 
-                  <div className="mt-3 p-2.5 rounded bg-black border border-zinc-900 text-[11px] font-mono text-zinc-500 truncate">
-                    Staging: {target.staging_agent_id || "kasauti_staging_default"}
+                    <span className="text-[11px] font-mono text-zinc-500">
+                      12 checks &bull; TRAI
+                    </span>
                   </div>
                 </div>
-
-                <div className="pt-3 border-t border-zinc-900 flex items-center justify-between">
-                  <button
-                    onClick={() => handleTriggerRun(target.id)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-transform active:scale-95"
-                  >
-                    <Play className="w-3 h-3 fill-black" />
-                    <span>Run Suite</span>
-                  </button>
-
-                  <span className="text-[11px] font-mono text-zinc-500">
-                    12 checks &bull; TRAI
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
+      </section>
+
+      {/* Realtime Voice Agent Execution Waveform Oscilloscope */}
+      <section className="space-y-2">
+        <RealtimeVoiceWaveform
+          isActive={false}
+          statusText="Standby &bull; Opus 24kHz"
+        />
       </section>
 
       {/* Recent Benchmark Runs Table */}
@@ -540,6 +585,7 @@ export default function HomePage() {
         isOpen={showRunModal}
         onClose={() => setShowRunModal(false)}
         targets={targets}
+        initialTargetId={selectedTargetId}
       />
     </div>
   );
