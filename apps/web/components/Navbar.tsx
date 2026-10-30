@@ -59,8 +59,12 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { href: "/", label: "Overview" },
-    { href: "/runs", label: "Runs & Audits" },
-    { href: "/knowledge", label: "Neural Topology" },
+    { href: "/runs", label: "Runs" },
+    { href: "/knowledge", label: "Topology" },
+    { href: "/sentinel", label: "Sentinel" },
+    { href: "/fuzzer", label: "Tool Fuzzer" },
+    { href: "/acoustic", label: "Acoustic" },
+    { href: "/verify/KASAUTI-2026-BOLNA-01", label: "Hallmark" },
   ];
 
   return (

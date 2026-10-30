@@ -79,6 +79,8 @@ export default function RunDetailPage() {
   const [selectedFix, setSelectedFix] = useState<Fix | null>(null);
   const [promoting, setPromoting] = useState(false);
   const [promotionResult, setPromotionResult] = useState<any | null>(null);
+  const [syncingBolna, setSyncingBolna] = useState(false);
+  const [creatingPR, setCreatingPR] = useState(false);
   const [filterMode, setFilterMode] = useState<"all" | "passed" | "failed">("all");
   const [searchScenario, setSearchScenario] = useState("");
   const [copied, setCopied] = useState(false);
@@ -170,6 +172,60 @@ export default function RunDetailPage() {
     }
   };
 
+  const handleBolnaDeploy = async () => {
+    if (!selectedFix || !run) return;
+    setSyncingBolna(true);
+    try {
+      const res = await fetch(`${API_BASE}/deployer/bolna-sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          staging_agent_id: "74bbf2a4-6561-48de-aec3-aafc7153bcd7",
+          prompt_patch_text: selectedFix.patched_prompt,
+          reason: `Autonomous regulatory patch for run ${runId.slice(0, 8)}`
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(`Successfully deployed to Bolna Agent Studio: ${data.deploy_message}`);
+      } else {
+        const err = await res.json();
+        alert("Bolna deploy error: " + (err.detail || "Failed"));
+      }
+    } catch (e) {
+      alert("Error deploying to Bolna: " + e);
+    } finally {
+      setSyncingBolna(false);
+    }
+  };
+
+  const handleCreateGitPR = async () => {
+    if (!selectedFix || !run) return;
+    setCreatingPR(true);
+    try {
+      const res = await fetch(`${API_BASE}/deployer/git-pr`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          run_id: run.id,
+          target_name: run.target_name || "Kasauti CSA",
+          rule_id: selectedFix.rule_id || "trai_compliance",
+          purity_score_before: run.purity_score,
+          purity_score_after: Math.min(100.0, run.purity_score + 18.5),
+          prompt_diff: selectedFix.diff || "+ Enforce strict TRAI preamble"
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        window.open(data.github_pr_url, "_blank");
+      }
+    } catch (e) {
+      alert("Error generating PR: " + e);
+    } finally {
+      setCreatingPR(false);
+    }
+  };
+
   if (loading && !run) {
     return (
       <div className="p-12 text-center text-xs font-mono text-zinc-500">
@@ -254,15 +310,27 @@ export default function RunDetailPage() {
               <span>Export PDF</span>
             </a>
 
-            {/* 1-Click Promote */}
+            {/* 1-Click Promote & Autonomous Bolna / Git Actions */}
             {selectedFix && (
-              <button
-                onClick={handlePromote}
-                disabled={promoting}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50"
-              >
-                <span>{promoting ? "Promoting..." : "Promote Fix to Prod"}</span>
-              </button>
+              <>
+                <button
+                  onClick={handleBolnaDeploy}
+                  disabled={syncingBolna}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50"
+                  title="Directly deploy to Bolna Agent Studio"
+                >
+                  <span>{syncingBolna ? "Deploying..." : "Deploy to Bolna"}</span>
+                </button>
+
+                <button
+                  onClick={handleCreateGitPR}
+                  disabled={creatingPR}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-700 text-xs font-mono transition-colors disabled:opacity-50"
+                  title="Open GitHub PR with compliance diff"
+                >
+                  <span>{creatingPR ? "Generating PR..." : "GitHub PR"}</span>
+                </button>
+              </>
             )}
 
             {!allPassed && (

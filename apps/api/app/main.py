@@ -9,6 +9,12 @@ from app.routes.calls import router as calls_router
 from app.routes.webhooks import router as webhooks_router
 from app.routes.budget import router as budget_router
 from app.routes.knowledge import router as knowledge_router
+from app.routes.telemetry import router as telemetry_router
+from app.routes.sentinel import router as sentinel_router
+from app.routes.fuzzer import router as fuzzer_router
+from app.routes.acoustic import router as acoustic_router
+from app.routes.deployer import router as deployer_router
+from app.routes.marketplace import router as marketplace_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -60,6 +66,12 @@ app.include_router(calls_router)
 app.include_router(webhooks_router)
 app.include_router(budget_router)
 app.include_router(knowledge_router)
+app.include_router(telemetry_router)
+app.include_router(sentinel_router)
+app.include_router(fuzzer_router)
+app.include_router(acoustic_router)
+app.include_router(deployer_router)
+app.include_router(marketplace_router)
 
 @app.get("/health")
 async def health_check():
