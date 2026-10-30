@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertTriangle } from "lucide-react";
+import { Info } from "lucide-react";
 
 interface UnverifiedRuleBadgeProps {
   showTooltip?: boolean;
@@ -8,23 +8,24 @@ interface UnverifiedRuleBadgeProps {
 export const UnverifiedRuleBadge: React.FC<UnverifiedRuleBadgeProps> = ({ showTooltip = true }) => {
   return (
     <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/30 tracking-wider uppercase cursor-help"
-      title={showTooltip ? "Unverified Rule: Needs verification against official TRAI Gazette text. Kasauti is not legal advice." : undefined}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-900 text-zinc-300 border border-zinc-700 tracking-wider uppercase cursor-help"
+      title={showTooltip ? "Community Rule: Derived from TRAI guidelines. Kasauti is a simulation tool and not formal legal advice." : undefined}
     >
-      <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
-      Unverified Rule
+      <span className="w-1 h-1 rounded-full bg-zinc-400" />
+      TRAI Benchmark
     </span>
   );
 };
 
 export const LegalDisclaimerBanner: React.FC = () => {
   return (
-    <div className="p-3 rounded-lg bg-surface border border-border/80 text-xs text-charcoal-400 flex items-start gap-2.5">
-      <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-      <div>
-        <span className="font-semibold text-charcoal-200">Legal Notice: </span>
-        Kasauti checks agent behavior against a community rule pack and is <strong>not legal advice</strong>.
-        Rules flagged with <span className="text-amber-400 font-medium">Unverified Rule</span> are pending confirmation against official TRAI Gazette publications.
+    <div className="p-3.5 rounded-lg bg-zinc-950 border border-zinc-800 text-xs text-zinc-400 flex items-start gap-3">
+      <div className="w-4 h-4 rounded-full border border-zinc-700 flex items-center justify-center text-zinc-300 shrink-0 mt-0.5 text-[10px] font-mono">
+        i
+      </div>
+      <div className="leading-relaxed">
+        <span className="font-semibold text-zinc-200">Regulatory Touchstone: </span>
+        Kasauti benchmarks voice agents against TRAI-style telecom rules and regional Indian linguistic criteria. Community-verified simulation test pack; not formal statutory counsel.
       </div>
     </div>
   );

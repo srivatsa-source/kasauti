@@ -9,41 +9,52 @@ export const PurityScoreBadge: React.FC<PurityScoreBadgeProps> = ({ score, size 
   const isHigh = score >= 80;
   const isMedium = score >= 50 && score < 80;
 
-  const getBorderColor = () => {
-    if (isHigh) return "border-gold text-gold";
-    if (isMedium) return "border-yellow-500 text-yellow-400";
-    return "border-red-400 text-red-400";
-  };
-
   const getKaratLabel = () => {
     if (score >= 95) return "24K Hallmark";
     if (score >= 85) return "22K Standard";
     if (score >= 70) return "18K Alloy";
-    return "Impure / Needs Polish";
+    return "Failed / Impure";
   };
 
   if (size === "lg") {
     return (
-      <div className="relative inline-flex flex-col items-center justify-center p-6 rounded-2xl bg-surface border border-gold/40 shadow-2xl shadow-gold/10">
-        <div className="text-xs uppercase tracking-widest text-charcoal-400 font-semibold mb-1">
-          Kasauti Purity Rating
+      <div className="relative inline-flex flex-col p-6 rounded-xl bg-zinc-950 border border-zinc-800 w-full">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500 font-semibold">
+            Kasauti Purity Rating
+          </span>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-300 border border-zinc-700/80 uppercase">
+            {getKaratLabel()}
+          </span>
         </div>
-        <div className="text-5xl font-black tracking-tight text-white flex items-baseline gap-1">
-          <span className="gold-gradient-text">{score.toFixed(1)}%</span>
+
+        <div className="text-4xl sm:text-5xl font-black font-mono tracking-tight text-white mt-1">
+          {score.toFixed(1)}%
         </div>
-        <div className="mt-2 text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-gold/15 text-gold border border-gold/30">
-          {getKaratLabel()}
+
+        {/* Minimalist Progress Meter */}
+        <div className="w-full h-1.5 bg-zinc-900 rounded-full overflow-hidden mt-4 border border-zinc-800">
+          <div
+            className="h-full bg-white transition-all duration-500"
+            style={{ width: `${Math.min(Math.max(score, 0), 100)}%` }}
+          />
+        </div>
+
+        <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 mt-2">
+          <span>0.0%</span>
+          <span>Target: 100%</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full border bg-surface/80 ${getBorderColor()}`}>
-      <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
-      <span className="text-xs font-bold tracking-wide">
-        {score.toFixed(0)}% Purity
+    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-zinc-800 bg-zinc-950 text-zinc-200 font-mono text-[11px]">
+      <span className={`w-1.5 h-1.5 rounded-full ${isHigh ? "bg-white" : isMedium ? "bg-zinc-400" : "bg-zinc-600"}`} />
+      <span className="font-semibold tracking-tight text-white">
+        {score.toFixed(0)}%
       </span>
+      <span className="text-zinc-500 text-[10px]">PURITY</span>
     </div>
   );
 };

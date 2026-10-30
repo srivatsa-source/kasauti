@@ -4,8 +4,8 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { 
-  ArrowLeft, CheckCircle2, XCircle, FileText, 
-  MessageSquare, User, Bot, Shield, AlertTriangle
+  ArrowLeft, Check, X, Copy, 
+  Terminal, Search, Bot, User
 } from "lucide-react";
 import { AudioPlayer, AudioMarker } from "@/components/AudioPlayer";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
@@ -13,7 +13,7 @@ import { SarvamSecondOpinion } from "@/components/SarvamSecondOpinion";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-interface Check {
+interface CheckItem {
   id: string;
   kind: string;
   rule_id: string;
@@ -42,7 +42,7 @@ interface CallDetail {
   recording_url?: string;
   cost: number;
   scenario?: Scenario;
-  checks: Check[];
+  checks: CheckItem[];
 }
 
 export default function CallDetailPage() {
@@ -50,6 +50,8 @@ export default function CallDetailPage() {
   const callId = params.id as string;
   const [call, setCall] = useState<CallDetail | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copiedTranscript, setCopiedTranscript] = useState(false);
+  const [searchTranscript, setSearchTranscript] = useState("");
 
   useEffect(() => {
     const fetchCall = async () => {
@@ -68,14 +70,22 @@ export default function CallDetailPage() {
   }, [callId]);
 
   if (loading) {
-    return <div className="p-12 text-center text-charcoal-400">Loading call execution details...</div>;
+    return (
+      <div className="p-12 text-center text-xs font-mono text-zinc-500">
+        &gt; Loading telephony execution {callId.slice(0, 8)}...
+      </div>
+    );
   }
 
   if (!call) {
-    return <div className="p-12 text-center text-red-400">Call not found.</div>;
+    return (
+      <div className="p-12 text-center text-xs font-mono text-zinc-500">
+        Execution record not found.
+      </div>
+    );
   }
 
-  const turns = (call.transcript || "").split("\n").filter(Boolean);
+  const rawTurns = (call.transcript || "").split("\n").filter(Boolean);
   const passed = call.checks.length > 0 && call.checks.every((c) => c.passed);
 
   // Generate waveform compliance markers based on evaluated checks
@@ -98,11 +108,23 @@ export default function CallDetailPage() {
   if (failedCheck) {
     markers.push({
       time: 14.5,
-      label: `Rule Breach: ${failedCheck.rule_id || "Violation"}`,
+      label: `Breach: ${failedCheck.rule_id || "Violation"}`,
       kind: "violation",
       description: failedCheck.evidence || "TRAI compliance threshold failed"
     });
   }
+
+  const handleCopyTranscript = () => {
+    if (!call.transcript) return;
+    navigator.clipboard.writeText(call.transcript);
+    setCopiedTranscript(true);
+    setTimeout(() => setCopiedTranscript(false), 2000);
+  };
+
+  const filteredTurns = rawTurns.filter((line) => {
+    if (!searchTranscript) return true;
+    return line.toLowerCase().includes(searchTranscript.toLowerCase());
+  });
 
   return (
     <div className="space-y-6">
@@ -110,33 +132,33 @@ export default function CallDetailPage() {
       <div>
         <Link
           href={`/runs/${call.run_id}`}
-          className="inline-flex items-center gap-1.5 text-xs text-charcoal-400 hover:text-gold mb-2 font-medium"
+          className="inline-flex items-center gap-1.5 text-xs font-mono text-zinc-500 hover:text-white mb-2 transition-colors"
         >
           <ArrowLeft className="w-3.5 h-3.5" /> Back to Benchmark Run
         </Link>
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-extrabold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white uppercase">
               {call.scenario?.title || "Call Execution"}
             </h1>
-            <p className="text-xs text-charcoal-400 font-mono mt-1">
-              Execution ID: {call.bolna_execution_id || call.id} &bull; Cost: ${call.cost.toFixed(3)}
+            <p className="text-xs font-mono text-zinc-400 mt-1">
+              Execution ID: {call.bolna_execution_id || call.id} &bull; Cost: ${call.cost.toFixed(3)} USD
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="px-2.5 py-1 rounded text-xs font-semibold bg-charcoal-700 text-charcoal-200 border border-border">
-              {call.scenario?.language}
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-1 rounded text-xs font-mono bg-zinc-900 text-zinc-300 border border-zinc-800">
+              {call.scenario?.language || "Hindi"}
             </span>
+
             {passed ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                <CheckCircle2 className="w-4 h-4" />
-                PASS [Purity 100%]
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-mono font-bold bg-zinc-900 text-white border border-zinc-600">
+                ● PASS [Purity 100%]
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-500/10 text-rose-400 border border-rose-500/30">
-                <XCircle className="w-4 h-4" />
-                FAIL
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-md text-xs font-mono font-bold bg-black text-zinc-400 border border-zinc-800">
+                ○ REGRESSION DETECTED
               </span>
             )}
           </div>
@@ -151,51 +173,77 @@ export default function CallDetailPage() {
       {/* Sarvam AI Indic Second Opinion & Translation Audit */}
       <SarvamSecondOpinion callId={call.id} />
 
+      {/* 2-Column Data Inspector */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Transcript Column */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-gold" />
-                Conversational Transcript
-              </h2>
-              <span className="text-xs text-charcoal-400">{turns.length} turns</span>
+        {/* Left Column: Conversational Transcript (7 cols) */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-zinc-400" />
+                <h2 className="text-xs font-bold text-white uppercase tracking-tight">
+                  Conversational Multi-Turn Transcript
+                </h2>
+                <span className="text-[10px] font-mono text-zinc-500">({rawTurns.length} turns)</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                {/* Search transcript */}
+                <div className="relative">
+                  <Search className="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-zinc-600" />
+                  <input
+                    type="text"
+                    placeholder="Search dialogue..."
+                    value={searchTranscript}
+                    onChange={(e) => setSearchTranscript(e.target.value)}
+                    className="pl-6 pr-2 py-0.5 rounded bg-black border border-zinc-800 text-[11px] font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-white transition-colors w-32"
+                  />
+                </div>
+
+                <button
+                  onClick={handleCopyTranscript}
+                  className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-[10px] font-mono transition-colors"
+                  title="Copy Raw Transcript"
+                >
+                  {copiedTranscript ? <Check className="w-3 h-3 text-white" /> : <Copy className="w-3 h-3" />}
+                  <span>{copiedTranscript ? "Copied" : "Copy"}</span>
+                </button>
+              </div>
             </div>
 
-            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-              {turns.length === 0 ? (
-                <div className="text-xs text-charcoal-400 italic">No transcript recorded yet.</div>
+            <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1 font-mono text-xs">
+              {filteredTurns.length === 0 ? (
+                <div className="text-xs text-zinc-500 italic p-4 text-center">
+                  No dialog turns matching query.
+                </div>
               ) : (
-                turns.map((line, idx) => {
+                filteredTurns.map((line, idx) => {
                   const isAgent = line.toLowerCase().startsWith("agent:");
                   const text = isAgent ? line.replace(/^agent:\s*/i, "") : line.replace(/^user:\s*/i, "");
 
                   return (
                     <div
                       key={idx}
-                      className={`flex gap-3 text-xs leading-relaxed p-3 rounded-xl ${
+                      className={`flex gap-3 p-3 rounded-lg border text-xs leading-relaxed ${
                         isAgent 
-                          ? "bg-charcoal-900 border border-border/70" 
-                          : "bg-surfaceHover border border-border/40"
+                          ? "bg-black border-zinc-800" 
+                          : "bg-zinc-900/60 border-zinc-850"
                       }`}
                     >
                       <div className="shrink-0 mt-0.5">
-                        {isAgent ? (
-                          <div className="w-6 h-6 rounded-full bg-gold/20 flex items-center justify-center text-gold">
-                            <Bot className="w-3.5 h-3.5" />
-                          </div>
-                        ) : (
-                          <div className="w-6 h-6 rounded-full bg-charcoal-700 flex items-center justify-center text-charcoal-200">
-                            <User className="w-3.5 h-3.5" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-semibold text-charcoal-400 text-[11px] mb-0.5">
-                          {isAgent ? "Agent (Voice Bot)" : "User (Simulated Persona)"}
+                        <div className={`w-5 h-5 rounded flex items-center justify-center text-[10px] font-mono font-bold ${
+                          isAgent ? "bg-white text-black" : "bg-zinc-800 text-zinc-300 border border-zinc-700"
+                        }`}>
+                          {isAgent ? "A" : "U"}
                         </div>
-                        <div className="text-charcoal-200 whitespace-pre-wrap">{text}</div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between text-[10px] text-zinc-500 uppercase mb-1">
+                          <span>{isAgent ? "Agent (Voice Bot)" : "User (Simulated Persona)"}</span>
+                          <span className="text-zinc-600">Turn {idx + 1}</span>
+                        </div>
+                        <div className="text-zinc-200 whitespace-pre-wrap">{text}</div>
                       </div>
                     </div>
                   );
@@ -205,75 +253,76 @@ export default function CallDetailPage() {
           </div>
         </div>
 
-        {/* Verification Checks & Scenario Meta Column */}
+        {/* Right Column: Scenario Metadata & Checks (5 cols) */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Scenario Details Card */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-3">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2">
-              <FileText className="w-4 h-4 text-gold" />
-              Scenario Persona &amp; Goal
+          {/* Scenario Persona Card */}
+          <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3 font-mono text-xs">
+            <h2 className="text-xs font-bold text-white uppercase tracking-tight flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-white" />
+              Scenario Persona &amp; Intent
             </h2>
-            <div className="text-xs space-y-2 text-charcoal-400">
+
+            <div className="space-y-2.5 text-zinc-400">
               <div>
-                <strong className="text-charcoal-200 block mb-0.5">Persona:</strong>
-                <p className="bg-charcoal-900/60 p-2.5 rounded-lg border border-border/60">
+                <span className="text-zinc-500 text-[10px] uppercase block mb-0.5">Caller Persona</span>
+                <p className="bg-black p-2.5 rounded border border-zinc-900 text-zinc-200 leading-relaxed font-sans text-xs">
                   {call.scenario?.persona}
                 </p>
               </div>
+
               <div>
-                <strong className="text-charcoal-200 block mb-0.5">Test Goal:</strong>
-                <p className="bg-charcoal-900/60 p-2.5 rounded-lg border border-border/60">
+                <span className="text-zinc-500 text-[10px] uppercase block mb-0.5">Test Goal</span>
+                <p className="bg-black p-2.5 rounded border border-zinc-900 text-zinc-200 leading-relaxed font-sans text-xs">
                   {call.scenario?.goal}
                 </p>
               </div>
+
               <div>
-                <strong className="text-charcoal-200 block mb-0.5">Expected Outcome:</strong>
-                <p className="bg-charcoal-900/60 p-2.5 rounded-lg border border-border/60">
+                <span className="text-zinc-500 text-[10px] uppercase block mb-0.5">Expected Outcome</span>
+                <p className="bg-black p-2.5 rounded border border-zinc-900 text-zinc-200 leading-relaxed font-sans text-xs">
                   {call.scenario?.expected_outcome}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Compliance & Quality Checks Checklist */}
-          <div className="p-6 rounded-2xl bg-surface border border-border space-y-3">
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                <Shield className="w-4 h-4 text-gold" />
+          {/* Compliance & Quality Checks */}
+          <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-3">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+              <h2 className="text-xs font-bold text-white uppercase tracking-tight flex items-center gap-2 font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-white" />
                 Compliance &amp; Quality Checks
               </h2>
-              <span className="text-xs text-charcoal-400">{call.checks.length} evaluated</span>
+              <span className="text-[10px] font-mono text-zinc-500">{call.checks.length} evaluated</span>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2 font-mono text-xs">
               {call.checks.map((chk) => (
                 <div
                   key={chk.id}
-                  className={`p-3 rounded-xl border text-xs space-y-1.5 ${
+                  className={`p-3 rounded-lg border space-y-1.5 ${
                     chk.passed 
-                      ? "bg-emerald-950/20 border-emerald-800/40" 
-                      : "bg-rose-950/20 border-rose-800/40"
+                      ? "bg-black border-zinc-800" 
+                      : "bg-zinc-900 border-zinc-700"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-1.5 font-bold">
-                      {chk.passed ? (
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-rose-400" />
-                      )}
-                      <span className="text-white capitalize">{chk.rule_id}</span>
+                      <span className={chk.passed ? "text-white" : "text-zinc-400"}>
+                        {chk.passed ? "✓" : "✕"}
+                      </span>
+                      <span className="text-white text-xs">{chk.rule_id}</span>
                     </div>
 
                     <div className="flex items-center gap-1.5">
                       {chk.kind === "rule" && <UnverifiedRuleBadge />}
-                      <span className="font-mono text-[11px] text-charcoal-400">
+                      <span className="text-[11px] text-zinc-400">
                         {chk.kind === "rubric" ? `${chk.score.toFixed(1)} / 5.0` : (chk.passed ? "1.0" : "0.0")}
                       </span>
                     </div>
                   </div>
 
-                  <p className="text-charcoal-300 text-[11px] leading-relaxed pl-5">
+                  <p className="text-zinc-400 text-[11px] leading-relaxed pl-4 font-sans">
                     {chk.evidence}
                   </p>
                 </div>

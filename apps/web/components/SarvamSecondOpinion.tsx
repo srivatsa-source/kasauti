@@ -2,8 +2,8 @@
 
 import React, { useState } from "react";
 import { 
-  Sparkles, CheckCircle2, AlertCircle, Languages, 
-  RefreshCw, Globe, Shield, ArrowRight, BookOpen
+  Check, RefreshCw, Terminal, 
+  ArrowRight, Shield, Layers, FileText
 } from "lucide-react";
 
 interface TurnComparison {
@@ -63,146 +63,145 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
   };
 
   return (
-    <div className="p-6 rounded-2xl bg-surface border border-gold/40 shadow-xl space-y-4">
-      {/* Title & Action */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
+    <div className="p-5 rounded-xl bg-zinc-950 border border-zinc-800 space-y-4">
+      {/* Header Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full bg-gold animate-pulse" />
-            <h2 className="text-base font-bold text-white flex items-center gap-2">
-              <Languages className="w-4 h-4 text-gold" />
-              Sarvam AI Indic &ldquo;Second Opinion&rdquo;
+            <span className="w-2 h-2 rounded-full bg-white" />
+            <h2 className="text-sm font-bold text-white uppercase tracking-tight">
+              Sarvam AI Indic Second Opinion
             </h2>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-gold/15 text-gold border border-gold/30 uppercase tracking-wider">
-              Mayura &bull; Saarika
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-300 border border-zinc-800 uppercase">
+              Saarika STT &bull; Mayura
             </span>
           </div>
-          <p className="text-xs text-charcoal-400 mt-1">
-            Independent vernacular audit checking regional phonetics, code-mixed nuances, and English translation.
+          <p className="text-xs text-zinc-400 mt-1">
+            Independent vernacular audit verifying regional phonetics, code-mixed Hinglish/Kannada, and etiquette.
           </p>
         </div>
 
         <button
           onClick={runVerification}
           disabled={loading}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-transform active:scale-95 shadow-lg shadow-gold/20 shrink-0 disabled:opacity-50"
+          className="flex items-center gap-2 px-3.5 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50 shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-          {loading ? "Auditing Indic Nuances..." : data ? "Re-Run Sarvam Audit" : "Run Sarvam Audit"}
+          {loading ? "Auditing Indic Stream..." : data ? "Re-Run Audit" : "Run Sarvam Audit"}
         </button>
       </div>
 
       {!data && !loading && (
-        <div className="p-8 text-center rounded-xl bg-charcoal-900/40 border border-border/80">
-          <Globe className="w-8 h-8 text-charcoal-600 mx-auto mb-2" />
-          <h3 className="text-xs font-bold text-charcoal-200">
-            Audit Bharat-First Nuances &amp; Phonetics
+        <div className="p-8 text-center rounded-lg bg-black border border-zinc-900 space-y-2">
+          <Terminal className="w-6 h-6 text-zinc-600 mx-auto" />
+          <h3 className="text-xs font-semibold text-zinc-300">
+            Awaiting Vernacular Verification
           </h3>
-          <p className="text-[11px] text-charcoal-400 max-w-md mx-auto mt-1">
-            Click above to cross-reference this call with Sarvam AI&apos;s models for Hindi, Hinglish, and Kannada speech verification.
+          <p className="text-[11px] text-zinc-500 max-w-sm mx-auto">
+            Run an independent cross-reference of this audio against Sarvam AI Saarika v2 Indic speech models.
           </p>
         </div>
       )}
 
       {loading && (
-        <div className="p-8 text-center text-xs text-charcoal-400 animate-pulse">
-          Connecting to Sarvam AI Mayura &amp; Saarika engines...
+        <div className="p-8 text-center text-xs text-zinc-400 font-mono animate-pulse">
+          &gt; Querying Sarvam Indic STT and Translation API endpoints...
         </div>
       )}
 
       {data && (
         <div className="space-y-4">
-          {/* Top Quick Stats */}
+          {/* Quick Stats Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="p-3 rounded-xl bg-charcoal-900/70 border border-border">
-              <span className="text-[10px] uppercase font-bold text-charcoal-400">
+            <div className="p-3 rounded-lg bg-black border border-zinc-800">
+              <span className="text-[10px] font-mono uppercase text-zinc-500 block mb-1">
                 Detected Dialect
               </span>
-              <div className="text-xs font-bold text-white mt-1">
+              <div className="text-xs font-semibold text-white">
                 {data.detected_dialect}
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-charcoal-900/70 border border-border">
-              <span className="text-[10px] uppercase font-bold text-charcoal-400">
-                Indic Phonetic Confidence
+            <div className="p-3 rounded-lg bg-black border border-zinc-800">
+              <span className="text-[10px] font-mono uppercase text-zinc-500 block mb-1">
+                Phonetic Confidence
               </span>
-              <div className="text-xs font-bold text-emerald-400 mt-1 flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="text-xs font-mono font-bold text-white flex items-center gap-1.5">
+                <Check className="w-3.5 h-3.5 text-white" />
                 {data.indic_confidence_pct}% Accurate
               </div>
             </div>
 
-            <div className="p-3 rounded-xl bg-charcoal-900/70 border border-border">
-              <span className="text-[10px] uppercase font-bold text-charcoal-400">
-                Etiquette &amp; Respect Index
+            <div className="p-3 rounded-lg bg-black border border-zinc-800">
+              <span className="text-[10px] font-mono uppercase text-zinc-500 block mb-1">
+                Etiquette (Tehzeeb)
               </span>
-              <div className="text-xs font-bold text-gold mt-1">
-                {data.cultural_etiquette_audit.respectful_greeting ? "Pass (Tehzeeb Verified)" : "Direct Tone"}
+              <div className="text-xs font-mono text-zinc-200">
+                {data.cultural_etiquette_audit.respectful_greeting ? "Pass (Formal Respect)" : "Direct Register"}
               </div>
             </div>
           </div>
 
-          {/* Sub-tabs */}
-          <div className="flex border-b border-border text-xs gap-4">
+          {/* Sub Navigation */}
+          <div className="flex border-b border-zinc-800 text-xs gap-4 font-mono">
             <button
               onClick={() => setActiveTab("diff")}
-              className={`pb-2 font-bold transition-colors ${
+              className={`pb-2 transition-colors ${
                 activeTab === "diff"
-                  ? "border-b-2 border-gold text-gold"
-                  : "text-charcoal-400 hover:text-white"
+                  ? "border-b-2 border-white text-white font-bold"
+                  : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              Turn-by-Turn Indic Diff
+              [ Turn-by-Turn Diff ]
             </button>
             <button
               onClick={() => setActiveTab("translation")}
-              className={`pb-2 font-bold transition-colors ${
+              className={`pb-2 transition-colors ${
                 activeTab === "translation"
-                  ? "border-b-2 border-gold text-gold"
-                  : "text-charcoal-400 hover:text-white"
+                  ? "border-b-2 border-white text-white font-bold"
+                  : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              Sarvam English Translation
+              [ English Translation ]
             </button>
             <button
               onClick={() => setActiveTab("culture")}
-              className={`pb-2 font-bold transition-colors ${
+              className={`pb-2 transition-colors ${
                 activeTab === "culture"
-                  ? "border-b-2 border-gold text-gold"
-                  : "text-charcoal-400 hover:text-white"
+                  ? "border-b-2 border-white text-white font-bold"
+                  : "text-zinc-500 hover:text-zinc-300"
               }`}
             >
-              Cultural Etiquette &amp; Honorifics
+              [ Cultural Etiquette Audit ]
             </button>
           </div>
 
-          {/* Tab 1: Diff */}
+          {/* Tab 1: Diff View */}
           {activeTab === "diff" && (
             <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
               {data.turn_comparisons.map((turn) => (
                 <div
                   key={turn.turn_index}
-                  className="p-3 rounded-xl bg-charcoal-900 border border-border text-xs space-y-1.5"
+                  className="p-3 rounded-lg bg-black border border-zinc-800/80 space-y-2"
                 >
-                  <div className="flex items-center justify-between text-[11px] text-charcoal-400 font-mono">
-                    <span className="capitalize font-bold text-gold">Turn {turn.turn_index} ({turn.speaker})</span>
-                    <span className="px-1.5 py-0.5 rounded bg-charcoal-800 text-charcoal-200 border border-border">
-                      {turn.indic_features_detected}
-                    </span>
+                  <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500 border-b border-zinc-900 pb-1.5">
+                    <span className="uppercase text-white font-semibold">Turn {turn.turn_index} &bull; {turn.speaker}</span>
+                    <span className="text-zinc-400">{turn.indic_features_detected}</span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
-                    <div className="p-2 rounded bg-surfaceHover/60 border border-border/40">
-                      <span className="text-[10px] uppercase font-bold text-charcoal-400 block mb-0.5">
-                        Primary ASR (Deepgram/Bolna)
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs font-mono">
+                    <div className="p-2.5 rounded bg-zinc-950 border border-zinc-800/60">
+                      <span className="text-[10px] uppercase text-zinc-500 block mb-1">
+                        Primary ASR (Deepgram / Bolna)
                       </span>
-                      <p className="text-charcoal-200 text-xs">{turn.bolna_text}</p>
+                      <p className="text-zinc-300 leading-relaxed">{turn.bolna_text}</p>
                     </div>
-                    <div className="p-2 rounded bg-gold/5 border border-gold/20">
-                      <span className="text-[10px] uppercase font-bold text-gold block mb-0.5">
-                        Sarvam Indic Verification
+
+                    <div className="p-2.5 rounded bg-zinc-900/60 border border-zinc-700/60">
+                      <span className="text-[10px] uppercase text-zinc-300 block mb-1 font-semibold">
+                        Sarvam Saarika Indic Audit
                       </span>
-                      <p className="text-white text-xs">{turn.sarvam_gloss}</p>
+                      <p className="text-white leading-relaxed">{turn.sarvam_gloss}</p>
                     </div>
                   </div>
                 </div>
@@ -212,12 +211,11 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
 
           {/* Tab 2: Translation */}
           {activeTab === "translation" && (
-            <div className="p-4 rounded-xl bg-charcoal-900 border border-border space-y-2">
-              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <BookOpen className="w-4 h-4 text-gold" />
-                English Translation by Sarvam Mayura v1
-              </div>
-              <p className="text-xs text-charcoal-300 leading-relaxed whitespace-pre-wrap font-mono p-3 rounded-lg bg-surfaceHover/80 border border-border/40">
+            <div className="p-4 rounded-lg bg-black border border-zinc-800 space-y-2 font-mono text-xs">
+              <span className="text-[10px] uppercase text-zinc-500 block">
+                Sarvam Mayura v1 Translation
+              </span>
+              <p className="text-zinc-200 leading-relaxed whitespace-pre-wrap p-3 rounded bg-zinc-950 border border-zinc-800">
                 {data.english_translation || "No translated text available."}
               </p>
             </div>
@@ -225,30 +223,29 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
 
           {/* Tab 3: Cultural Etiquette */}
           {activeTab === "culture" && (
-            <div className="p-4 rounded-xl bg-charcoal-900 border border-border space-y-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-white">
-                <Shield className="w-4 h-4 text-gold" />
-                Indian Telephone Etiquette &amp; Code-Mixing Audit
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="p-3 rounded-lg bg-surface border border-border">
-                  <span className="text-charcoal-400 block mb-1">Namaste / Greeting</span>
-                  <span className="font-bold text-emerald-400">
-                    {data.cultural_etiquette_audit.respectful_greeting ? "✓ Present in Turn 1" : "✗ Missing"}
+            <div className="p-4 rounded-lg bg-black border border-zinc-800 space-y-3 font-mono text-xs">
+              <span className="text-[10px] uppercase text-zinc-500 block">
+                Indian Telecom Behavioral Checks
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 rounded bg-zinc-950 border border-zinc-800">
+                  <span className="text-zinc-500 block text-[10px] mb-1">Greeting Disclosure</span>
+                  <span className="text-white font-bold">
+                    {data.cultural_etiquette_audit.respectful_greeting ? "PASS [Namaste / Ji]" : "FAIL [Missing]"}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-surface border border-border">
-                  <span className="text-charcoal-400 block mb-1">Honorifics (&apos;Ji&apos; / &apos;Aap&apos;)</span>
-                  <span className="font-bold text-emerald-400">
-                    {data.cultural_etiquette_audit.honorific_usage ? "✓ Polite Register" : "Neutral Register"}
+                <div className="p-3 rounded bg-zinc-950 border border-zinc-800">
+                  <span className="text-zinc-500 block text-[10px] mb-1">Honorific Register</span>
+                  <span className="text-white font-bold">
+                    {data.cultural_etiquette_audit.honorific_usage ? "PASS [Aap / Ji]" : "NEUTRAL [Tum / Direct]"}
                   </span>
                 </div>
-                <div className="p-3 rounded-lg bg-surface border border-border">
-                  <span className="text-charcoal-400 block mb-1">Code-Switching Intact</span>
-                  <span className="font-bold text-emerald-400">✓ No Translation Artifacts</span>
+                <div className="p-3 rounded bg-zinc-950 border border-zinc-800">
+                  <span className="text-zinc-500 block text-[10px] mb-1">Code-Switching</span>
+                  <span className="text-white font-bold">PASS [Natural Mix]</span>
                 </div>
               </div>
-              <p className="text-[11px] text-charcoal-400 italic">
+              <p className="text-[11px] text-zinc-400 mt-2">
                 {data.cultural_etiquette_audit.verdict}
               </p>
             </div>
@@ -258,4 +255,3 @@ export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({ callId
     </div>
   );
 };
-

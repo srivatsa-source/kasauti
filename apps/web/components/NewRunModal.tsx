@@ -2,8 +2,8 @@
 
 import React, { useState, useEffect } from "react";
 import { 
-  Play, X, CheckSquare, Square, Shield, 
-  Coins, Sparkles, AlertCircle, ArrowRight
+  Play, X, CheckSquare, Square, 
+  Terminal, ShieldCheck, ArrowRight
 } from "lucide-react";
 
 interface Target {
@@ -43,7 +43,7 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   const [selectedTargetId, setSelectedTargetId] = useState<string>("");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
-  const [suiteName, setSuiteName] = useState("Custom TRAI Compliance Benchmark");
+  const [suiteName, setSuiteName] = useState("TRAI Regulatory & Behavioral Pack");
   const [loading, setLoading] = useState(false);
   const [fetchingScenarios, setFetchingScenarios] = useState(true);
   const [filterLang, setFilterLang] = useState<string>("All");
@@ -63,7 +63,6 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
         if (res.ok) {
           const data: Scenario[] = await res.json();
           setScenarios(data);
-          // By default, select all scenarios
           setSelectedScenarioIds(data.map((s) => s.id));
         }
       } catch (err) {
@@ -135,115 +134,113 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="w-full max-w-2xl rounded-2xl bg-surface border border-gold/40 shadow-2xl overflow-hidden my-8">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-border bg-charcoal-900/60">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gold/20 flex items-center justify-center text-gold">
-              <Play className="w-4 h-4 fill-gold" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                Launch Voice Benchmark Run
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-gold/15 text-gold border border-gold/30">
-                  Pre-Flight Guard
-                </span>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4 overflow-y-auto">
+      <div className="w-full max-w-2xl rounded-xl bg-black border border-zinc-800 shadow-2xl overflow-hidden my-6">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-5 border-b border-zinc-800 bg-zinc-950">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-white" />
+              <h2 className="text-sm font-bold text-white uppercase tracking-tight">
+                Benchmark Run Dispatcher
               </h2>
-              <p className="text-xs text-charcoal-400">
-                Select target, pick scenarios, and review safety budget before execution
-              </p>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 text-zinc-400 border border-zinc-800">
+                Pre-Flight Guard
+              </span>
             </div>
+            <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+              Target configuration, scenario checklist, and budget verification
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-charcoal-400 hover:text-white hover:bg-surfaceHover transition-colors"
+            className="p-1 rounded-md text-zinc-500 hover:text-white hover:bg-zinc-900 transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        {/* Body */}
-        <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
-          {/* Target Selector */}
+        {/* Modal Body */}
+        <div className="p-5 space-y-4 max-h-[70vh] overflow-y-auto">
+          {/* Target Selection */}
           <div>
-            <label className="block text-xs font-semibold text-charcoal-200 mb-1.5">
+            <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">
               Select Voice Agent Target
             </label>
             <select
               value={selectedTargetId}
               onChange={(e) => setSelectedTargetId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl bg-charcoal-900 border border-border text-white text-xs font-medium focus:outline-none focus:border-gold"
+              className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white text-xs font-mono focus:outline-none focus:border-white transition-colors"
             >
               {targets.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.name} ({t.phone_number}) — Staging: {t.staging_agent_id || "default"}
+                  {t.name} ({t.phone_number}) &mdash; Staging: {t.staging_agent_id || "default"}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Suite Title */}
+          {/* Suite Name */}
           <div>
-            <label className="block text-xs font-semibold text-charcoal-200 mb-1.5">
+            <label className="block text-xs font-mono uppercase text-zinc-400 mb-1">
               Benchmark Suite Title
             </label>
             <input
               type="text"
               value={suiteName}
               onChange={(e) => setSuiteName(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs focus:outline-none focus:border-gold"
+              className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white text-xs font-mono focus:outline-none focus:border-white transition-colors"
             />
           </div>
 
-          {/* Quick Scenario Preset Helpers */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-semibold text-charcoal-200">
-                Select Scenarios ({selectedScenarioIds.length} of {scenarios.length} selected)
+          {/* Scenarios Header & Filter Controls */}
+          <div className="pt-2 border-t border-zinc-900">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <label className="text-xs font-mono uppercase text-zinc-300">
+                Scenarios ({selectedScenarioIds.length} of {scenarios.length} selected)
               </label>
-              <div className="flex items-center gap-2 text-[11px]">
+
+              <div className="flex items-center gap-2 text-[11px] font-mono">
                 <button
                   type="button"
                   onClick={selectAll}
-                  className="text-gold hover:underline font-medium"
+                  className="text-zinc-300 hover:text-white underline"
                 >
-                  Select All
+                  All
                 </button>
-                <span className="text-charcoal-600">&bull;</span>
+                <span className="text-zinc-700">&bull;</span>
                 <button
                   type="button"
                   onClick={deselectAll}
-                  className="text-charcoal-400 hover:text-white font-medium"
+                  className="text-zinc-500 hover:text-zinc-300"
                 >
                   Clear
                 </button>
-                <span className="text-charcoal-600">&bull;</span>
+                <span className="text-zinc-700">&bull;</span>
                 <button
                   type="button"
                   onClick={() => {
-                    const first = scenarios[0];
-                    if (first) selectSingleForLiveTest(first.id);
+                    if (scenarios.length > 0) selectSingleForLiveTest(scenarios[0].id);
                   }}
-                  className="text-emerald-400 hover:underline font-medium"
-                  title="Selects 1 scenario to save Bolna credits on live testing"
+                  className="text-white font-semibold underline"
+                  title="Selects 1 call to minimize credit burn"
                 >
-                  Single Test (Save Credits)
+                  [ 1 Live Test ]
                 </button>
               </div>
             </div>
 
             {/* Language Filter Pills */}
-            <div className="flex flex-wrap gap-1.5 mb-3">
+            <div className="flex flex-wrap gap-1 mb-2 font-mono text-[10px]">
               {["All", "Hindi", "Hinglish", "Kannada", "English"].map((lang) => (
                 <button
                   key={lang}
                   type="button"
                   onClick={() => setFilterLang(lang)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                  className={`px-2 py-0.5 rounded transition-colors ${
                     filterLang === lang
-                      ? "bg-gold text-charcoal-900"
-                      : "bg-charcoal-800 text-charcoal-400 hover:text-charcoal-200 border border-border"
+                      ? "bg-white text-black font-bold"
+                      : "bg-zinc-900 text-zinc-400 hover:text-zinc-200 border border-zinc-800"
                   }`}
                 >
                   {lang}
@@ -251,40 +248,45 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
               ))}
             </div>
 
-            {/* Scenario Checklist */}
+            {/* Scenarios List */}
             {fetchingScenarios ? (
-              <div className="p-6 text-center text-xs text-charcoal-400">Loading catalog...</div>
+              <div className="p-6 text-center text-xs font-mono text-zinc-500">
+                &gt; Loading test scenario catalog...
+              </div>
             ) : (
-              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1">
                 {filteredScenarios.map((sc) => {
                   const isChecked = selectedScenarioIds.includes(sc.id);
                   return (
                     <div
                       key={sc.id}
                       onClick={() => toggleScenario(sc.id)}
-                      className={`flex items-start gap-3 p-3 rounded-xl border text-xs cursor-pointer transition-colors ${
+                      className={`flex items-start gap-2.5 p-2.5 rounded-md border text-xs cursor-pointer transition-colors ${
                         isChecked
-                          ? "bg-charcoal-800/80 border-gold/40 text-white"
-                          : "bg-charcoal-900/50 border-border/70 text-charcoal-400 hover:bg-charcoal-800/40"
+                          ? "bg-zinc-900/90 border-zinc-600 text-white"
+                          : "bg-zinc-950/60 border-zinc-900 text-zinc-500 hover:bg-zinc-900/40"
                       }`}
                     >
-                      <div className="mt-0.5 text-gold shrink-0">
+                      <div className="mt-0.5 shrink-0">
                         {isChecked ? (
-                          <CheckSquare className="w-4 h-4 fill-gold text-charcoal-900" />
+                          <div className="w-3.5 h-3.5 rounded-sm bg-white text-black flex items-center justify-center text-[10px] font-bold">
+                            ✓
+                          </div>
                         ) : (
-                          <Square className="w-4 h-4 text-charcoal-600" />
+                          <div className="w-3.5 h-3.5 rounded-sm border border-zinc-700 bg-zinc-950" />
                         )}
                       </div>
+
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold truncate text-white">
+                          <span className="font-semibold truncate text-zinc-200">
                             {sc.title}
                           </span>
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-charcoal-700 text-charcoal-200 border border-border shrink-0">
+                          <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-zinc-800 text-zinc-400 shrink-0">
                             {sc.language}
                           </span>
                         </div>
-                        <p className="text-[11px] text-charcoal-400 line-clamp-1 mt-0.5">
+                        <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5">
                           {sc.goal}
                         </p>
                       </div>
@@ -295,48 +297,42 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
             )}
           </div>
 
-          {/* Budget & Safety Warning Card */}
-          <div className="p-4 rounded-xl bg-charcoal-900/90 border border-border flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400">
-                <Coins className="w-4 h-4" />
-              </div>
-              <div>
-                <div className="font-bold text-white">Estimated Cost</div>
-                <div className="text-[11px] text-charcoal-400 font-mono">
-                  {selectedScenarioIds.length} calls &bull; ~${estimatedCost} USD estimated
-                </div>
-              </div>
+          {/* Telemetry Footer Card */}
+          <div className="p-3 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-between font-mono text-xs">
+            <div>
+              <span className="text-[10px] text-zinc-500 block uppercase">Estimated Spend</span>
+              <span className="text-white font-bold">
+                ${estimatedCost} USD <span className="text-zinc-600 font-normal">({selectedScenarioIds.length} calls)</span>
+              </span>
             </div>
             <div className="text-right">
-              <span className="text-[11px] font-semibold text-gold bg-gold/10 px-2.5 py-1 rounded-full border border-gold/30">
-                Safe Staging Target
-              </span>
+              <span className="text-[10px] text-zinc-500 block uppercase">Execution Safety</span>
+              <span className="text-zinc-300">Staging Guard Active</span>
             </div>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-border bg-charcoal-900/60">
+        {/* Modal Actions */}
+        <div className="flex items-center justify-between p-4 border-t border-zinc-800 bg-zinc-950">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-medium text-charcoal-400 hover:text-white"
+            className="px-3 py-1.5 rounded-md text-xs font-mono text-zinc-400 hover:text-white"
           >
             Cancel
           </button>
+          
           <button
             type="button"
             onClick={handleLaunch}
             disabled={loading || selectedScenarioIds.length === 0}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-transform active:scale-95 shadow-lg shadow-gold/20 disabled:opacity-50"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 disabled:opacity-50"
           >
-            <Play className="w-3.5 h-3.5 fill-charcoal-900" />
-            {loading ? "Launching Call Sequence..." : `Dial & Benchmark (${selectedScenarioIds.length})`}
+            <Play className="w-3 h-3 fill-black" />
+            <span>{loading ? "Dispatching..." : `Execute Benchmark (${selectedScenarioIds.length})`}</span>
           </button>
         </div>
       </div>
     </div>
   );
 };
-

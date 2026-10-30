@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { 
-  Phone, Plus, Play, Sparkles, AlertCircle, 
-  ExternalLink, ArrowRight, Activity, Brain
+  Plus, Play, Terminal, Phone, Copy, Check,
+  ExternalLink, ArrowRight, Activity, Search, Shield
 } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
@@ -42,6 +42,9 @@ export default function HomePage() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRunModal, setShowRunModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [runFilter, setRunFilter] = useState<"all" | "passed" | "failed">("all");
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // New target form state
   const [name, setName] = useState("");
@@ -71,6 +74,12 @@ export default function HomePage() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleCopy = (text: string, id: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   const handleCreateTarget = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -92,7 +101,7 @@ export default function HomePage() {
         setName("");
         fetchData();
       }
-    } catch (err) {
+    } catch {
       alert("Failed to create target");
     } finally {
       setSubmitting(false);
@@ -113,142 +122,203 @@ export default function HomePage() {
         const data = await res.json();
         window.location.href = `/runs/${data.id}`;
       }
-    } catch (err) {
+    } catch {
       alert("Failed to trigger run");
     }
   };
 
+  // Metrics calculations
+  const totalCalls = runs.reduce((acc, r) => acc + (r.total_calls || 0), 0);
+  const avgPurity = runs.length > 0
+    ? (runs.reduce((acc, r) => acc + r.purity_score, 0) / runs.length).toFixed(1)
+    : "0.0";
+
+  // Filtered runs
+  const filteredRuns = runs.filter((r) => {
+    if (runFilter === "passed") return r.purity_score >= 80;
+    if (runFilter === "failed") return r.purity_score < 80;
+    return true;
+  }).filter((r) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      (r.target_name || "").toLowerCase().includes(q) ||
+      r.id.toLowerCase().includes(q) ||
+      r.suite_name.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="space-y-8">
-      {/* Hero Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-surface border border-gold/30 p-8 sm:p-10 shadow-2xl">
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-gold/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 text-gold border border-gold/30 text-xs font-bold tracking-wider uppercase mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            Voice Agent Touchstone
+      {/* Minimalist Hero Strip */}
+      <div className="rounded-xl bg-zinc-950 border border-zinc-800 p-6 sm:p-8 space-y-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-white" />
+              <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 font-semibold">
+                Voice Agent Touchstone &bull; India
+              </span>
+            </div>
+            
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              Test it like gold before you dial.
+            </h1>
+
+            <p className="text-zinc-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+              Automated adversarial testing for Indian voice agents across <strong className="text-zinc-200">Hindi, Hinglish, Kannada, and Indian English</strong>. Benchmarks TRAI regulatory mandates, diagnoses failures, and auto-patches prompts.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            Test it like gold before you dial.
-          </h1>
-          <p className="mt-3 text-charcoal-400 text-sm sm:text-base leading-relaxed">
-            Kasauti places automated test calls across <strong className="text-charcoal-200">Hindi, Hinglish, Kannada & Indian English</strong>, checks TRAI-style compliance rules, identifies failures, and automatically patches your staging prompt.
-          </p>
+
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <button
+              onClick={() => setShowRunModal(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all active:scale-95 shadow-sm"
+            >
+              <Play className="w-3.5 h-3.5 fill-black" />
+              <span>Launch Benchmark</span>
+            </button>
+
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Target</span>
+            </button>
+
+            <Link
+              href="/knowledge"
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-800 text-xs font-medium transition-colors"
+            >
+              <Terminal className="w-3.5 h-3.5" />
+              <span>Neural Topology</span>
+            </Link>
+          </div>
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-4 items-center">
-          <button
-            onClick={() => setShowRunModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-sm transition-transform active:scale-95 shadow-lg shadow-gold/20"
-          >
-            <Play className="w-4 h-4 fill-charcoal-900" />
-            Launch Benchmark Run
-          </button>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surfaceHover hover:bg-charcoal-700 border border-border text-charcoal-200 hover:text-white font-medium text-sm transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add Target
-          </button>
-          <Link
-            href="/knowledge"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-surfaceHover hover:bg-charcoal-700 border border-border text-charcoal-200 hover:text-white font-medium text-sm transition-colors"
-          >
-            <Brain className="w-4 h-4 text-gold" />
-            Neural Topology
-          </Link>
-          {runs.length > 0 && (
-            <Link
-              href={`/runs/${runs[0].id}`}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-charcoal-900 hover:bg-charcoal-800 border border-gold/30 text-gold font-medium text-sm transition-colors"
-            >
-              <Activity className="w-4 h-4 text-gold" />
-              Latest: {runs[0].purity_score}% Purity
-            </Link>
-          )}
+        {/* 4-Column High-Visibility KPI Strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-zinc-900">
+          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
+            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Registered Targets</span>
+            <span className="text-xl font-bold text-white">{targets.length}</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">Active voice endpoints</span>
+          </div>
+
+          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
+            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Total Test Runs</span>
+            <span className="text-xl font-bold text-white">{runs.length}</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">{totalCalls} calls benchmarked</span>
+          </div>
+
+          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
+            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Aggregate Purity</span>
+            <span className="text-xl font-bold text-white">{avgPurity}%</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">Across all scenarios</span>
+          </div>
+
+          <div className="p-3 rounded-lg bg-black border border-zinc-900 font-mono">
+            <span className="text-[10px] text-zinc-500 uppercase block mb-1">Dialect Coverage</span>
+            <span className="text-xl font-bold text-white">4</span>
+            <span className="text-[10px] text-zinc-600 block mt-0.5">HI &bull; Hinglish &bull; KN &bull; EN</span>
+          </div>
         </div>
       </div>
 
       <LegalDisclaimerBanner />
 
-      {/* Targets Grid */}
-      <section className="space-y-4">
+      {/* Targets Grid Section */}
+      <section className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-white">Voice Agent Targets</h2>
-            <p className="text-xs text-charcoal-400">Agents monitored and benchmarked by Kasauti</p>
+            <h2 className="text-sm font-bold text-white uppercase tracking-tight">Voice Agent Targets</h2>
+            <p className="text-xs text-zinc-500 font-mono">Monitored endpoints with staging-to-prod isolation</p>
           </div>
+
           <button
             onClick={() => setShowAddModal(true)}
-            className="text-xs text-gold hover:text-gold-light font-bold flex items-center gap-1"
+            className="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1"
           >
             <Plus className="w-3.5 h-3.5" />
-            Add Target
+            <span>Add Target</span>
           </button>
         </div>
 
         {loading ? (
-          <div className="p-8 text-center text-charcoal-400">Loading targets...</div>
+          <div className="p-8 text-center text-xs font-mono text-zinc-500">&gt; Loading target registry...</div>
         ) : targets.length === 0 ? (
-          <div className="p-12 text-center rounded-2xl bg-surface border border-border">
-            <Phone className="w-10 h-10 text-charcoal-600 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-white">No targets registered yet</h3>
-            <p className="text-xs text-charcoal-400 mt-1">Add your voice agent phone number or staging agent ID to start testing.</p>
+          <div className="p-8 text-center rounded-xl bg-zinc-950 border border-zinc-800 space-y-2">
+            <Phone className="w-8 h-8 text-zinc-600 mx-auto" />
+            <div className="text-xs font-semibold text-white">No Targets Configured</div>
+            <p className="text-[11px] text-zinc-500 max-w-sm mx-auto">
+              Add your voice agent phone number or staging agent ID to start automated benchmarking.
+            </p>
             <button
               onClick={() => setShowAddModal(true)}
-              className="mt-4 px-4 py-2 rounded-lg bg-gold text-charcoal-900 text-xs font-bold"
+              className="mt-2 px-3 py-1.5 rounded-md bg-white text-black font-semibold text-xs"
             >
               Add First Target
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {targets.map((target) => (
               <div
                 key={target.id}
-                className="rounded-2xl bg-surface border border-border p-6 hover:border-gold/50 transition-all flex flex-col justify-between group shadow-lg"
+                className="rounded-xl bg-zinc-950 border border-zinc-800 p-5 hover:border-zinc-600 transition-all flex flex-col justify-between group space-y-4"
               >
                 <div>
                   <div className="flex items-start justify-between">
                     <div>
-                      <h3 className="font-bold text-lg text-white group-hover:text-gold transition-colors">
+                      <h3 className="font-bold text-white text-sm group-hover:text-zinc-200 transition-colors">
                         {target.name}
                       </h3>
-                      <div className="text-xs font-mono text-charcoal-400 mt-1 flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-gold/80" />
-                        {target.phone_number}
+                      <div className="text-xs font-mono text-zinc-400 mt-1 flex items-center gap-1.5">
+                        <Phone className="w-3 h-3 text-zinc-500" />
+                        <span>{target.phone_number}</span>
+                        <button
+                          onClick={() => handleCopy(target.phone_number, target.id)}
+                          className="text-zinc-600 hover:text-white"
+                          title="Copy phone"
+                        >
+                          {copiedId === target.id ? (
+                            <Check className="w-3 h-3 text-white" />
+                          ) : (
+                            <Copy className="w-3 h-3" />
+                          )}
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap gap-1.5">
+                  {/* Languages Tags */}
+                  <div className="mt-3 flex flex-wrap gap-1">
                     {target.languages?.map((lang) => (
                       <span
                         key={lang}
-                        className="px-2 py-0.5 rounded text-[11px] font-semibold bg-charcoal-700 text-charcoal-200 border border-border"
+                        className="px-2 py-0.5 rounded text-[10px] font-mono bg-zinc-900 text-zinc-400 border border-zinc-800"
                       >
                         {lang}
                       </span>
                     ))}
                   </div>
 
-                  <div className="mt-4 p-3 rounded-lg bg-charcoal-900/60 border border-border/60 text-xs font-mono text-charcoal-400 truncate">
-                    Staging Agent: {target.staging_agent_id || "kasauti_staging_default"}
+                  <div className="mt-3 p-2.5 rounded bg-black border border-zinc-900 text-[11px] font-mono text-zinc-500 truncate">
+                    Staging: {target.staging_agent_id || "kasauti_staging_default"}
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+                <div className="pt-3 border-t border-zinc-900 flex items-center justify-between">
                   <button
                     onClick={() => handleTriggerRun(target.id)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-transform active:scale-95"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-transform active:scale-95"
                   >
-                    <Play className="w-3.5 h-3.5 fill-charcoal-900" />
-                    Run 12 Scenarios
+                    <Play className="w-3 h-3 fill-black" />
+                    <span>Run Suite</span>
                   </button>
 
-                  <span className="text-[11px] text-charcoal-400 font-medium">
-                    12 checks &bull; TRAI pack
+                  <span className="text-[11px] font-mono text-zinc-500">
+                    12 checks &bull; TRAI
                   </span>
                 </div>
               </div>
@@ -258,65 +328,108 @@ export default function HomePage() {
       </section>
 
       {/* Recent Benchmark Runs Table */}
-      <section className="space-y-4 pt-4">
-        <div className="flex items-center justify-between">
+      <section className="space-y-3 pt-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-white">Recent Test Runs</h2>
-            <p className="text-xs text-charcoal-400">Purity scores and pass/fail distributions</p>
+            <h2 className="text-sm font-bold text-white uppercase tracking-tight">Recent Benchmark Runs</h2>
+            <p className="text-xs text-zinc-500 font-mono">Purity ratings and compliance pass/fail telemetry</p>
           </div>
-          <Link href="/runs" className="text-xs text-gold hover:text-gold-light font-bold flex items-center gap-1">
-            View All Runs <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+
+          <div className="flex items-center gap-2">
+            {/* Search filter input */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="text"
+                placeholder="Filter runs..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-3 py-1 rounded-md bg-zinc-950 border border-zinc-800 text-xs font-mono text-white placeholder-zinc-600 focus:outline-none focus:border-white transition-colors w-40 sm:w-48"
+              />
+            </div>
+
+            {/* Run Filter Pills */}
+            <div className="flex rounded-md bg-zinc-950 border border-zinc-800 p-0.5 text-xs font-mono">
+              <button
+                onClick={() => setRunFilter("all")}
+                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                  runFilter === "all" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                All
+              </button>
+              <button
+                onClick={() => setRunFilter("passed")}
+                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                  runFilter === "passed" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                Pass
+              </button>
+              <button
+                onClick={() => setRunFilter("failed")}
+                className={`px-2.5 py-0.5 rounded text-[11px] transition-colors ${
+                  runFilter === "failed" ? "bg-white text-black font-bold" : "text-zinc-500 hover:text-white"
+                }`}
+              >
+                Fail
+              </button>
+            </div>
+          </div>
         </div>
 
         {runs.length === 0 ? (
-          <div className="p-8 text-center text-charcoal-400 bg-surface rounded-xl border border-border">
-            No test runs yet. Run a test on any target above.
+          <div className="p-8 text-center text-xs font-mono text-zinc-500 bg-zinc-950 rounded-xl border border-zinc-800">
+            No test runs yet. Run a benchmark on any target above.
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-charcoal-900 border-b border-border text-charcoal-400 uppercase tracking-wider font-semibold">
+          <div className="overflow-x-auto rounded-xl border border-zinc-800 bg-zinc-950">
+            <table className="w-full text-left text-xs font-mono">
+              <thead className="bg-black border-b border-zinc-800 text-zinc-500 uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th className="px-6 py-3.5">Target</th>
-                  <th className="px-6 py-3.5">Suite Name</th>
-                  <th className="px-6 py-3.5">Status</th>
-                  <th className="px-6 py-3.5">Purity Score</th>
-                  <th className="px-6 py-3.5">Calls (Pass / Total)</th>
-                  <th className="px-6 py-3.5 text-right">Action</th>
+                  <th className="px-5 py-3">Run ID</th>
+                  <th className="px-5 py-3">Target</th>
+                  <th className="px-5 py-3">Suite Name</th>
+                  <th className="px-5 py-3">Status</th>
+                  <th className="px-5 py-3">Purity Score</th>
+                  <th className="px-5 py-3">Calls Passed</th>
+                  <th className="px-5 py-3 text-right">Inspect</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border/60">
-                {runs.slice(0, 5).map((run) => (
-                  <tr key={run.id} className="hover:bg-surfaceHover/50 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-white">
+              <tbody className="divide-y divide-zinc-900">
+                {filteredRuns.slice(0, 8).map((run) => (
+                  <tr key={run.id} className="hover:bg-zinc-900/40 transition-colors">
+                    <td className="px-5 py-3.5 text-zinc-400">
+                      {run.id.slice(0, 8)}...
+                    </td>
+                    <td className="px-5 py-3.5 font-semibold text-white">
                       {run.target_name || "Bharat FinServe"}
                     </td>
-                    <td className="px-6 py-4 text-charcoal-200">
+                    <td className="px-5 py-3.5 text-zinc-300">
                       {run.suite_name}
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                    <td className="px-5 py-3.5">
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
                         run.status === "completed" 
-                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
-                          : "bg-gold/15 text-gold border border-gold/30 animate-pulse"
+                          ? "bg-zinc-900 text-zinc-200 border border-zinc-700" 
+                          : "bg-white text-black font-semibold animate-pulse"
                       }`}>
-                        {run.status}
+                        {run.status === "completed" ? "● Completed" : "◌ Running"}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5">
                       <PurityScoreBadge score={run.purity_score} size="sm" />
                     </td>
-                    <td className="px-6 py-4 font-mono text-charcoal-200">
-                      <span className="text-emerald-400 font-bold">{run.passed_calls}</span> / {run.total_calls} passed
+                    <td className="px-5 py-3.5 text-zinc-300">
+                      <span className="text-white font-bold">{run.passed_calls}</span> / {run.total_calls}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-5 py-3.5 text-right">
                       <Link
                         href={`/runs/${run.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surfaceHover hover:bg-charcoal-600 text-charcoal-200 hover:text-white font-semibold transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-800 transition-colors text-[11px]"
                       >
-                        Inspect Run
-                        <ExternalLink className="w-3.5 h-3.5 text-gold" />
+                        Inspect
+                        <ArrowRight className="w-3 h-3 text-zinc-400" />
                       </Link>
                     </td>
                   </tr>
@@ -329,16 +442,16 @@ export default function HomePage() {
 
       {/* Add Target Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-          <div className="w-full max-w-lg rounded-2xl bg-surface border border-gold/40 p-6 shadow-2xl">
-            <h3 className="text-lg font-bold text-white">Add Voice Agent Target</h3>
-            <p className="text-xs text-charcoal-400 mt-1">
-              Configure target for mock simulation or real Bolna agent testing.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-xl bg-black border border-zinc-800 p-6 shadow-2xl">
+            <h3 className="text-sm font-bold text-white uppercase tracking-tight">Add Voice Agent Target</h3>
+            <p className="text-xs text-zinc-400 mt-1 font-mono">
+              Configure telephony target for automated regulatory benchmarking.
             </p>
 
-            <form onSubmit={handleCreateTarget} className="mt-5 space-y-4">
+            <form onSubmit={handleCreateTarget} className="mt-4 space-y-3 font-mono text-xs">
               <div>
-                <label className="block text-xs font-semibold text-charcoal-200 mb-1">
+                <label className="block text-zinc-400 mb-1 uppercase text-[10px]">
                   Agent Name
                 </label>
                 <input
@@ -347,12 +460,12 @@ export default function HomePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Axis KYC Verification Agent"
-                  className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs focus:outline-none focus:border-gold"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white focus:outline-none focus:border-white transition-colors"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-charcoal-200 mb-1">
+                <label className="block text-zinc-400 mb-1 uppercase text-[10px]">
                   Recipient Phone Number (E.164)
                 </label>
                 <input
@@ -360,59 +473,59 @@ export default function HomePage() {
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs font-mono focus:outline-none focus:border-gold"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white focus:outline-none focus:border-white transition-colors"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-charcoal-200 mb-1">
-                    Bolna Production Agent ID
+                  <label className="block text-zinc-400 mb-1 uppercase text-[10px]">
+                    Production Agent ID
                   </label>
                   <input
                     type="text"
                     value={bolnaAgentId}
                     onChange={(e) => setBolnaAgentId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs font-mono focus:outline-none focus:border-gold"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white focus:outline-none focus:border-white transition-colors"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-charcoal-200 mb-1">
-                    Staging Agent ID (Safe Patching)
+                  <label className="block text-zinc-400 mb-1 uppercase text-[10px]">
+                    Staging Agent ID
                   </label>
                   <input
                     type="text"
                     value={stagingAgentId}
                     onChange={(e) => setStagingAgentId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs font-mono focus:outline-none focus:border-gold"
+                    className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white focus:outline-none focus:border-white transition-colors"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-charcoal-200 mb-1">
-                  Current Agent Prompt Notes
+                <label className="block text-zinc-400 mb-1 uppercase text-[10px]">
+                  Current Prompt Notes
                 </label>
                 <textarea
                   rows={3}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg bg-charcoal-900 border border-border text-white text-xs focus:outline-none focus:border-gold"
+                  className="w-full px-3 py-2 rounded-md bg-zinc-950 border border-zinc-800 text-white focus:outline-none focus:border-white transition-colors font-sans text-xs"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-800">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-medium text-charcoal-400 hover:text-white"
+                  className="px-3 py-1.5 rounded-md text-xs font-mono text-zinc-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-lg bg-gold hover:bg-gold-dark text-charcoal-900 font-bold text-xs transition-colors"
+                  className="px-4 py-2 rounded-md bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-colors"
                 >
                   {submitting ? "Saving..." : "Create Target"}
                 </button>
@@ -422,7 +535,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* New Run Launcher Modal */}
+      {/* New Run Modal */}
       <NewRunModal
         isOpen={showRunModal}
         onClose={() => setShowRunModal(false)}
