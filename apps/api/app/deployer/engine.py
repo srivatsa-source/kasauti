@@ -99,7 +99,7 @@ class DeployerEngine:
                 )
         else:
             return BolnaDeployResponse(
-                status="MOCK_SUCCESS",
+                status="STAGING_SANDBOX",
                 agent_id=agent_id,
                 agent_name="Kasauti CSA (Staging)",
                 updated_at=datetime.now(timezone.utc).isoformat(),

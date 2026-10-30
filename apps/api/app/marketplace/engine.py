@@ -3,6 +3,7 @@ import time
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
 from pydantic import BaseModel, Field
+from app.db.supabase_client import supabase_service
 
 class HallmarkCertificate(BaseModel):
     cert_id: str
@@ -24,14 +25,13 @@ class CertificationRegistry:
     """
     Public Verifiable Hallmark Certification Registry.
     Generates cryptographic proof of compliance for Indian voice agents
-    benchmarked across the 12 regulatory and behavioral suites.
+    benchmarked across the 12 regulatory and behavioral suites, persisted to Supabase.
     """
     def __init__(self):
         self._certificates: Dict[str, HallmarkCertificate] = {}
         self._seed_production_cert()
 
     def _seed_production_cert(self):
-        # Generate primary certificate for the active Bolna agent
         cert_id = "KASAUTI-2026-BOLNA-01"
         agent_id = "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
         score = 98.4
@@ -61,13 +61,14 @@ class CertificationRegistry:
         )
         self._certificates[cert_id] = cert
 
-    def issue_certificate(
+    async def issue_certificate(
         self,
         agent_name: str,
         bolna_agent_id: str,
         phone_number: str,
         purity_score: float,
-        dialects: Optional[List[str]] = None
+        dialects: Optional[List[str]] = None,
+        run_id: Optional[str] = None
     ) -> HallmarkCertificate:
         ts = int(time.time())
         cert_id = f"KASAUTI-2026-{ts % 10000:04d}"
@@ -98,6 +99,17 @@ class CertificationRegistry:
             badge_html=badge_html
         )
         self._certificates[cert_id] = cert
+
+        # Persist certificate to Supabase
+        await supabase_service.insert_record("hallmark_certificates", {
+            "cert_id": cert_id,
+            "run_id": run_id or "run-default",
+            "target_id": bolna_agent_id,
+            "purity_score": purity_score,
+            "sha256_signature": sig,
+            "issued_at": cert.issued_at
+        })
+
         return cert
 
     def get_certificate(self, cert_id: str) -> Optional[HallmarkCertificate]:
@@ -107,4 +119,3 @@ class CertificationRegistry:
         return list(self._certificates.values())
 
 marketplace_instance = CertificationRegistry()
-

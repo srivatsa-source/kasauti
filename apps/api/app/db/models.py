@@ -117,3 +117,81 @@ class Job(Base):
     error: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, onupdate=utc_now)
+
+
+class BenchmarkRun(Base):
+    __tablename__ = "benchmark_runs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    target_id: Mapped[str] = mapped_column(String(36), ForeignKey("targets.id", ondelete="CASCADE"), nullable=False)
+    bolna_execution_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    status: Mapped[str] = mapped_column(String(50), default="queued")
+    purity_score: Mapped[float] = mapped_column(Float, default=0.0)
+    audio_storage_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    bolna_transcript_jsonb: Mapped[Any] = mapped_column(JSON, default=list)
+    sarvam_transcript_jsonb: Mapped[Any] = mapped_column(JSON, default=list)
+    trai_compliance_jsonb: Mapped[Any] = mapped_column(JSON, default=dict)
+    ast_prompt_diff: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class SentinelTelemetry(Base):
+    __tablename__ = "sentinel_telemetry"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    run_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("benchmark_runs.id", ondelete="SET NULL"), nullable=True)
+    utterance: Mapped[str] = mapped_column(Text, nullable=False)
+    intercept_latency_ms: Mapped[float] = mapped_column(Float, nullable=False)
+    rule_triggered: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    action_taken: Mapped[str] = mapped_column(String(50), nullable=False)
+    timestamp: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class FuzzerLog(Base):
+    __tablename__ = "fuzzer_logs"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    run_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("benchmark_runs.id", ondelete="SET NULL"), nullable=True)
+    attack_vector: Mapped[str] = mapped_column(Text, nullable=False)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)
+    agent_response: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    tool_called_flag: Mapped[bool] = mapped_column(Boolean, default=False)
+    passed: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class AcousticBenchmark(Base):
+    __tablename__ = "acoustic_benchmarks"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    run_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("benchmark_runs.id", ondelete="SET NULL"), nullable=True)
+    soundscape_profile: Mapped[str] = mapped_column(String(100), nullable=False)
+    snr_db: Mapped[float] = mapped_column(Float, nullable=False)
+    baseline_wer: Mapped[float] = mapped_column(Float, nullable=False)
+    degraded_wer: Mapped[float] = mapped_column(Float, nullable=False)
+    audio_artifact_url: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class HallmarkCertificate(Base):
+    __tablename__ = "hallmark_certificates"
+
+    cert_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    run_id: Mapped[str] = mapped_column(String(36), ForeignKey("benchmark_runs.id", ondelete="CASCADE"), nullable=False)
+    target_id: Mapped[str] = mapped_column(String(36), ForeignKey("targets.id", ondelete="CASCADE"), nullable=False)
+    purity_score: Mapped[float] = mapped_column(Float, nullable=False)
+    sha256_signature: Mapped[str] = mapped_column(String(128), nullable=False)
+    issued_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+
+
+class TrainingDataset(Base):
+    __tablename__ = "training_datasets"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    contributor_github: Mapped[str] = mapped_column(String(100), nullable=False)
+    dialect: Mapped[str] = mapped_column(String(50), nullable=False)
+    scenario_type: Mapped[str] = mapped_column(String(100), nullable=False)
+    audio_url: Mapped[str] = mapped_column(Text, nullable=False)
+    ground_truth_jsonb: Mapped[Any] = mapped_column(JSON, default=dict)
+    sha256_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    verified_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

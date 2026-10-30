@@ -31,7 +31,7 @@ async def verify_certificate(cert_id: str):
 @router.post("/issue", response_model=HallmarkCertificate)
 async def issue_new_certificate(payload: IssueCertRequest):
     """Issues a new verifiable cryptographic Hallmark certificate for an audited voice agent."""
-    return marketplace_instance.issue_certificate(
+    return await marketplace_instance.issue_certificate(
         agent_name=payload.agent_name,
         bolna_agent_id=payload.bolna_agent_id,
         phone_number=payload.phone_number,
