@@ -58,8 +58,9 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
 
         wavesurferRef.current = ws;
 
-        const urlToLoad = recordingUrl || "https://actions.google.com/sounds/v1/ambiences/coffee_shop.ogg";
-        ws.load(urlToLoad);
+        if (recordingUrl) {
+          ws.load(recordingUrl);
+        }
 
         ws.on("ready", () => {
           setDuration(ws.getDuration());
@@ -144,7 +145,18 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
 
       {/* Waveform Canvas Container */}
       <div className="relative py-2 bg-[#f4f4f0] rounded-xl border-2 border-black p-3">
-        <div ref={containerRef} className="w-full cursor-pointer" />
+        {!recordingUrl && (
+          <div className="py-6 text-center">
+            <Volume2 className="w-8 h-8 text-black/40 mx-auto mb-2" />
+            <p className="text-xs font-bold text-black uppercase tracking-wide">
+              Real-Time Carrier Audio Finalizing
+            </p>
+            <p className="text-[11px] text-gray-600 mt-1">
+              Audio artifact will appear here as soon as Bolna carrier finalization finishes.
+            </p>
+          </div>
+        )}
+        <div ref={containerRef} className={`w-full cursor-pointer ${!recordingUrl ? 'hidden' : ''}`} />
 
         {/* Visual Waveform Markers Overlay Pins */}
         <div className="relative w-full h-8 mt-2 border-t-2 border-black">
@@ -184,7 +196,10 @@ export const AudioPlayer: React.FC<AudioPlayerProps> = ({ recordingUrl, markers 
         <div className="flex items-center space-x-2">
           <button
             onClick={togglePlay}
-            className="flex items-center justify-center w-10 h-10 rounded-xl bg-brutal-yellow hover:bg-yellow-300 border-2 border-black text-black font-black transition-all shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none"
+            disabled={!recordingUrl}
+            className={`flex items-center justify-center w-10 h-10 rounded-xl border-2 border-black text-black font-black transition-all shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none ${
+              !recordingUrl ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50' : 'bg-brutal-yellow hover:bg-yellow-300'
+            }`}
           >
             {isPlaying ? <Pause className="w-4 h-4 fill-black" /> : <Play className="w-4 h-4 fill-black ml-0.5" />}
           </button>

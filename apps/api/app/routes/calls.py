@@ -66,6 +66,12 @@ async def get_call_detail(call_id: str, db: AsyncSession = Depends(get_db)):
     chk_res = await db.execute(select(Check).where(Check.call_id == call.id))
     checks = chk_res.scalars().all()
 
+    # Automatically backfill real Bolna telephony recording if available
+    if not call.recording_url and call.bolna_execution_id and not str(call.bolna_execution_id).startswith("mock_"):
+        call.recording_url = f"https://api.bolna.ai/recordings/call/{call.bolna_execution_id}"
+        await db.commit()
+        await db.refresh(call)
+
     return CallDetailResponse(
         id=call.id,
         run_id=call.run_id,

@@ -54,15 +54,19 @@ class RealBolnaClient(BolnaClient):
     ) -> Dict[str, Any]:
         self._check_safety_limits()
 
-        # Call Direction configuration:
-        # DIRECTION=caller_to_target: Persona agent (BOLNA_CALLER_AGENT_ID) dials target agent number (BOLNA_TARGET_PHONE)
-        # DIRECTION=target_to_caller: Target agent dials tester number (recipient_phone_number)
-        if settings.DIRECTION == "caller_to_target" and settings.BOLNA_CALLER_AGENT_ID:
+        # Call Direction & Target Resolution:
+        # Prioritize explicit agent_id if configured on target and not default placeholder,
+        # otherwise use configured BOLNA_CALLER_AGENT_ID or BOLNA_STAGING_AGENT_ID.
+        if agent_id and agent_id not in ("agent_prod_bharat", "default", ""):
+            effective_agent_id = agent_id
+        elif settings.BOLNA_CALLER_AGENT_ID:
             effective_agent_id = settings.BOLNA_CALLER_AGENT_ID
-            effective_recipient = recipient_phone_number or settings.BOLNA_TARGET_PHONE
+        elif settings.BOLNA_STAGING_AGENT_ID:
+            effective_agent_id = settings.BOLNA_STAGING_AGENT_ID
         else:
             effective_agent_id = agent_id
-            effective_recipient = recipient_phone_number or settings.BOLNA_TARGET_PHONE
+
+        effective_recipient = recipient_phone_number or settings.BOLNA_TARGET_PHONE
 
         payload: Dict[str, Any] = {
             "agent_id": effective_agent_id,

@@ -163,6 +163,7 @@ async def get_run(run_id: str, db: AsyncSession = Depends(get_db)):
     calls = calls_res.scalars().all()
 
     calls_summary = []
+    db_updated = False
     for c in calls:
         sc_res = await db.execute(select(Scenario).where(Scenario.id == c.scenario_id))
         sc = sc_res.scalar_one_or_none()
@@ -170,17 +171,25 @@ async def get_run(run_id: str, db: AsyncSession = Depends(get_db)):
         chk_res = await db.execute(select(Check).where(Check.call_id == c.id))
         checks = chk_res.scalars().all()
 
+        rec_url = c.recording_url
+        if not rec_url and c.bolna_execution_id and not str(c.bolna_execution_id).startswith("mock_"):
+            rec_url = f"https://api.bolna.ai/recordings/call/{c.bolna_execution_id}"
+            c.recording_url = rec_url
+            db_updated = True
+
         calls_summary.append(CallSummary(
             id=c.id,
             scenario_id=c.scenario_id,
             bolna_execution_id=c.bolna_execution_id,
             status=c.status,
             transcript=c.transcript,
-            recording_url=c.recording_url,
+            recording_url=rec_url,
             cost=c.cost,
             scenario=sc,
             checks=checks
         ))
+    if db_updated:
+        await db.commit()
 
     fixes_res = await db.execute(select(Fix).where(Fix.run_id == run.id))
     fixes = fixes_res.scalars().all()

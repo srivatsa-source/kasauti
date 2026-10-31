@@ -11,7 +11,7 @@ import { AudioPlayer, AudioMarker } from "@/components/AudioPlayer";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
 import { SarvamSecondOpinion } from "@/components/SarvamSecondOpinion";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
 interface Check {
   id: string;

@@ -44,7 +44,7 @@ interface SarvamSecondOpinionProps {
   callId: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
 export const SarvamSecondOpinion: React.FC<SarvamSecondOpinionProps> = ({
   callId,
