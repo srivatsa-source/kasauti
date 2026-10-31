@@ -107,6 +107,11 @@ export default function HomePage() {
   };
 
   const handleTriggerRun = async (targetId: string) => {
+    const tgt = targets.find((t) => t.id === targetId);
+    if (!tgt || tgt.phone_number.includes("00000000") || tgt.phone_number.includes("XXXX") || !tgt.phone_number) {
+      handleOpenBenchmark(targetId);
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/runs`, {
         method: "POST",

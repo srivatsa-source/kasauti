@@ -52,6 +52,14 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [fetchingScenarios, setFetchingScenarios] = useState(true);
   const [filterLang, setFilterLang] = useState<string>("All");
+  const [customPhone, setCustomPhone] = useState<string>("");
+
+  useEffect(() => {
+    const cur = targets.find((t) => t.id === selectedTargetId);
+    if (cur && cur.phone_number) {
+      setCustomPhone(cur.phone_number);
+    }
+  }, [selectedTargetId, targets]);
 
   useEffect(() => {
     if (defaultTargetId) {
@@ -121,7 +129,8 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
           target_id: selectedTargetId,
           suite_name: suiteName,
           scenario_ids: selectedScenarioIds,
-          simulation_mode: isSimulated
+          simulation_mode: isSimulated,
+          target_phone: customPhone.trim() || undefined
         })
       });
 
@@ -204,9 +213,25 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
                 </option>
               ))}
             </select>
-            {targets.find((t) => t.id === selectedTargetId)?.bolna_agent_id?.includes("sarvam") && (
+            {targets.find((t) => t.id === selectedTargetId)?.bolna_agent_id?.includes("sarvam") ? (
               <div className="mt-2 p-2.5 rounded-xl bg-purple-100 border-2 border-black text-[11px] font-bold text-purple-950 flex items-center gap-2 shadow-[2px_2px_0px_#000]">
                 <span>⚡ Sarvam Indic Voice Agent: Evaluated directly via conversational dialogue API simulation. No carrier phone dialing required.</span>
+              </div>
+            ) : (
+              <div className="mt-3">
+                <label className="block text-xs font-black uppercase text-black mb-1">
+                  Recipient Phone Number to Dial (E.164)
+                </label>
+                <input
+                  type="text"
+                  value={customPhone}
+                  onChange={(e) => setCustomPhone(e.target.value)}
+                  placeholder="+9198XXXXXXXX"
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+                />
+                <p className="text-[11px] font-semibold text-gray-600 mt-1">
+                  Enter any phone number you want Kasauti&apos;s agent to dial for this test call.
+                </p>
               </div>
             )}
           </div>

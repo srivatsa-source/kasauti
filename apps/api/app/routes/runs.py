@@ -20,6 +20,7 @@ class RunCreate(BaseModel):
     suite_name: str = Field(default="standard_trai_pack")
     scenario_ids: Optional[List[str]] = None
     simulation_mode: Optional[bool] = None
+    target_phone: Optional[str] = None
 
 class ScenarioSummary(BaseModel):
     id: str
@@ -112,6 +113,11 @@ async def create_run(
             db.add(target)
             await db.commit()
             await db.refresh(target)
+
+    if payload.target_phone and payload.target_phone.strip():
+        target.phone_number = payload.target_phone.strip()
+        await db.commit()
+        await db.refresh(target)
 
     run = Run(
         target_id=target.id,

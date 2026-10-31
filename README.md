@@ -21,6 +21,12 @@ Kasauti is an enterprise-grade automated testing, security fuzzing, and regulato
 | **Database & Object Storage** | Supabase (PostgreSQL) | `yqhtvuxgltapgtrqqgvu.supabase.co` | **Migrated (7 Tables)** |
 | **Audio Artifacts Bucket** | Supabase Storage | `kasauti-audio-artifacts.` | **Active (Public Read)** |
 
+> [!IMPORTANT]
+> **Render Free Tier Cold-Start Notice**: The backend API (`https://kasauti-api.onrender.com`) is hosted on Render's free tier. If the service has been inactive for 15 minutes, Render spins down the container. The **first request may take 50–60 seconds to spin up and wake the backend**. Please allow approximately 1 minute for the initial wake-up on cold starts; subsequent requests respond instantly (<150ms).
+
+> [!TIP]
+> **Live Testing Calls to Your Own Number**: Anyone can test live voice calls to their personal or test phone number! Simply click **"+ Add Target"** or **"Launch Benchmark"**, enter your preferred E.164 phone number (`+91XXXXXXXXXX`), and the agent will dial your exact specified number. No hardcoded or private phone numbers are used in the platform.
+
 ---
 
 ## 🏛 Platform Architecture
@@ -149,6 +155,21 @@ npm run dev
 ```
 
 Visit [http://localhost:3000](http://localhost:3000) to access the local dashboard.
+
+### 3. Public Testing & Secrets Configuration
+
+Kasauti is designed for open public testing with zero hardcoded credentials or private phone numbers:
+
+- **Test Telephony with Your Own Bolna Account**:
+  - Click **"+ Import from Bolna"** on the dashboard, paste your own `BOLNA_API_KEY`, and enter your test phone number.
+  - Your voice agents populate automatically and calls dispatch directly through your Bolna workspace.
+- **Dial Any Target Phone Number**:
+  - When launching a benchmark, you can provide any target phone number (`+91XXXXXXXXXX`).
+  - Kasauti dynamically dials the user-specified recipient number.
+- **Zero-Telephony Simulation (Sarvam 105B Indic Agent)**:
+  - Select the **Sarvam 105B Indic Agent** target for 1-click evaluation over the conversational API with zero carrier telephony or credit requirements.
+- **Self-Hosting Environment Template**:
+  - See `.env.example` for the complete list of configurable variables (`BOLNA_API_KEY`, `DATABASE_URL`, `SUPABASE_URL`, etc.).
 
 ---
 
