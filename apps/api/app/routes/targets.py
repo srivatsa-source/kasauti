@@ -263,3 +263,77 @@ async def get_target(target_id: str, db: AsyncSession = Depends(get_db)):
         languages=["Hindi", "Hinglish", "Kannada", "Indian English"],
         notes="Primary Bolna outbound customer support voice agent."
     )
+
+
+@router.post("/fetch-sarvam-agents")
+async def fetch_sarvam_agents():
+    """
+    Lists available Sarvam conversational voice agents.
+    """
+    from app.sarvam.client import get_sarvam_client
+    client = get_sarvam_client()
+    models = await client.list_models()
+    return [
+        {
+            "id": m.get("id"),
+            "name": f"Sarvam AI {m.get('id').upper()}",
+            "agent_type": "sarvam_llm",
+            "languages": ["Hindi", "Kannada", "Hinglish", "Indian English"],
+            "notes": "Sarvam Indic Conversational LLM Voice Model."
+        }
+        for m in models
+    ]
+
+@router.post("/import-sarvam-agents", response_model=List[TargetResponse])
+async def import_sarvam_agents(db: AsyncSession = Depends(get_db)):
+    """
+    Imports Sarvam Conversational Voice Agents into targets table
+    ready for direct simulation benchmark testing (no phone dialing).
+    """
+    sarvam_targets = [
+        {
+            "id": "sarvam-105b-conversations-target",
+            "name": "Sarvam 105B Indic Conversational Voice Agent",
+            "phone_number": "+918000000001",
+            "bolna_agent_id": "sarvam-105b-conversations",
+            "staging_agent_id": "sarvam-105b-conversations",
+            "languages": ["Hindi", "Kannada", "Hinglish", "Indian English"],
+            "notes": "Sarvam AI Conversational Model. Tested via direct Indic simulation without carrier dialing."
+        },
+        {
+            "id": "sarvam-105b-foundation-target",
+            "name": "Sarvam 105B Foundation Voice Model",
+            "phone_number": "+918000000002",
+            "bolna_agent_id": "sarvam-105b",
+            "staging_agent_id": "sarvam-105b",
+            "languages": ["Hindi", "English", "Kannada", "Tamil"],
+            "notes": "Sarvam AI 105B Indic Foundation Model for regional dialog verification."
+        }
+    ]
+
+    imported = []
+    for st in sarvam_targets:
+        res = await db.execute(select(Target).where(Target.bolna_agent_id == st["bolna_agent_id"]))
+        existing = res.scalar_one_or_none()
+        if existing:
+            existing.name = st["name"]
+            existing.phone_number = st["phone_number"]
+            existing.languages = st["languages"]
+            existing.notes = st["notes"]
+            imported.append(existing)
+        else:
+            t_obj = Target(
+                name=st["name"],
+                phone_number=st["phone_number"],
+                bolna_agent_id=st["bolna_agent_id"],
+                staging_agent_id=st["staging_agent_id"],
+                languages=st["languages"],
+                notes=st["notes"]
+            )
+            db.add(t_obj)
+            imported.append(t_obj)
+
+    await db.commit()
+    for t in imported:
+        await db.refresh(t)
+    return imported

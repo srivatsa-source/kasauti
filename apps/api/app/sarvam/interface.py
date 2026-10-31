@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 class SarvamClient(ABC):
     @abstractmethod
@@ -23,3 +23,16 @@ class SarvamClient(ABC):
         """Transcribe audio using Sarvam Indic STT."""
         pass
 
+    @abstractmethod
+    async def chat_completion(
+        self,
+        messages: List[Dict[str, str]],
+        model: str = "sarvam-105b"
+    ) -> Dict[str, Any]:
+        """Generate conversational completion using Sarvam Indic LLM."""
+        pass
+
+    @abstractmethod
+    async def list_models(self) -> List[Dict[str, Any]]:
+        """List available Sarvam models."""
+        pass

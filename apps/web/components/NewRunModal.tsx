@@ -200,10 +200,15 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
             >
               {targets.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.name} ({t.phone_number}) — Staging: {t.staging_agent_id || "default"}
+                  {t.name} ({t.phone_number}) — {t.bolna_agent_id?.includes("sarvam") ? "Sarvam Indic Model" : "Bolna Telephony"}
                 </option>
               ))}
             </select>
+            {targets.find((t) => t.id === selectedTargetId)?.bolna_agent_id?.includes("sarvam") && (
+              <div className="mt-2 p-2.5 rounded-xl bg-purple-100 border-2 border-black text-[11px] font-bold text-purple-950 flex items-center gap-2 shadow-[2px_2px_0px_#000]">
+                <span>⚡ Sarvam Indic Voice Agent: Evaluated directly via conversational dialogue API simulation. No carrier phone dialing required.</span>
+              </div>
+            )}
           </div>
 
           {/* Suite Title */}

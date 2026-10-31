@@ -146,6 +146,20 @@ export default function HomePage() {
     setShowRunModal(true);
   };
 
+  const handleImportSarvam = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/targets/import-sarvam-agents`, { method: "POST" });
+      if (res.ok) {
+        await fetchData();
+        alert("Successfully imported Sarvam 105B Indic Conversational Voice Agents into Kasauti!");
+      } else {
+        alert("Failed to import Sarvam agents");
+      }
+    } catch (err) {
+      alert("Error importing Sarvam agents: " + err);
+    }
+  };
+
   const filteredTargets = targets.filter((t) => 
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     t.phone_number.includes(searchQuery) ||
@@ -577,13 +591,20 @@ export default function HomePage() {
               Registered phone numbers and Bolna agent configurations
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setShowImportModal(true)}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brutal-pink hover:bg-pink-300 border-2 border-black text-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
             >
               <DownloadCloud className="w-4 h-4 stroke-[2.5]" />
               Import from Bolna
+            </button>
+            <button
+              onClick={handleImportSarvam}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brutal-purple hover:bg-purple-300 border-2 border-black text-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <Bot className="w-4 h-4 stroke-[2.5]" />
+              Import Sarvam Agent
             </button>
             <button
               onClick={() => setShowAddModal(true)}
@@ -636,11 +657,15 @@ export default function HomePage() {
                         <h3 className="font-black text-lg text-black uppercase tracking-tight group-hover:text-brutal-pink transition-colors truncate">
                           {target.name}
                         </h3>
-                        {target.bolna_agent_id && (
+                        {target.bolna_agent_id && target.bolna_agent_id.includes("sarvam") ? (
+                          <span className="px-2 py-0.2 rounded-full bg-purple-100 text-purple-900 border border-black text-[9px] font-black uppercase tracking-wider shadow-[1px_1px_0px_#000] shrink-0">
+                            Sarvam Indic LLM
+                          </span>
+                        ) : target.bolna_agent_id ? (
                           <span className="px-2 py-0.2 rounded-full bg-emerald-100 text-emerald-900 border border-black text-[9px] font-black uppercase tracking-wider shadow-[1px_1px_0px_#000] shrink-0">
                             Bolna Active
                           </span>
-                        )}
+                        ) : null}
                       </div>
                       <div className="text-xs font-mono font-bold text-gray-700 mt-1 flex items-center gap-1.5">
                         <Phone className="w-3.5 h-3.5 text-black stroke-[2.5]" />
