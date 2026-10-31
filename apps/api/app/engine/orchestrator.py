@@ -70,6 +70,7 @@ def build_scenario_call_context(scenario: dict) -> dict:
 
 class RunOrchestrator:
     def __init__(self, confirmed_by_user: bool = True, simulation_mode: Optional[bool] = None):
+        self.simulation_mode = bool(simulation_mode)
         if simulation_mode:
             from app.bolna.mock_client import MockBolnaClient
             self.bolna = MockBolnaClient()

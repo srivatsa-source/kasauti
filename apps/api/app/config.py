@@ -98,7 +98,7 @@ class Settings(BaseSettings):
 
     # Budget & Safety limits
     BUDGET_USD: float = Field(default=8.0, description="Hard cap on total spend across calls")
-    MAX_CALLS_PER_RUN: int = Field(default=3, description="Maximum calls allowed in a single run")
+    MAX_CALLS_PER_RUN: int = Field(default=15, description="Maximum calls allowed in a single run")
     MAX_CALL_SECONDS: int = Field(default=60, description="Duration limit per call")
     DAILY_SPEND_CAP: float = Field(default=8.0)
 
