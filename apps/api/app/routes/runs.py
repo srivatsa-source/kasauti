@@ -1,4 +1,8 @@
+import logging
 from typing import List, Optional, Any
+from app.config import settings
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
@@ -95,7 +99,7 @@ async def create_run(
             target = all_targets[0]
         else:
             live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
-            live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
+            live_phone = settings.BOLNA_TARGET_PHONE or "+919800000000"
             target = Target(
                 name="Kasauti CSA (Bolna Telephony Agent)",
                 phone_number=live_phone,
@@ -161,7 +165,7 @@ async def list_runs(db: AsyncSession = Depends(get_db)):
                 failed_calls=r.failed_calls,
                 created_at=r.created_at,
                 target_name=t.name if t else "Kasauti CSA (Bolna Telephony Agent)",
-                target_phone=t.phone_number if t else "+919019823296",
+                target_phone=t.phone_number if t else (settings.BOLNA_TARGET_PHONE or "+919800000000"),
                 calls=[],
                 fixes=[]
             ))
@@ -200,7 +204,7 @@ async def list_runs(db: AsyncSession = Depends(get_db)):
                         failed_calls=total - passed,
                         created_at=b.get("created_at"),
                         target_name=target_name,
-                        target_phone="+919019823296",
+                        target_phone=settings.BOLNA_TARGET_PHONE or "+919800000000",
                         calls=[],
                         fixes=[]
                     ))
@@ -258,7 +262,7 @@ async def get_run(run_id: str, db: AsyncSession = Depends(get_db)):
                         failed_calls=total - passed,
                         created_at=b.get("created_at"),
                         target_name=target_name,
-                        target_phone="+919019823296",
+                        target_phone=settings.BOLNA_TARGET_PHONE or "+919800000000",
                         calls=mock_calls,
                         fixes=[]
                     )

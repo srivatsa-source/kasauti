@@ -20,6 +20,7 @@ import {
   X,
   ChevronDown,
   Lightbulb,
+  FileText,
 } from "lucide-react";
 import { NewRunModal } from "@/components/NewRunModal";
 
@@ -105,6 +106,7 @@ export const Navbar: React.FC = () => {
     { href: "/telemetry", label: "Telemetry", icon: Radio },
     { href: "/knowledge", label: "Neural Graph", icon: Brain },
     { href: "/marketplace", label: "Marketplace", icon: Award },
+    { href: "/docs", label: "TRAI Rules", icon: FileText },
     { href: "/why", label: "Why", icon: Lightbulb },
   ];
 

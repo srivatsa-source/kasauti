@@ -31,7 +31,7 @@ export const ImportBolnaModal: React.FC<ImportBolnaModalProps> = ({
   onImportSuccess,
 }) => {
   const [apiKey, setApiKey] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("+919019823296");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [agents, setAgents] = useState<BolnaAgentItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [fetching, setFetching] = useState(false);
@@ -100,7 +100,7 @@ export const ImportBolnaModal: React.FC<ImportBolnaModalProps> = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           api_key: apiKey.trim() || null,
-          phone_number: phoneNumber.trim() || "+919019823296",
+          phone_number: phoneNumber.trim() || "+919800000000",
           agent_ids: selectedIds,
         }),
       });
@@ -218,7 +218,7 @@ export const ImportBolnaModal: React.FC<ImportBolnaModalProps> = ({
             </label>
             <input
               type="text"
-              placeholder="+919019823296"
+              placeholder="+9198XXXXXXXX"
               value={phoneNumber}
               onChange={(e) => setPhoneNumber(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"

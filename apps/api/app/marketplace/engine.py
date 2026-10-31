@@ -47,7 +47,7 @@ class CertificationRegistry:
             cert_id=cert_id,
             agent_name="Kasauti CSA (Bolna Telephony Agent)",
             bolna_agent_id=agent_id,
-            phone_number="+919019823296",
+            phone_number="+919800000000",
             purity_score=score,
             grade="GOLD",
             statutory_standing="100% TRAI COMPLIANT",

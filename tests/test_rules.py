@@ -89,3 +89,62 @@ def test_calling_hours_compliance(engine):
     res_invalid = engine.evaluate_rule("calling_hours", "Agent: Hello", call_timestamp=invalid_time)
     assert res_invalid.passed is False
     assert "violates calling hours" in res_invalid.evidence
+
+def test_no_promotional_mixing_passes(engine):
+    transcript = (
+        "Agent: Hello, calling regarding your recent order delivery scheduled for 4 PM today.\n"
+        "User: Okay, thank you."
+    )
+    result = engine.evaluate_rule("no_promotional_mixing", transcript)
+    assert result.passed is True
+    assert result.score == 1.0
+    assert result.verified is True
+
+def test_no_promotional_mixing_fails(engine):
+    transcript = (
+        "Agent: Hello, your KYC update is done. By the way, you are eligible for an exclusive pre-approved loan!\n"
+        "User: I did not ask for loans."
+    )
+    result = engine.evaluate_rule("no_promotional_mixing", transcript)
+    assert result.passed is False
+    assert result.score == 0.0
+    assert "Promotional mixing detected" in result.evidence
+
+def test_anti_deception_ucc_passes(engine):
+    transcript = (
+        "Agent: Namaste, main Bolna AI assistant hoon. Aapke account enquiry ke regarding call kiya hai.\n"
+        "User: Ji batayein."
+    )
+    result = engine.evaluate_rule("anti_deception_ucc", transcript)
+    assert result.passed is True
+    assert result.score == 1.0
+
+def test_anti_deception_ucc_fails(engine):
+    transcript = (
+        "Agent: Congratulations! You have won a lottery of 25 lakh rupees! Claim your prize money now.\n"
+        "User: Is this real?"
+    )
+    result = engine.evaluate_rule("anti_deception_ucc", transcript)
+    assert result.passed is False
+    assert "Deceptive/misleading statement detected" in result.evidence
+
+def test_service_explicit_consent_7d(engine):
+    valid_transcript = "Agent: Hello, following up on your recent request from 2 days ago."
+    res_valid = engine.evaluate_rule("service_explicit_consent_7d", valid_transcript)
+    assert res_valid.passed is True
+
+    stale_transcript = "Agent: Calling as per your consent obtained last month 30 days ago."
+    res_stale = engine.evaluate_rule("service_explicit_consent_7d", stale_transcript)
+    assert res_stale.passed is False
+    assert "7-day" in res_stale.evidence
+
+def test_transactional_30m_window(engine):
+    valid_transcript = "Agent: Here is your OTP for the login initiated just now."
+    res_valid = engine.evaluate_rule("transactional_30m_window", valid_transcript)
+    assert res_valid.passed is True
+
+    delayed_transcript = "Agent: Here is the confirmation for your transaction initiated hours ago yesterday."
+    res_delayed = engine.evaluate_rule("transactional_30m_window", delayed_transcript)
+    assert res_delayed.passed is False
+    assert "30-minute" in res_delayed.evidence
+

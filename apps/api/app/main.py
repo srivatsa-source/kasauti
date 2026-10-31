@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
             existing_targets = t_res.scalars().all()
             if not existing_targets:
                 live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
-                live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
+                live_phone = settings.BOLNA_TARGET_PHONE or "+919800000000"
                 t_live = Target(
                     name="Kasauti CSA (Bolna Telephony Agent)",
                     phone_number=live_phone,

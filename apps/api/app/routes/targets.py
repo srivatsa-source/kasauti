@@ -90,7 +90,7 @@ async def list_targets(db: AsyncSession = Depends(get_db)):
 
     # 3. Fallback to active environment configured Bolna target
     live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
-    live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
+    live_phone = settings.BOLNA_TARGET_PHONE or "+919800000000"
     return [
         TargetResponse(
             id="default-bolna-target",
@@ -163,7 +163,7 @@ async def import_bolna_agents(payload: ImportBolnaAgentsRequest, db: AsyncSessio
     if not key:
         raise HTTPException(status_code=400, detail="Bolna API key is required to import agents.")
 
-    phone = payload.phone_number or settings.BOLNA_TARGET_PHONE or "+919019823296"
+    phone = payload.phone_number or settings.BOLNA_TARGET_PHONE or "+919800000000"
 
     headers = {
         "Authorization": f"Bearer {key}",
@@ -252,7 +252,7 @@ async def get_target(target_id: str, db: AsyncSession = Depends(get_db)):
 
     # Check fallback
     live_agent_id = settings.BOLNA_CALLER_AGENT_ID or settings.BOLNA_STAGING_AGENT_ID or "74bbf2a4-6561-48de-aec3-aafc7153bcd7"
-    live_phone = settings.BOLNA_TARGET_PHONE or "+919019823296"
+    live_phone = settings.BOLNA_TARGET_PHONE or "+919800000000"
     return TargetResponse(
         id=target_id,
         name="Kasauti CSA (Bolna Telephony Agent)",

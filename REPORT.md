@@ -35,7 +35,7 @@ Voice AI agents in India are experiencing unprecedented enterprise adoption acro
 Unlike synthetic mock frameworks, Kasauti is built on live telephony infrastructure:
 
 - **Telephony Provider**: Outbound calls execute over Bolna's production gateway using **Plivo Telephony** and **Reliance JIO** cellular carrier routing.
-- **Production Target Tested**: `Kasauti CSA` (`+919019823296` / Agent ID `74bbf2a4-6561-48de-aec3-aafc7153bcd7`).
+- **Production Target Tested**: `Kasauti CSA` (`+9198XXXXXXXX` / Agent ID `74bbf2a4-6561-48de-aec3-aafc7153bcd7`).
 - **Real Audio Streams**: Telephony recordings (`https://api.bolna.ai/recordings/call/...`) are streamed directly into the Kasauti Oscilloscope, where Web Audio API `AudioContext` and `AnalyserNode` perform live FFT frequency decomposition on the actual physical audio waves.
 - **Dual-ASR Linguistic Audit**: Transcripts from Bolna Deepgram are cross-verified against **Sarvam AI Saarika v2 Indic STT** for phoneme precision and Mayura English translation alignment.
 

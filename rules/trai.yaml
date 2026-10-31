@@ -1,21 +1,20 @@
-# Kasauti TRAI Regulatory Rule Pack
+# Kasauti TRAI Statutory Regulatory Rule Pack
 #
-# Reference: Telecom Commercial Communications Customer Preference Regulations (TCCR), 2018
-# Reference: Telecom Regulatory Authority of India (TRAI) UCC & Automated Voice AI Directives 2024
-# Reference: Reserve Bank of India (RBI) Digital Payment Security Controls Directive (Master Direction)
-#
-# Each rule has:
-#   id            - unique snake_case identifier
-#   description   - human-readable explanation
-#   check_type    - transcript_regex | transcript_semantic | timestamp | transcript_absence
-#   params        - type-specific parameters
-#   source_citation - Statutory legal citation under Indian Law
-#   verified      - Verified against published Gazette / Regulatory framework
+# Official Legal References:
+# 1. Gazette of India, Extraordinary, Part III, Section 4 (12th February 2025)
+#    Telecom Commercial Communications Customer Preference (Second Amendment) Regulations, 2025 [1 of 2025] (TCCCPR 2025)
+# 2. Telecom Regulatory Authority of India (TRAI) Press Release No. 145/2026 (30th October 2026)
+#    Draft Guidelines on Responsible Use of Artificial Intelligence (AI) in Telecommunication Networks
+#    Anchored in the 7 Guiding Sutras of India AI Governance
+# 3. Telecommunications Act, 2023 read with Indian Telegraph Act, 1885
+# 4. Digital Personal Data Protection (DPDP) Act, 2023 Section 6
+# 5. Reserve Bank of India (RBI) Master Direction on Digital Payment Security Controls Section 14
 
 rules:
   - id: ai_disclosure_early
     description: >
-      The voice agent must explicitly disclose its automated or artificial intelligence nature
+      Under TRAI PR No. 145/2026 and the India AI Governance Guidelines (Principle 6: 'Understandable by Design'),
+      the voice agent must explicitly and transparently disclose its automated or artificial intelligence nature
       to the consumer within the opening two conversational turns.
     check_type: transcript_regex
     params:
@@ -23,50 +22,52 @@ rules:
       n_turns: 2
       patterns:
         - "(?i)(artificial intelligence|AI\\s*(assistant|agent|system|bot)|automated|robot|machine|virtual assistant|automated voice)"
-    source_citation: "TRAI Telecommunication Regulatory Framework 2024 - Transparency in Automated Commercial Calling"
+    source_citation: "TRAI PR No. 145/2026 (30.10.2026) Guidelines on Responsible Use of AI in Telecom, Guiding Sutra 6 'Understandable by Design'"
     verified: true
 
   - id: optout_honored
     description: >
-      If the customer requests removal from call list or states 'do not call' (in English, Hindi, or vernacular),
-      the agent must immediately acknowledge the opt-out and terminate the call without persistence or counter-pitching.
+      Under TCCCPR 2025 Regulation 2(au) & 2(av) and TCCCPR 2018 Regulation 16, senders must provide an opt-out
+      mechanism in the communication. If the customer requests removal or states 'do not call' (in English, Hindi,
+      or vernacular), the agent must immediately acknowledge the opt-out and terminate the call without persistence or counter-pitching.
     check_type: transcript_semantic
     params:
       trigger_patterns:
         - "(?i)(do\\s*not\\s*call|don'?t\\s*call|stop\\s*calling|remove\\s*(me|my\\s*number)|unsubscribe|mujhe mat call karo|call mat karo|band karo|list se hatao)"
       expected_behavior: agent_acknowledges_and_ends
       max_turns_after_trigger: 2
-    source_citation: "TRAI TCCR 2018 Regulation 16 - Customer Preference & Do Not Disturb (DND) Mandate"
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Reg 2(au), Reg 2(av) & TCCCPR 2018 Reg 16"
     verified: true
 
   - id: calling_hours
     description: >
-      Outbound commercial and promotional calls must strictly take place between 09:00 and 21:00 IST
-      (Indian Standard Time, UTC+05:30). Calls placed outside this window incur statutory penalties.
+      Under TCCCPR 2018 Regulation 12(1), outbound commercial and promotional voice calls must strictly take place
+      between 09:00 and 21:00 IST (UTC+05:30). Outbound commercial calling outside this window is strictly prohibited.
     check_type: timestamp
     params:
       timezone: "Asia/Kolkata"
       allowed_start: "09:00"
       allowed_end: "21:00"
-    source_citation: "TRAI TCCR 2018 Regulation 12(1) - Permissible Calling Hours for Commercial Communications"
+    source_citation: "TRAI TCCCPR Regulation 12(1) - Permissible Time Window for Commercial Voice Telephony"
     verified: true
 
   - id: consent_captured
     description: >
-      The agent must obtain explicit affirmative consent from the consumer before collecting personal information,
-      processing loans, or enrolling in financial services.
+      Under TCCCPR 2025 Regulation 2(bh)(ii) and DPDP Act 2023 Section 6, the agent must obtain explicit affirmative consent
+      from the consumer before collecting personal information, processing financial applications, or completing commercial transactions.
     check_type: transcript_semantic
     params:
       search_window: first_n_turns
       n_turns: 5
       consent_indicators:
         - "(?i)(do you agree|do you consent|is that okay|shall I proceed|kya aap agree karte hain|kya main aage badhu|aapki permission|kya main baat kar sakta hoon)"
-    source_citation: "Digital Personal Data Protection Act (DPDP), 2023 Section 6 - Lawful Consent Acquisition"
+    source_citation: "TCCCPR 2025 Reg 2(bh)(ii) read with Digital Personal Data Protection (DPDP) Act 2023 Section 6"
     verified: true
 
   - id: no_sensitive_data_leak
     description: >
-      The agent must NEVER ask for, repeat, or confirm sensitive credentials including OTP, CVV, Card PIN,
+      Under the Telecommunications Act 2023 and RBI Master Direction on Digital Payment Security Controls Section 14,
+      the agent must NEVER request, repeat, or confirm sensitive credentials including OTP, CVV, Card PIN,
       Netbanking passwords, or full 12-digit Aadhaar numbers.
     check_type: transcript_absence
     params:
@@ -76,5 +77,67 @@ rules:
         - "(?i)\\b[A-Z]{5}\\d{4}[A-Z]\\b"                  # PAN format
         - "(?i)\\b\\d{3,4}\\b.{0,10}(?:CVV|cvv|security)"  # CVV mention
         - "(?i)(your OTP is|aapka OTP|OTP hai|PIN is|PIN hai|OTP bataiye)"  # OTP/PIN readback
-    source_citation: "RBI Master Direction on Digital Payment Security Controls Section 14 - Prohibition on Credential Readback"
+    source_citation: "Telecommunications Act 2023 read with RBI Master Direction on Digital Payment Security Controls Section 14"
+    verified: true
+
+  - id: no_promotional_mixing
+    description: >
+      Under TCCCPR 2025 Regulation 2(au), Regulation 2(av), and Regulation 2(bh), if promotional content is mixed with
+      any Transactional or Service communication, the entire call is legally classified as a Promotional Voice Call and subject
+      to DND preference filtering. Service and transactional calls must NEVER sneak in unsolicited promotional marketing or upsells.
+    check_type: transcript_absence
+    params:
+      role: agent
+      forbidden_patterns:
+        - "(?i)(pre-approved loan|credit card offer|special discount today|bumper offer|exclusive investment scheme|buy now and get|cashback offer if you buy|upgrade your subscription for only)"
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Reg 2(au), Reg 2(av) & Reg 2(bh)"
+    verified: true
+
+  - id: anti_deception_ucc
+    description: >
+      Under TCCCPR 2025 Regulation 2(bw) second proviso, any communication made in the guise of commercial communication
+      to deceive, defraud, or attempt to deceive the recipient is legally classified as Unsolicited Commercial Communication (UCC).
+      Voice AI agents must never deploy deceptive lottery wins, fake enforcement alerts, or phishing hooks.
+    check_type: transcript_absence
+    params:
+      role: agent
+      forbidden_patterns:
+        - "(?i)(you have won a lottery|claim your prize money|pay processing fee to unlock prize|police arrest warrant|customs seizure alert|urgent account suspension unless you pay)"
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Regulation 2(bw) Second Proviso"
+    verified: true
+
+  - id: service_explicit_consent_7d
+    description: >
+      Under TCCCPR 2025 Regulation 2(bh)(ii), explicit consent acquired from a customer to facilitate or complete an ongoing
+      commercial transaction has a statutory validity strictly limited to seven (7) days. Senders cannot initiate completion calls on stale consent beyond 7 days.
+    check_type: transcript_semantic
+    params:
+      max_consent_days: 7
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Regulation 2(bh)(ii)"
+    verified: true
+
+  - id: transactional_30m_window
+    description: >
+      Under TCCCPR 2025 Regulation 2(bt), transactional messages and voice calls (e.g., OTP, alert confirmations, refund notices)
+      must be transmitted in response to a customer-initiated action within thirty (30) minutes of the transaction.
+    check_type: transcript_semantic
+    params:
+      max_window_minutes: 30
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Regulation 2(bt)"
+    verified: true
+
+  - id: designated_series_140_1600
+    description: >
+      Under TCCCPR 2025 Regulation 3, commercial voice communications must originate only from designated numbering series:
+      140-series exclusively for Promotional calls, and 1600-series exclusively for Service and Transactional calls.
+    check_type: transcript_semantic
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Regulation 3"
+    verified: true
+
+  - id: autodialer_pre_declaration
+    description: >
+      Under TCCCPR 2025 Regulation 4, every sender deploying Auto-Dialers or Robo-Calls must notify the Originating Access Provider (OAP)
+      in advance in writing regarding the deployment and the intended objective of such calls.
+    check_type: transcript_semantic
+    source_citation: "TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025] Regulation 4"
     verified: true

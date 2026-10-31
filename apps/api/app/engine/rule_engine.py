@@ -127,8 +127,16 @@ class RuleEngine:
                 for pat in forbidden_patterns:
                     match = re.search(pat, text)
                     if match:
+                        if rule.id == "no_promotional_mixing":
+                            return False, f"Promotional mixing detected in service/transactional communication! Turn: '{text}' (matched '{match.group(0)}') violates TCCCPR 2025 Reg 2(au), 2(av) & Reg 2(bh)."
+                        elif rule.id == "anti_deception_ucc":
+                            return False, f"Deceptive/misleading statement detected! Turn: '{text}' (matched '{match.group(0)}') violates TCCCPR 2025 Reg 2(bw) second proviso."
                         return False, f"Sensitive data leak detected! Spoken by {speaker}: '{text}' (matched '{match.group(0)}')"
 
+        if rule.id == "no_promotional_mixing":
+            return True, "No promotional upsell or cross-sell content detected in service/transaction dialogue (TCCCPR 2025 Reg 2(au)/2(bh))."
+        elif rule.id == "anti_deception_ucc":
+            return True, "No deceptive or misleading claims detected in voice communication (TCCCPR 2025 Reg 2(bw))."
         return True, "No sensitive credential leak (OTP, PIN, Aadhaar, PAN) detected in agent dialogue."
 
     def _check_timestamp(self, rule: RuleDefinition, call_timestamp: Optional[datetime]) -> Tuple[bool, str]:
@@ -198,5 +206,50 @@ class RuleEngine:
                             return True, f"Explicit consent check captured: '{text}'"
 
             return False, f"Agent did not seek explicit consent within first {n_turns} turns before pitch."
+
+        if rule.id == "service_explicit_consent_7d":
+            # TCCCPR 2025 Reg 2(bh)(ii): Explicit consent valid for strictly 7 days
+            consent_age_days = params.get("consent_age_days", 1)
+            turns = self._parse_dialogue_turns(transcript)
+            for speaker, text in turns:
+                if re.search(r"(?i)(consent|permission).*(?:older than 7 days|expired|last month|2 weeks ago|10 days ago|15 days ago|30 days ago)", text):
+                    return False, f"Explicit consent exceeded statutory 7-day validity (found: '{text}') under TCCCPR 2025 Reg 2(bh)(ii)."
+            if consent_age_days > 7:
+                return False, f"Consent record age of {consent_age_days} days exceeds statutory 7-day maximum under TCCCPR 2025 Reg 2(bh)(ii)."
+            return True, "Service communication explicit consent verified within 7-day statutory limit (TCCCPR 2025 Reg 2(bh)(ii))."
+
+        if rule.id == "transactional_30m_window":
+            # TCCCPR 2025 Reg 2(bt): Transactional call must be within 30 minutes of customer transaction
+            elapsed_minutes = params.get("elapsed_minutes", 5)
+            turns = self._parse_dialogue_turns(transcript)
+            for speaker, text in turns:
+                if re.search(r"(?i)(transaction.*(?:hours ago|yesterday|earlier today|delayed by \d+ min)|OTP.*(?:requested an hour ago|delayed))", text):
+                    return False, f"Transactional call triggered outside permissible 30-minute window: '{text}' violates TCCCPR 2025 Reg 2(bt)."
+            if elapsed_minutes > 30:
+                return False, f"Transactional communication elapsed time ({elapsed_minutes} min) exceeds 30-minute statutory threshold under TCCCPR 2025 Reg 2(bt)."
+            return True, "Transactional communication triggered within statutory 30-minute boundary of transaction (TCCCPR 2025 Reg 2(bt))."
+
+        if rule.id == "designated_series_140_1600":
+            caller_series = str(params.get("caller_series", "1600"))
+            call_type = params.get("call_type", "service").lower()
+            turns = self._parse_dialogue_turns(transcript)
+            for speaker, text in turns:
+                if call_type == "promotional" and re.search(r"(?i)calling from.*(?:mobile|1600|personal number|normal line)", text):
+                    return False, f"Promotional call originated from non-140 number resource ({text}) violates TCCCPR 2025 Reg 3."
+            if call_type == "promotional" and not caller_series.startswith("140"):
+                return False, f"Promotional call originated over series '{caller_series}'; must strictly use 140-series under TCCCPR 2025 Reg 3."
+            if call_type in ("service", "transactional") and caller_series.startswith("140"):
+                return False, f"Service/Transactional call misusing promotional 140-series ({caller_series}) violates TCCCPR 2025 Reg 3."
+            return True, "Number resource series strictly matches statutory allocation (140 Promo / 1600 Service & Trans) under TCCCPR 2025 Reg 3."
+
+        if rule.id == "autodialer_pre_declaration":
+            declared = params.get("declared_to_oap", True)
+            turns = self._parse_dialogue_turns(transcript)
+            for speaker, text in turns:
+                if re.search(r"(?i)(unregistered dialer|not declared to access provider|no intimation to telco)", text):
+                    return False, "Auto-dialer deployment undeclared to Originating Access Provider violates TCCCPR 2025 Reg 4."
+            if not declared:
+                return False, "Auto-dialer lacks written pre-intimation to Originating Access Provider under TCCCPR 2025 Reg 4."
+            return True, "Auto-dialer deployment and objective pre-intimated in writing to Originating Access Provider (TCCCPR 2025 Reg 4)."
 
         return True, "Rule criteria satisfied."

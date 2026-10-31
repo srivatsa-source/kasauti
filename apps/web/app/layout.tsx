@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/Navbar";
@@ -49,18 +50,16 @@ export default function RootLayout({
                 type="text"
                 placeholder="developer@yourcompany.com"
                 readOnly
-                value="docs.kasauti.ai"
+                value="kasauti.ai/docs"
                 className="px-3 py-1.5 text-xs font-mono bg-white border-2 border-black rounded shadow-[2px_2px_0px_#000] text-black focus:outline-none"
               />
-              <a
-                href="https://github.com/srivatsa-source/kasauti"
-                target="_blank"
-                rel="noreferrer"
+              <Link
+                href="/docs"
                 className="px-4 py-1.5 text-xs font-extrabold uppercase bg-black text-white border-2 border-black rounded shadow-[2px_2px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none flex items-center gap-1 transition-all"
               >
                 <span>Read Docs</span>
                 <ArrowUpRight className="w-3.5 h-3.5" />
-              </a>
+              </Link>
             </div>
           </div>
         </div>

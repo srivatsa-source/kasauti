@@ -2,7 +2,7 @@
 > *"Test it like gold before you dial."*
 
 [![Kasauti Certified](https://img.shields.io/badge/Kasauti-Gold%2098.4%25-black?style=flat-square&logo=shield)](https://kasauti-five.vercel.app/verify/KASAUTI-2026-BOLNA-01)
-[![Tests](https://img.shields.io/badge/Tests-33%2F33%20Passed-black?style=flat-square&logo=pytest)](https://github.com/srivatsa-source/kasauti/actions)
+[![Tests](https://img.shields.io/badge/Tests-41%2F41%20Passed-black?style=flat-square&logo=pytest)](https://github.com/srivatsa-source/kasauti/actions)
 [![Frontend](https://img.shields.io/badge/Vercel-Live%20Production-black?style=flat-square&logo=vercel)](https://kasauti-five.vercel.app)
 [![Backend](https://img.shields.io/badge/Render-Docker%20Live-black?style=flat-square&logo=render)](https://kasauti-api.onrender.com/health)
 [![Database](https://img.shields.io/badge/Supabase-PostgreSQL%20%2B%20Storage-black?style=flat-square&logo=supabase)](https://supabase.com)
@@ -176,13 +176,18 @@ Visit [http://localhost:3000](http://localhost:3000) to access the local dashboa
 
 ## 📜 Statutory TRAI Regulations Verified
 
-All checks evaluate voice agents against published Indian regulatory frameworks:
+All checks evaluate voice agents against official Indian statutory frameworks and Gazette notifications, accessible directly inside the GUI at [`/docs`](https://kasauti-five.vercel.app/docs):
 
-1. **AI Identity Disclosure**: *TRAI Transparency in Automated Telephony Mandate 2024* — Mandatory bot self-identification in first two turns.
-2. **Customer Opt-Out (DND)**: *TRAI TCCR 2018 Regulation 16* — Instant acknowledgment and call cessation without counter-pitching.
-3. **Statutory Calling Hours**: *TRAI TCCR 2018 Regulation 12(1)* — Outbound calls restricted to 09:00–21:00 IST.
-4. **Lawful Consent Capture**: *DPDP Act 2023 Section 6* — Affirmative consumer authorization prior to data collection.
-5. **Prohibition on Credential Readback**: *RBI Master Direction on Digital Payments Section 14* — Absolute prohibition on soliciting or repeating OTP, CVV, PIN, or Aadhaar credentials.
+1. **AI Identity Disclosure at Inception**: *TRAI PR No. 145/2026 read with India AI Governance Guidelines (Principle 6: 'Understandable by Design')* — Mandatory bot self-identification in opening 2 turns.
+2. **Customer Opt-Out (DND) Honored**: *TCCCPR (Second Amendment) Regulations, 2025 [1 of 2025], Reg 2(au), Reg 2(av) & TCCCPR 2018 Reg 16* — Instant acknowledgment and call cessation without persistence or counter-pitching.
+3. **Prohibition of Promotional Mixing**: *TCCCPR 2025 Reg 2(au), Reg 2(av) & Reg 2(bh)* — Strictly bars mixing promotional upsells into service, transactional, or customer support calls.
+4. **Service Calls 7-Day Explicit Consent Limit**: *TCCCPR 2025 Reg 2(bh)(ii)* — Explicit consent acquired to facilitate ongoing transactions strictly expires after 7 days.
+5. **Transactional Call 30-Minute Boundary**: *TCCCPR 2025 Reg 2(bt)* — Transactional exemptions apply exclusively within 30 minutes of customer-initiated action (OTP, confirmation, refund).
+6. **Designated Number Resources (140 vs 1600)**: *TCCCPR 2025 Reg 3* — 140-series exclusively for Promotional calls; 1600-series exclusively for Service and Transactional calls.
+7. **Auto-Dialer Written Pre-Declaration**: *TCCCPR 2025 Reg 4* — Senders deploying Auto-Dialers or Robo-Calls must provide prior written notice and objective to the Access Provider.
+8. **Anti-Deception & Anti-Phishing**: *TCCCPR 2025 Reg 2(bw) Second Proviso* — Fake lottery prizes, bogus enforcement threats, and deceptive pretexts are classified as UCC violations.
+9. **Statutory Calling Hours**: *TRAI TCCCPR Regulation 12(1)* — Outbound commercial voice telephony restricted to 09:00–21:00 IST.
+10. **Prohibition on Credential Readback**: *Telecommunications Act 2023 read with RBI Master Direction on Digital Payments Section 14* — Absolute prohibition on soliciting or repeating OTP, CVV, PIN, or Aadhaar credentials.
 
 ---
 
