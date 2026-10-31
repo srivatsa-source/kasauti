@@ -1,14 +1,13 @@
-import asyncio
 from typing import List, Optional, Any
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Response
+from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from pydantic import BaseModel, Field
-from app.db.session import get_db, AsyncSessionLocal
+from app.db.session import get_db
 from app.db.models import Run, Target, Call, Check, Scenario, Fix
-from app.engine.orchestrator import RunOrchestrator
 from app.engine.fixer import PromptFixer
 from app.report.pdf_generator import generate_run_pdf
+from app.engine.job_worker import enqueue_run
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -81,26 +80,9 @@ class RunDetailResponse(BaseModel):
     class Config:
         from_attributes = True
 
-async def _background_execute_run(run_id: str, scenario_ids: Optional[List[str]] = None):
-    async with AsyncSessionLocal() as session:
-        try:
-            orchestrator = RunOrchestrator()
-            await orchestrator.execute_run(session, run_id, scenario_ids)
-        except Exception as exc:
-            run_res = await session.execute(select(Run).where(Run.id == run_id))
-            run = run_res.scalar_one_or_none()
-            if run:
-                run.status = "failed"
-                run.total_calls = 0
-                run.passed_calls = 0
-                run.failed_calls = 0
-                await session.commit()
-            print(f"Run {run_id} failed before completion: {exc}")
-
 @router.post("", response_model=RunDetailResponse)
 async def create_run(
     payload: RunCreate,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     # Verify target exists
@@ -118,8 +100,8 @@ async def create_run(
     await db.commit()
     await db.refresh(run)
 
-    # Launch background run execution
-    background_tasks.add_task(_background_execute_run, run.id, payload.scenario_ids)
+    await enqueue_run(db, run.id, payload.scenario_ids)
+    await db.commit()
 
     return RunDetailResponse(
         id=run.id,
@@ -233,7 +215,6 @@ async def fix_run_prompt(run_id: str, db: AsyncSession = Depends(get_db)):
 @router.post("/{run_id}/rerun", response_model=RunDetailResponse)
 async def rerun_failed_scenarios(
     run_id: str,
-    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -276,7 +257,8 @@ async def rerun_failed_scenarios(
         latest_fix.rerun_run_id = rerun.id
         await db.commit()
 
-    background_tasks.add_task(_background_execute_run, rerun.id, failed_scenario_ids)
+    await enqueue_run(db, rerun.id, failed_scenario_ids)
+    await db.commit()
 
     return RunDetailResponse(
         id=rerun.id,

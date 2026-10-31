@@ -1,3 +1,4 @@
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +16,7 @@ from app.routes.fuzzer import router as fuzzer_router
 from app.routes.acoustic import router as acoustic_router
 from app.routes.deployer import router as deployer_router
 from app.routes.marketplace import router as marketplace_router
+from app.engine.job_worker import recover_run_jobs, run_job_worker
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -48,7 +50,14 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         print(f"Warning: seeding targets encountered: {e}")
 
-    yield
+    await recover_run_jobs()
+    stop_event = asyncio.Event()
+    worker_task = asyncio.create_task(run_job_worker(stop_event))
+    try:
+        yield
+    finally:
+        stop_event.set()
+        await worker_task
 
 app = FastAPI(
     title="Kasauti API",
