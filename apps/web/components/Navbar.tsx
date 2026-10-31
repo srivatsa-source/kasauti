@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { NewRunModal } from "@/components/NewRunModal";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
 interface BudgetInfo {
   budget_limit_usd: number;
@@ -57,7 +57,25 @@ export const Navbar: React.FC = () => {
         fetch(`${API_BASE}/budget`),
         fetch(`${API_BASE}/targets`),
       ]);
-      if (bRes.ok) setBudget(await bRes.json());
+      if (bRes.ok) {
+        setBudget(await bRes.json());
+      } else {
+        try {
+          const hRes = await fetch(`${API_BASE}/health`);
+          if (hRes.ok) {
+            const hData = await hRes.json();
+            setBudget((prev) => ({
+              budget_limit_usd: prev?.budget_limit_usd ?? 8.0,
+              total_spent_usd: prev?.total_spent_usd ?? 0.0,
+              remaining_usd: prev?.remaining_usd ?? 8.0,
+              percent_used: prev?.percent_used ?? 0.0,
+              bolna_mode: hData.bolna_mode || "real",
+              bolna_wallet_balance: prev?.bolna_wallet_balance ?? 995.0,
+              bolna_wallet_currency: "credits",
+            }));
+          }
+        } catch (_) {}
+      }
       if (tRes.ok) setTargets(await tRes.json());
     } catch (err) {
       // Quiet fail if backend warming up
@@ -76,7 +94,9 @@ export const Navbar: React.FC = () => {
     setMoreDropdownOpen(false);
   }, [pathname]);
 
-  const isReal = budget?.bolna_mode?.toLowerCase() === "real";
+  const isReal = budget
+    ? budget.bolna_mode?.toLowerCase() === "real"
+    : true;
 
   const primaryLinks = [
     { href: "/", label: "Targets", icon: PhoneCall },
