@@ -154,7 +154,7 @@ export const Navbar: React.FC = () => {
                   className={`w-2 h-2 rounded-full border border-black ${isReal ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`}
                 />
                 <span className="text-[10px] uppercase tracking-wide whitespace-nowrap">
-                  {isReal ? "REAL BOLNA" : "MOCK MODE"}
+                  {isReal ? "REAL" : "MOCK MODE"}
                 </span>
               </div>
             </div>

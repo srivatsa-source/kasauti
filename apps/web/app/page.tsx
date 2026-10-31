@@ -254,7 +254,7 @@ export default function HomePage() {
             <div className="text-xs font-semibold text-black flex items-center gap-2 pt-1">
               <span>Contribute or fork on</span>
               <a
-                href="https://github.com"
+                href="https://github.com/srivatsa-source/kasauti"
                 target="_blank"
                 rel="noreferrer"
                 className="underline font-black text-black hover:text-brutal-pink inline-flex items-center gap-1"

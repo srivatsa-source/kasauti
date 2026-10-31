@@ -53,7 +53,7 @@ export default function RootLayout({
                 className="px-3 py-1.5 text-xs font-mono bg-white border-2 border-black rounded shadow-[2px_2px_0px_#000] text-black focus:outline-none"
               />
               <a
-                href="https://github.com"
+                href="https://github.com/srivatsa-source/kasauti"
                 target="_blank"
                 rel="noreferrer"
                 className="px-4 py-1.5 text-xs font-extrabold uppercase bg-black text-white border-2 border-black rounded shadow-[2px_2px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none flex items-center gap-1 transition-all"
