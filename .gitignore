@@ -33,3 +33,8 @@ data/artifacts/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local research and agent notes
+CLAUDE.md
+reports/
+research_notes/
