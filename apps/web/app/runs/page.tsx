@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, ExternalLink, History, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ExternalLink, History, ArrowUpRight, Search } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
@@ -23,6 +23,14 @@ interface Run {
 export default function RunsHistoryPage() {
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredRuns = runs.filter((r) =>
+    r.suite_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (r.target_name && r.target_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    r.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.status.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const fetchRuns = async () => {
     try {
@@ -52,17 +60,38 @@ export default function RunsHistoryPage() {
         >
           <ArrowLeft className="w-3.5 h-3.5 stroke-[3]" /> Back to Targets
         </Link>
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brutal-yellow border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
-            <History className="w-5 h-5 text-black stroke-[2.5]" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brutal-yellow border-2 border-black flex items-center justify-center shadow-[2px_2px_0px_#000]">
+              <History className="w-5 h-5 text-black stroke-[2.5]" />
+            </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display">
+                Benchmark Run History
+              </h1>
+              <p className="text-xs font-semibold text-gray-700">
+                Historical record of automated voice agent test runs and purity scores.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-black font-display">
-              Benchmark Run History
-            </h1>
-            <p className="text-xs font-semibold text-gray-700">
-              Historical record of automated voice agent test runs and purity scores.
-            </p>
+
+          <div className="relative min-w-[240px] max-w-xs">
+            <input
+              type="text"
+              placeholder="Search by suite, target, or ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-3.5 py-2 pl-9 rounded-xl bg-white border-2 border-black text-xs font-bold text-black placeholder:text-gray-500 shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+            />
+            <Search className="w-3.5 h-3.5 text-black absolute left-3 top-2.5 pointer-events-none stroke-[2.5]" />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="absolute right-2.5 top-2 text-gray-500 hover:text-black font-bold text-xs"
+              >
+                ✕
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -74,6 +103,10 @@ export default function RunsHistoryPage() {
       ) : runs.length === 0 ? (
         <div className="p-12 text-center rounded-2xl bg-white border-3 border-black text-black font-bold shadow-[6px_6px_0px_#000]">
           No runs recorded yet. Launch a benchmark run from the home page.
+        </div>
+      ) : filteredRuns.length === 0 ? (
+        <div className="p-12 text-center rounded-2xl bg-white border-3 border-black text-black font-bold shadow-[6px_6px_0px_#000]">
+          No benchmark runs match &quot;{searchQuery}&quot;. Clear search to view all {runs.length} runs.
         </div>
       ) : (
         <div className="overflow-x-auto rounded-2xl border-3 border-black bg-white shadow-[6px_6px_0px_#000000]">
@@ -90,7 +123,7 @@ export default function RunsHistoryPage() {
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-black/10 font-medium">
-              {runs.map((run) => (
+              {filteredRuns.map((run) => (
                 <tr key={run.id} className="hover:bg-yellow-50/60 transition-colors">
                   <td className="px-6 py-4 font-mono font-bold text-black">
                     {run.id.slice(0, 8)}...

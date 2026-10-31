@@ -148,7 +148,16 @@ export default function HomePage() {
 
   const filteredTargets = targets.filter((t) => 
     t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    t.phone_number.includes(searchQuery)
+    t.phone_number.includes(searchQuery) ||
+    (t.bolna_agent_id && t.bolna_agent_id.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    t.languages?.some((l) => l.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  const filteredRuns = runs.filter((r) => 
+    r.suite_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (r.target_name && r.target_name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+    r.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const avgPurity = runs.length > 0
@@ -197,15 +206,34 @@ export default function HomePage() {
                 <ArrowUpRight className="w-4 h-4 stroke-[3]" />
               </button>
 
-              <div className="relative flex-1 min-w-[220px] max-w-xs">
+              <div className="relative flex-1 min-w-[220px] max-w-sm">
                 <input
                   type="text"
-                  placeholder="Search targets or suites..."
+                  placeholder="Search targets or suites (e.g. Hindi, TRAI)..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full px-4 py-3 pl-10 rounded-xl bg-white border-2 border-black text-xs font-bold text-black placeholder:text-gray-500 shadow-[3px_3px_0px_#000000] focus:outline-none focus:bg-yellow-50"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      document.getElementById("targets-section")?.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="w-full px-4 py-3 pl-10 pr-8 rounded-xl bg-white border-2 border-black text-xs font-bold text-black placeholder:text-gray-500 shadow-[3px_3px_0px_#000000] focus:outline-none focus:bg-yellow-50"
                 />
                 <Search className="w-4 h-4 text-black absolute left-3.5 top-3.5 pointer-events-none stroke-[2.5]" />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-3.5 text-gray-500 hover:text-black font-bold text-xs"
+                    title="Clear search"
+                  >
+                    ✕
+                  </button>
+                )}
+                {searchQuery.trim() && (
+                  <div className="absolute -bottom-6 left-1 text-[10px] font-black uppercase text-black bg-brutal-yellow px-2 py-0.5 rounded border border-black shadow-[1px_1px_0px_#000] whitespace-nowrap z-20 animate-fade-in">
+                    Matches: {filteredTargets.length} target{filteredTargets.length !== 1 ? "s" : ""} · {filteredRuns.length} run{filteredRuns.length !== 1 ? "s" : ""} (Press Enter)
+                  </div>
+                )}
               </div>
             </div>
 
@@ -698,6 +726,10 @@ export default function HomePage() {
           <div className="p-8 text-center text-gray-700 bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000] font-semibold text-xs">
             No test runs logged yet. Click &quot;Run 12 Scenarios&quot; on any target above to launch the benchmark.
           </div>
+        ) : filteredRuns.length === 0 ? (
+          <div className="p-8 text-center text-gray-700 bg-white rounded-2xl border-2 border-black shadow-[4px_4px_0px_#000] font-semibold text-xs">
+            No benchmark runs match &quot;{searchQuery}&quot;. Clear search to view all {runs.length} runs.
+          </div>
         ) : (
           <div className="overflow-x-auto rounded-2xl border-3 border-black bg-white shadow-[6px_6px_0px_#000000]">
             <table className="w-full text-left text-xs">
@@ -712,7 +744,7 @@ export default function HomePage() {
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-black/10 font-medium">
-                {runs.slice(0, 5).map((run) => (
+                {filteredRuns.slice(0, 8).map((run) => (
                   <tr key={run.id} className="hover:bg-yellow-50/60 transition-colors">
                     <td className="px-6 py-4 font-black text-black">
                       {run.target_name || "Bharat FinServe"}
