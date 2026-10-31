@@ -42,7 +42,7 @@ interface GraphData {
     self_healing_fixes_deployed: number;
     compliance_health_score: number;
     languages_covered: number;
-    top_vulnerabilities: Array<{ name: string; risk: string }>;
+    top_vulnerabilities?: Array<{ name: string; risk: string }>;
   };
 }
 
@@ -61,7 +61,23 @@ export default function KnowledgePage() {
       setLoading(true);
       const res = await fetch(`${API_BASE}/knowledge-graph`);
       if (res.ok) {
-        const json: GraphData = await res.json();
+        const payload = await res.json();
+        const json: GraphData = {
+          nodes: Array.isArray(payload?.nodes) ? payload.nodes : [],
+          edges: Array.isArray(payload?.edges) ? payload.edges : [],
+          stats: {
+            total_nodes: payload?.stats?.total_nodes ?? 0,
+            total_edges: payload?.stats?.total_edges ?? 0,
+            total_rules: payload?.stats?.total_rules ?? 0,
+            total_failures_identified: payload?.stats?.total_failures_identified ?? 0,
+            self_healing_fixes_deployed: payload?.stats?.self_healing_fixes_deployed ?? 0,
+            compliance_health_score: payload?.stats?.compliance_health_score ?? 0,
+            languages_covered: payload?.stats?.languages_covered ?? 0,
+            top_vulnerabilities: Array.isArray(payload?.stats?.top_vulnerabilities)
+              ? payload.stats.top_vulnerabilities
+              : [],
+          },
+        };
         setData(json);
 
         // Initialize positions in a circle/neural layout
@@ -506,7 +522,7 @@ export default function KnowledgePage() {
                 Vulnerability Risk Clusters
               </h3>
               <div className="space-y-2">
-                {data.stats.top_vulnerabilities.map((v, idx) => (
+                {(data.stats.top_vulnerabilities ?? []).map((v, idx) => (
                   <div key={idx} className="p-3 rounded-xl bg-gray-50 border-2 border-black flex items-center justify-between text-xs">
                     <span className="font-bold text-black">{v.name}</span>
                     <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-black">

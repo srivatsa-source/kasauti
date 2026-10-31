@@ -25,6 +25,8 @@ async def test_knowledge_graph_endpoint():
         assert "nodes" in data
         assert "edges" in data
         assert "stats" in data
+        assert "top_vulnerabilities" in data["stats"]
+        assert isinstance(data["stats"]["top_vulnerabilities"], list)
         assert len(data["nodes"]) > 0
         assert len(data["edges"]) > 0
 
@@ -60,4 +62,3 @@ async def test_sarvam_verification_endpoint():
                 assert "sarvam_indic_stt" in sdata
                 assert "english_translation" in sdata
                 assert "cultural_etiquette_audit" in sdata
-

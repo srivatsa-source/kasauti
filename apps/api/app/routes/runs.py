@@ -83,8 +83,19 @@ class RunDetailResponse(BaseModel):
 
 async def _background_execute_run(run_id: str, scenario_ids: Optional[List[str]] = None):
     async with AsyncSessionLocal() as session:
-        orchestrator = RunOrchestrator()
-        await orchestrator.execute_run(session, run_id, scenario_ids)
+        try:
+            orchestrator = RunOrchestrator()
+            await orchestrator.execute_run(session, run_id, scenario_ids)
+        except Exception as exc:
+            run_res = await session.execute(select(Run).where(Run.id == run_id))
+            run = run_res.scalar_one_or_none()
+            if run:
+                run.status = "failed"
+                run.total_calls = 0
+                run.passed_calls = 0
+                run.failed_calls = 0
+                await session.commit()
+            print(f"Run {run_id} failed before completion: {exc}")
 
 @router.post("", response_model=RunDetailResponse)
 async def create_run(
@@ -101,7 +112,7 @@ async def create_run(
     run = Run(
         target_id=payload.target_id,
         suite_name=payload.suite_name,
-        status="queued"
+        status="in_progress"
     )
     db.add(run)
     await db.commit()
@@ -405,4 +416,3 @@ async def get_scenarios_catalog():
     from app.engine.scenario_compiler import ScenarioCompiler
     compiler = ScenarioCompiler()
     return compiler.list_scenarios()
-
