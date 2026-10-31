@@ -1,3 +1,4 @@
+from sqlalchemy import text
 import logging
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
@@ -33,6 +34,10 @@ async def init_db():
     try:
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            try:
+                await conn.execute(text("ALTER TABLE targets ADD COLUMN bolna_api_key VARCHAR(255)"))
+            except Exception:
+                pass
         logger.info("Primary database engine initialized successfully.")
     except Exception as e:
         logger.warning(f"Primary database connection failed ({e}). Falling back to local SQLite engine.")
@@ -47,6 +52,10 @@ async def init_db():
         try:
             async with engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
+            try:
+                await conn.execute(text("ALTER TABLE targets ADD COLUMN bolna_api_key VARCHAR(255)"))
+            except Exception:
+                pass
             logger.info("SQLite fallback engine initialized successfully.")
         except Exception as sqle:
             logger.error(f"Fallback SQLite init failed: {sqle}")

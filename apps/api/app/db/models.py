@@ -19,6 +19,7 @@ class Target(Base):
     phone_number: Mapped[str] = mapped_column(String(50), nullable=False)
     bolna_agent_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     staging_agent_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    bolna_api_key: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     languages: Mapped[List[str]] = mapped_column(JSON, default=lambda: ["Hindi", "English"])
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)

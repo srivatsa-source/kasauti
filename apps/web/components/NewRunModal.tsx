@@ -30,6 +30,8 @@ interface NewRunModalProps {
   onClose: () => void;
   targets: Target[];
   onRunLaunched?: (runId: string) => void;
+  defaultTargetId?: string;
+  onOpenImportModal?: () => void;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
@@ -38,9 +40,11 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   isOpen,
   onClose,
   targets,
-  onRunLaunched
+  onRunLaunched,
+  defaultTargetId,
+  onOpenImportModal,
 }) => {
-  const [selectedTargetId, setSelectedTargetId] = useState<string>("");
+  const [selectedTargetId, setSelectedTargetId] = useState<string>(defaultTargetId || "");
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [suiteName, setSuiteName] = useState("Custom TRAI Compliance Benchmark");
@@ -50,10 +54,12 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   const [filterLang, setFilterLang] = useState<string>("All");
 
   useEffect(() => {
-    if (targets.length > 0 && !selectedTargetId) {
+    if (defaultTargetId) {
+      setSelectedTargetId(defaultTargetId);
+    } else if (targets.length > 0 && !selectedTargetId) {
       setSelectedTargetId(targets[0].id);
     }
-  }, [targets, selectedTargetId]);
+  }, [targets, defaultTargetId, selectedTargetId]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -173,9 +179,20 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
           
           {/* Target Selector */}
           <div>
-            <label className="block text-xs font-black uppercase text-black mb-1.5">
-              Select Voice Agent Target
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-black uppercase text-black">
+                Select Voice Agent Target
+              </label>
+              {onOpenImportModal && (
+                <button
+                  type="button"
+                  onClick={onOpenImportModal}
+                  className="text-xs font-bold text-black underline hover:text-brutal-pink cursor-pointer"
+                >
+                  + Import from Bolna
+                </button>
+              )}
+            </div>
             <select
               value={selectedTargetId}
               onChange={(e) => setSelectedTargetId(e.target.value)}

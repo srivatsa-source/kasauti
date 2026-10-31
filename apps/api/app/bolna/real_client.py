@@ -12,13 +12,14 @@ class RealBolnaClient(BolnaClient):
     Strictly enforces staging agent isolation: target agent is NEVER patched.
     """
 
-    def __init__(self, confirmed_by_user: bool = False):
-        if not settings.BOLNA_API_KEY:
+    def __init__(self, confirmed_by_user: bool = False, api_key: Optional[str] = None):
+        key = api_key or settings.BOLNA_API_KEY
+        if not key:
             raise ValueError(
                 "BOLNA_API_KEY is not configured! RealBolnaClient cannot be instantiated without a valid key. "
                 "Use BOLNA_MODE=mock or provide BOLNA_API_KEY in .env."
             )
-        self.api_key = settings.BOLNA_API_KEY
+        self.api_key = key
         self.base_url = settings.BOLNA_BASE_URL.rstrip("/")
         self.confirmed_by_user = confirmed_by_user
         self.calls_count_today = 0

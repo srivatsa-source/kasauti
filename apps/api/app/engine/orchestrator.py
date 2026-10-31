@@ -183,9 +183,15 @@ class RunOrchestrator:
         await db.refresh(call)
 
         try:
+            # Resolve target-specific Bolna client if target provides its own API key
+            bolna_client = self.bolna
+            if getattr(target, "bolna_api_key", None) and not self.simulation_mode:
+                from app.bolna.real_client import RealBolnaClient
+                bolna_client = RealBolnaClient(confirmed_by_user=True, api_key=target.bolna_api_key)
+
             # 1. Start Bolna Call with dynamic scenario context
             context = build_scenario_call_context(scenario)
-            call_res = await self.bolna.start_call(
+            call_res = await bolna_client.start_call(
                 agent_id=agent_id,
                 recipient_phone_number=target.phone_number,
                 context=context
@@ -194,24 +200,24 @@ class RunOrchestrator:
             call.bolna_execution_id = exec_id
             await db.commit()
 
-            # 2. Wait for completion (RealBolnaClient polls until terminal or MAX_CALL_SECONDS timeout)
+            # 2. Wait for completion
             execution_data = None
-            if hasattr(self.bolna, "poll_until_terminal"):
+            if hasattr(bolna_client, "poll_until_terminal"):
                 from app.config import settings
-                execution_data = await self.bolna.poll_until_terminal(
+                execution_data = await bolna_client.poll_until_terminal(
                     exec_id,
                     max_wait_seconds=settings.MAX_CALL_SECONDS
                 )
             else:
                 for _ in range(30):
                     await asyncio.sleep(0.4)
-                    data = await self.bolna.get_execution(exec_id)
+                    data = await bolna_client.get_execution(exec_id)
                     if data.get("status") in ("completed", "failed", "canceled", "stopped"):
                         execution_data = data
                         break
 
             if not execution_data:
-                execution_data = await self.bolna.get_execution(exec_id)
+                execution_data = await bolna_client.get_execution(exec_id)
 
             call.status = execution_data.get("status", "completed")
             call.transcript = execution_data.get("transcript", "")
@@ -221,7 +227,7 @@ class RunOrchestrator:
                 for _ in range(3):
                     await asyncio.sleep(1.5)
                     try:
-                        latest_exec = await self.bolna.get_execution(exec_id)
+                        latest_exec = await bolna_client.get_execution(exec_id)
                         tel_latest = latest_exec.get("telephony_data") or {}
                         rec_url = latest_exec.get("recording_url") or tel_latest.get("recording_url")
                         if rec_url:

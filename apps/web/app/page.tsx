@@ -6,11 +6,13 @@ import {
   Phone, Plus, Play, Sparkles, AlertCircle, 
   ExternalLink, ArrowRight, Activity, Brain,
   ArrowUpRight, Search, CheckCircle2, Globe,
-  ShieldCheck, Mic, MessageSquare, Terminal, Zap
+  ShieldCheck, Mic, MessageSquare, Terminal, Zap,
+  DownloadCloud, Trash2, Bot, Sliders
 } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
 import { NewRunModal } from "@/components/NewRunModal";
+import { ImportBolnaModal } from "@/components/ImportBolnaModal";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
@@ -43,6 +45,8 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showRunModal, setShowRunModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedTargetForRun, setSelectedTargetForRun] = useState<string | undefined>(undefined);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -119,6 +123,27 @@ export default function HomePage() {
     } catch (err) {
       alert("Failed to trigger run");
     }
+  };
+
+  const handleDeleteTarget = async (id: string, targetName: string) => {
+    if (!confirm(`Are you sure you want to remove target "${targetName}"?`)) return;
+    try {
+      const res = await fetch(`${API_BASE}/targets/${id}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setTargets((prev) => prev.filter((t) => t.id !== id));
+      } else {
+        alert("Could not delete target.");
+      }
+    } catch (err) {
+      alert("Failed to delete target: " + String(err));
+    }
+  };
+
+  const handleOpenBenchmark = (targetId?: string) => {
+    setSelectedTargetForRun(targetId);
+    setShowRunModal(true);
   };
 
   const filteredTargets = targets.filter((t) => 
@@ -524,13 +549,22 @@ export default function HomePage() {
               Registered phone numbers and Bolna agent configurations
             </p>
           </div>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-black text-white hover:bg-neutral-800 border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#ff90e8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
-          >
-            <Plus className="w-4 h-4 stroke-[3]" />
-            Add Target
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setShowImportModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-brutal-pink hover:bg-pink-300 border-2 border-black text-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <DownloadCloud className="w-4 h-4 stroke-[2.5]" />
+              Import from Bolna
+            </button>
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-black text-white hover:bg-neutral-800 border-2 border-black text-xs font-black uppercase tracking-wider shadow-[2px_2px_0px_#ff90e8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              Add Target
+            </button>
+          </div>
         </div>
 
         {loading ? (
@@ -544,12 +578,21 @@ export default function HomePage() {
             <p className="text-xs font-semibold text-gray-600 mt-1">
               Add your voice agent phone number or staging agent ID to start benchmarking.
             </p>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="mt-4 px-5 py-2.5 rounded-xl bg-brutal-yellow text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
-            >
-              Add First Target
-            </button>
+            <div className="flex flex-wrap items-center justify-center gap-3 mt-4">
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="px-5 py-2.5 rounded-xl bg-brutal-yellow text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all flex items-center gap-2"
+              >
+                <DownloadCloud className="w-4 h-4 stroke-[2.5]" />
+                Import from Bolna
+              </button>
+              <button
+                onClick={() => setShowAddModal(true)}
+                className="px-5 py-2.5 rounded-xl bg-white text-black border-2 border-black text-xs font-black uppercase tracking-wider shadow-[3px_3px_0px_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all"
+              >
+                Add Custom Target
+              </button>
+            </div>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -559,16 +602,34 @@ export default function HomePage() {
                 className="card-brutal-hover rounded-2xl p-6 flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="font-black text-lg text-black uppercase tracking-tight group-hover:text-brutal-pink transition-colors">
-                        {target.name}
-                      </h3>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-black text-lg text-black uppercase tracking-tight group-hover:text-brutal-pink transition-colors truncate">
+                          {target.name}
+                        </h3>
+                        {target.bolna_agent_id && (
+                          <span className="px-2 py-0.2 rounded-full bg-emerald-100 text-emerald-900 border border-black text-[9px] font-black uppercase tracking-wider shadow-[1px_1px_0px_#000] shrink-0">
+                            Bolna Active
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs font-mono font-bold text-gray-700 mt-1 flex items-center gap-1.5">
                         <Phone className="w-3.5 h-3.5 text-black stroke-[2.5]" />
                         {target.phone_number}
                       </div>
                     </div>
+
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTarget(target.id, target.name);
+                      }}
+                      className="p-1.5 rounded-lg bg-white hover:bg-red-50 border border-black text-gray-600 hover:text-red-600 shadow-[1px_1px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all shrink-0"
+                      title="Delete target"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
 
                   {/* Languages Chips */}
@@ -584,22 +645,26 @@ export default function HomePage() {
                   </div>
 
                   <div className="mt-4 p-2.5 rounded-lg bg-gray-50 border border-black text-[11px] font-mono text-gray-800 truncate">
-                    <span className="font-bold text-black">Staging:</span> {target.staging_agent_id || "kasauti_staging_default"}
+                    <span className="font-bold text-black">Bolna ID:</span> {target.bolna_agent_id || target.staging_agent_id || "default"}
                   </div>
                 </div>
 
-                <div className="mt-6 pt-4 border-t-2 border-black flex items-center justify-between">
+                <div className="mt-6 pt-4 border-t-2 border-black flex items-center justify-between gap-2">
                   <button
                     onClick={() => handleTriggerRun(target.id)}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brutal-yellow hover:bg-yellow-300 border-2 border-black text-black font-black text-xs uppercase tracking-wider shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-brutal-yellow hover:bg-yellow-300 border-2 border-black text-black font-black text-xs uppercase tracking-wider shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                   >
                     <Play className="w-3.5 h-3.5 fill-black" />
                     Run 12 Scenarios
                   </button>
 
-                  <span className="text-[10px] font-mono font-bold text-gray-600">
-                    TRAI 12-Check Pack
-                  </span>
+                  <button
+                    onClick={() => handleOpenBenchmark(target.id)}
+                    className="p-2 rounded-lg bg-white hover:bg-neutral-100 border-2 border-black text-black font-black text-xs uppercase shadow-[2px_2px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                    title="Configure scenarios"
+                  >
+                    <Sliders className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -798,8 +863,25 @@ export default function HomePage() {
       {/* New Run Launcher Modal */}
       <NewRunModal
         isOpen={showRunModal}
-        onClose={() => setShowRunModal(false)}
+        onClose={() => {
+          setShowRunModal(false);
+          setSelectedTargetForRun(undefined);
+        }}
         targets={targets}
+        defaultTargetId={selectedTargetForRun}
+        onOpenImportModal={() => {
+          setShowRunModal(false);
+          setShowImportModal(true);
+        }}
+      />
+
+      {/* Bolna Agent Import Modal */}
+      <ImportBolnaModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImportSuccess={() => {
+          fetchData();
+        }}
       />
 
     </div>
