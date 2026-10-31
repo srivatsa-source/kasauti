@@ -34,6 +34,22 @@ class KnowledgeGraphResponse(BaseModel):
     edges: List[GraphEdge]
     stats: Dict[str, Any]
 
+def rank_vulnerabilities(
+    failure_patterns: List[Dict[str, str]],
+    rule_failure_counts: Dict[str, int],
+) -> List[Dict[str, str]]:
+    """Failure patterns with recorded breaches, most breached first."""
+    breached = [
+        (fp["label"], rule_failure_counts.get(fp["rule"], 0))
+        for fp in failure_patterns
+        if rule_failure_counts.get(fp["rule"], 0) > 0
+    ]
+    breached.sort(key=lambda item: item[1], reverse=True)
+    return [
+        {"name": label, "risk": f"{count} breach" if count == 1 else f"{count} breaches"}
+        for label, count in breached
+    ]
+
 @router.get("", response_model=KnowledgeGraphResponse)
 async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
     """
@@ -354,6 +370,7 @@ async def get_knowledge_graph(db: AsyncSession = Depends(get_db)):
             "compliance_health_score": compliance_idx,
             "languages_covered": len(languages),
             "sentinel_events_processed": len(sentinel_records),
-            "fuzzer_attacks_evaluated": len(fuzzer_records)
+            "fuzzer_attacks_evaluated": len(fuzzer_records),
+            "top_vulnerabilities": rank_vulnerabilities(failure_patterns, rule_failure_counts)
         }
     )

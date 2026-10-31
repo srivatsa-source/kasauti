@@ -2,6 +2,7 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from app.main import app
+from app.routes.knowledge import rank_vulnerabilities
 
 @pytest.mark.asyncio
 async def test_budget_endpoint():
@@ -27,6 +28,30 @@ async def test_knowledge_graph_endpoint():
         assert "stats" in data
         assert len(data["nodes"]) > 0
         assert len(data["edges"]) > 0
+
+@pytest.mark.asyncio
+async def test_knowledge_graph_stats_include_top_vulnerabilities():
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        response = await ac.get("/knowledge-graph")
+        assert response.status_code == 200
+        vulnerabilities = response.json()["stats"]["top_vulnerabilities"]
+        assert isinstance(vulnerabilities, list)
+        for vulnerability in vulnerabilities:
+            assert set(vulnerability) == {"name", "risk"}
+
+def test_rank_vulnerabilities_orders_by_breaches_and_skips_clean_patterns():
+    patterns = [
+        {"label": "Clean", "rule": "rule_clean"},
+        {"label": "Once", "rule": "rule_once"},
+        {"label": "Often", "rule": "rule_often"},
+    ]
+    counts = {"rule_once": 1, "rule_often": 3}
+
+    assert rank_vulnerabilities(patterns, counts) == [
+        {"name": "Often", "risk": "3 breaches"},
+        {"name": "Once", "risk": "1 breach"},
+    ]
 
 @pytest.mark.asyncio
 async def test_scenarios_catalog():

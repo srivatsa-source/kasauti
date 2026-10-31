@@ -6,8 +6,19 @@ import {
   ArrowLeft, Brain, Sparkles, Shield, AlertTriangle, 
   RefreshCw, Zap, CheckCircle2, Filter, Layers, Info
 } from "lucide-react";
+import {
+  GRAPH_COLUMNS,
+  GRAPH_HEIGHT,
+  GRAPH_LABEL_FONT,
+  GRAPH_LINE_HEIGHT,
+  GRAPH_WIDTH,
+  layoutGraph,
+} from "@/components/graphLayout";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
+// Canvas pixels per layout unit, so labels stay sharp when the canvas is scaled to fit.
+const CANVAS_SCALE = 2;
 
 interface GraphNode {
   id: string;
@@ -19,8 +30,10 @@ interface GraphNode {
   metadata: Record<string, any>;
   x?: number;
   y?: number;
-  vx?: number;
-  vy?: number;
+  radius?: number;
+  labelX?: number;
+  labelWidth?: number;
+  labelLines?: string[];
 }
 
 interface GraphEdge {
@@ -42,7 +55,8 @@ interface GraphData {
     self_healing_fixes_deployed: number;
     compliance_health_score: number;
     languages_covered: number;
-    top_vulnerabilities: Array<{ name: string; risk: string }>;
+    // Optional because web and API deploy separately.
+    top_vulnerabilities?: Array<{ name: string; risk: string }>;
   };
 }
 
@@ -64,28 +78,12 @@ export default function KnowledgePage() {
         const json: GraphData = await res.json();
         setData(json);
 
-        // Initialize positions in a circle/neural layout
-        const width = 900;
-        const height = 600;
-        const centerX = width / 2;
-        const centerY = height / 2;
-
-        const initializedNodes = json.nodes.map((node, i) => {
-          const angle = (i / json.nodes.length) * 2 * Math.PI;
-          let radius = 220;
-          if (node.type === "language") radius = 80;
-          else if (node.type === "failure") radius = 170;
-          else if (node.type === "fix") radius = 260;
-
-          const deterministicJitter = ((i * 19) % 37 - 18) * 1.2;
-          return {
-            ...node,
-            x: centerX + radius * Math.cos(angle) + deterministicJitter,
-            y: centerY + radius * Math.sin(angle) + deterministicJitter,
-            vx: 0,
-            vy: 0
-          };
-        });
+        const measureContext = document.createElement("canvas").getContext("2d");
+        if (measureContext) measureContext.font = GRAPH_LABEL_FONT;
+        const initializedNodes = layoutGraph(
+          json.nodes,
+          (text) => measureContext?.measureText(text).width ?? text.length * 7.5
+        );
 
         nodesRef.current = initializedNodes;
         if (!selectedNode && initializedNodes.length > 0) {
@@ -116,7 +114,17 @@ export default function KnowledgePage() {
 
     const render = () => {
       time += 0.02;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(CANVAS_SCALE, 0, 0, CANVAS_SCALE, 0, 0);
+      ctx.clearRect(0, 0, GRAPH_WIDTH, GRAPH_HEIGHT);
+
+      // Column Headers
+      ctx.font = "900 12px sans-serif";
+      ctx.fillStyle = "#000000";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      GRAPH_COLUMNS.forEach((column) => {
+        ctx.fillText(column.title.toUpperCase(), column.x + 12, 22);
+      });
 
       const nodes = nodesRef.current;
       const nodeMap = new Map<string, GraphNode>();
@@ -171,7 +179,7 @@ export default function KnowledgePage() {
         const isHovered = hoveredNodeRef.current?.id === node.id;
         const isSelected = selectedNode?.id === node.id;
 
-        const baseRadius = node.val ? node.val * 0.75 : 11;
+        const baseRadius = node.radius ?? 8;
         const radius = isSelected ? baseRadius * 1.3 : (isHovered ? baseRadius * 1.15 : baseRadius);
 
         // Node Drop-shadow brutalist outline
@@ -201,11 +209,22 @@ export default function KnowledgePage() {
         ctx.strokeStyle = "#000000";
         ctx.stroke();
 
-        // Node Label
-        ctx.font = isSelected ? "bold 11px sans-serif" : "bold 9px sans-serif";
-        ctx.fillStyle = isFiltered ? "#000000" : "#888888";
-        ctx.textAlign = "center";
-        ctx.fillText(node.label, node.x, node.y + radius + 13);
+        // Node Label: the backing plate keeps edges from running through the text
+        const lines = node.labelLines ?? [node.label];
+        const labelX = node.labelX ?? node.x;
+        const labelHeight = lines.length * GRAPH_LINE_HEIGHT;
+        const labelTop = node.y - labelHeight / 2;
+
+        ctx.fillStyle = isSelected ? "#000000" : (isHovered ? "#ffc900" : "#faf9f5");
+        ctx.fillRect(labelX - 4, labelTop - 2, (node.labelWidth ?? 0) + 8, labelHeight + 4);
+
+        ctx.font = GRAPH_LABEL_FONT;
+        ctx.fillStyle = isSelected ? "#ffffff" : (isFiltered ? "#000000" : "#888888");
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        lines.forEach((line, index) => {
+          ctx.fillText(line, labelX, labelTop + GRAPH_LINE_HEIGHT * (index + 0.5));
+        });
       });
 
       animRef.current = requestAnimationFrame(render);
@@ -218,47 +237,34 @@ export default function KnowledgePage() {
     };
   }, [data, activeFilter, selectedNode]);
 
-  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Finds the node whose circle or label sits under the pointer
+  const findNodeAt = (e: React.MouseEvent<HTMLCanvasElement>): GraphNode | null => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
+    const x = (e.clientX - rect.left) * (GRAPH_WIDTH / rect.width);
+    const y = (e.clientY - rect.top) * (GRAPH_HEIGHT / rect.height);
 
-    // Find clicked node
-    for (const node of nodesRef.current) {
-      if (node.x && node.y) {
-        const dist = Math.hypot(node.x - x, node.y - y);
-        if (dist <= (node.val || 12)) {
-          setSelectedNode(node);
-          return;
-        }
-      }
-    }
+    return nodesRef.current.find((node) => {
+      if (!node.x || !node.y) return false;
+      const onCircle = Math.hypot(node.x - x, node.y - y) <= (node.radius ?? 8) + 4;
+      const labelX = node.labelX ?? node.x;
+      const labelHeight = (node.labelLines?.length ?? 1) * GRAPH_LINE_HEIGHT;
+      const onLabel =
+        x >= labelX - 4 &&
+        x <= labelX + (node.labelWidth ?? 0) + 4 &&
+        Math.abs(y - node.y) <= labelHeight / 2 + 2;
+      return onCircle || onLabel;
+    }) ?? null;
+  };
+
+  const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    const node = findNodeAt(e);
+    if (node) setSelectedNode(node);
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-
-    let found: GraphNode | null = null;
-    for (const node of nodesRef.current) {
-      if (node.x && node.y) {
-        const dist = Math.hypot(node.x - x, node.y - y);
-        if (dist <= (node.val || 12)) {
-          found = node;
-          break;
-        }
-      }
-    }
-    hoveredNodeRef.current = found;
+    hoveredNodeRef.current = findNodeAt(e);
   };
 
   return (
@@ -387,31 +393,15 @@ export default function KnowledgePage() {
           </div>
 
           {/* Canvas */}
-          <div className="relative w-full overflow-hidden rounded-xl bg-[#faf9f5] border-2 border-black flex items-center justify-center">
+          <div className="w-full overflow-x-auto rounded-xl bg-[#faf9f5] border-2 border-black">
             <canvas
               ref={canvasRef}
-              width={900}
-              height={550}
+              width={GRAPH_WIDTH * CANVAS_SCALE}
+              height={GRAPH_HEIGHT * CANVAS_SCALE}
               onClick={handleCanvasClick}
               onMouseMove={handleCanvasMouseMove}
-              className="w-full h-auto cursor-crosshair max-h-[550px]"
+              className="block w-full min-w-[720px] h-auto cursor-pointer"
             />
-
-            {/* Legend Overlay */}
-            <div className="absolute bottom-3 left-3 bg-white/95 p-3 rounded-xl border-2 border-black shadow-[3px_3px_0px_#000] text-[10px] font-black uppercase space-y-1 text-black pointer-events-none">
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-brutal-yellow border border-black" /> Yellow: TRAI &amp; Rubric Rules
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 border border-black" /> Pink: Identified Failures
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-brutal-green border border-black" /> Green: Self-Healing Patches
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-brutal-purple border border-black" /> Purple: Dialect Hubs
-              </div>
-            </div>
           </div>
         </div>
 
@@ -506,14 +496,20 @@ export default function KnowledgePage() {
                 Vulnerability Risk Clusters
               </h3>
               <div className="space-y-2">
-                {data.stats.top_vulnerabilities.map((v, idx) => (
-                  <div key={idx} className="p-3 rounded-xl bg-gray-50 border-2 border-black flex items-center justify-between text-xs">
-                    <span className="font-bold text-black">{v.name}</span>
-                    <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-black">
-                      {v.risk}
-                    </span>
-                  </div>
-                ))}
+                {data.stats.top_vulnerabilities?.length ? (
+                  data.stats.top_vulnerabilities.map((v, idx) => (
+                    <div key={idx} className="p-3 rounded-xl bg-gray-50 border-2 border-black flex items-center justify-between gap-3 text-xs">
+                      <span className="font-bold text-black">{v.name}</span>
+                      <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-100 text-rose-700 border border-black whitespace-nowrap">
+                        {v.risk}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs font-semibold text-gray-700">
+                    No breaches recorded yet. Clusters appear here after a benchmark run finds failures.
+                  </p>
+                )}
               </div>
             </div>
           )}

@@ -19,6 +19,7 @@ import {
   Menu,
   X,
   ChevronDown,
+  Lightbulb,
 } from "lucide-react";
 import { NewRunModal } from "@/components/NewRunModal";
 
@@ -104,6 +105,7 @@ export const Navbar: React.FC = () => {
     { href: "/telemetry", label: "Telemetry", icon: Radio },
     { href: "/knowledge", label: "Neural Graph", icon: Brain },
     { href: "/marketplace", label: "Marketplace", icon: Award },
+    { href: "/why", label: "Why", icon: Lightbulb },
   ];
 
   const secondaryLinks = [
@@ -151,7 +153,7 @@ export const Navbar: React.FC = () => {
                 <span
                   className={`w-2 h-2 rounded-full border border-black ${isReal ? "bg-emerald-500 animate-ping" : "bg-brutal-yellow"}`}
                 />
-                <span className="text-[10px] uppercase tracking-wide">
+                <span className="text-[10px] uppercase tracking-wide whitespace-nowrap">
                   {isReal ? "REAL BOLNA" : "MOCK MODE"}
                 </span>
               </div>
@@ -165,7 +167,7 @@ export const Navbar: React.FC = () => {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`px-3 py-1.5 text-xs font-bold tracking-tight rounded-full transition-all ${
+                    className={`px-3 py-1.5 text-xs font-bold tracking-tight rounded-full whitespace-nowrap transition-all ${
                       isActive
                         ? "bg-black text-white shadow-[2px_2px_0px_#ff90e8]"
                         : "text-black hover:bg-black/5"
@@ -180,7 +182,7 @@ export const Navbar: React.FC = () => {
               <div className="relative">
                 <button
                   onClick={() => setMoreDropdownOpen(!moreDropdownOpen)}
-                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold tracking-tight rounded-full transition-all ${
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold tracking-tight rounded-full whitespace-nowrap transition-all ${
                     isSecondaryActive || moreDropdownOpen
                       ? "bg-black text-white shadow-[2px_2px_0px_#ffc900]"
                       : "text-black hover:bg-black/5"
@@ -224,7 +226,7 @@ export const Navbar: React.FC = () => {
             {/* Right: Budget + CTA + Mobile Hamburger */}
             <div className="flex items-center gap-2 sm:gap-3">
               {budget && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brutal-bg border-2 border-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000]">
+                <div className="hidden md:flex lg:hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-brutal-bg border-2 border-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000]">
                   <Coins className="w-3.5 h-3.5 text-black" />
                   <span>
                     ${budget.total_spent_usd.toFixed(2)} / $
