@@ -51,8 +51,13 @@ async def init_db():
         except Exception as sqle:
             logger.error(f"Fallback SQLite init failed: {sqle}")
 
+def get_session_factory():
+    global AsyncSessionLocal
+    return AsyncSessionLocal
+
 async def get_db():
-    async with AsyncSessionLocal() as session:
+    factory = get_session_factory()
+    async with factory() as session:
         try:
             yield session
         finally:

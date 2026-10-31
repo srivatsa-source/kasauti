@@ -10,8 +10,12 @@ from app.engine.scenario_compiler import ScenarioCompiler
 from app.db.models import Run, Call, Check, Target, Scenario
 
 class RunOrchestrator:
-    def __init__(self, confirmed_by_user: bool = True):
-        self.bolna = get_bolna_client(confirmed_by_user=confirmed_by_user)
+    def __init__(self, confirmed_by_user: bool = True, simulation_mode: Optional[bool] = None):
+        if simulation_mode:
+            from app.bolna.mock_client import MockBolnaClient
+            self.bolna = MockBolnaClient()
+        else:
+            self.bolna = get_bolna_client(confirmed_by_user=confirmed_by_user)
         self.rule_engine = RuleEngine()
         self.rubric_judge = RubricJudge()
         self.compiler = ScenarioCompiler()

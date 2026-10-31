@@ -59,10 +59,10 @@ class RealBolnaClient(BolnaClient):
         # DIRECTION=target_to_caller: Target agent dials tester number (recipient_phone_number)
         if settings.DIRECTION == "caller_to_target" and settings.BOLNA_CALLER_AGENT_ID:
             effective_agent_id = settings.BOLNA_CALLER_AGENT_ID
-            effective_recipient = settings.BOLNA_TARGET_PHONE or recipient_phone_number
+            effective_recipient = recipient_phone_number or settings.BOLNA_TARGET_PHONE
         else:
             effective_agent_id = agent_id
-            effective_recipient = recipient_phone_number
+            effective_recipient = recipient_phone_number or settings.BOLNA_TARGET_PHONE
 
         payload: Dict[str, Any] = {
             "agent_id": effective_agent_id,

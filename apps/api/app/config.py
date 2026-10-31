@@ -35,6 +35,16 @@ class Settings(BaseSettings):
                         import urllib.parse
                         password = urllib.parse.quote(password, safe="")
                         v = f"{scheme}://{user}:{password}@{host_part}"
+        # Probe PostgreSQL host resolution (e.g. catches IPv6-only Supabase endpoints in IPv4 container)
+        if v.startswith("postgresql+asyncpg://"):
+            try:
+                import socket, urllib.parse
+                parsed = urllib.parse.urlparse(v)
+                if parsed.hostname:
+                    socket.getaddrinfo(parsed.hostname, parsed.port or 5432)
+            except Exception:
+                return f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}"
+
         if v in ("sqlite+aiosqlite:///./kasauti.db", "sqlite+aiosqlite:///kasauti.db"):
             return f"sqlite+aiosqlite:///{ROOT_DIR / 'kasauti.db'}"
         return v

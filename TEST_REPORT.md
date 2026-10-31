@@ -8,7 +8,7 @@
 | **Pytest Production Suite** | ✅ PASS | 33 passed, 0 failed, 0 errors (24.20s) |
 | **Contributor Schema Gate** | ✅ PASS | Validated `hi_dnd_optout_01`, `kn_account_inquiry_02` WAV/JSON |
 | **Anti-Mock Static Scanner** | ✅ PASS | 0 forbidden patterns across `apps/api/app` and `apps/web/app` |
-| **Next.js Production Build**| ✅ PASS | 9/9 pages compiled successfully |
+| **Next.js Production Build**| ✅ PASS | 12/12 pages compiled successfully |
 | **Live Backend API (Render)**| ✅ PASS | Status 200 at `https://kasauti-api.onrender.com/health` |
 | **Live Frontend (Vercel)** | ✅ PASS | Live at `https://kasauti-five.vercel.app` |
 | **Supabase DB & Storage** | ✅ PASS | Connected (`yqhtvuxgltapgtrqqgvu.supabase.co`), bucket `kasauti-audio-artifacts.` |

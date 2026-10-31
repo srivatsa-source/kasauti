@@ -7,7 +7,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Job, Run
-from app.db.session import AsyncSessionLocal
+from app.db.session import get_session_factory
 from app.engine.orchestrator import RunOrchestrator
 
 logger = logging.getLogger("kasauti.job_worker")
@@ -16,7 +16,7 @@ POLL_INTERVAL_SECONDS = 2
 STALE_JOB_SECONDS = 300
 
 
-def _job_payload(job: Job) -> tuple[str, Optional[list[str]]]:
+def _job_payload(job: Job) -> tuple[str, Optional[list[str]], Optional[bool]]:
     payload: dict[str, Any] = job.payload or {}
     run_id = payload.get("run_id")
     if not isinstance(run_id, str) or not run_id:
@@ -28,17 +28,23 @@ def _job_payload(job: Job) -> tuple[str, Optional[list[str]]]:
         or not all(isinstance(item, str) for item in scenario_ids)
     ):
         raise ValueError("Run job payload has invalid scenario_ids")
-    return run_id, scenario_ids
+    simulation_mode = payload.get("simulation_mode")
+    return run_id, scenario_ids, simulation_mode
 
 
 async def enqueue_run(
     session: AsyncSession,
     run_id: str,
     scenario_ids: Optional[list[str]] = None,
+    simulation_mode: Optional[bool] = None,
 ) -> Job:
     job = Job(
         task_type="execute_run",
-        payload={"run_id": run_id, "scenario_ids": scenario_ids},
+        payload={
+            "run_id": run_id,
+            "scenario_ids": scenario_ids,
+            "simulation_mode": simulation_mode,
+        },
         status="pending",
     )
     session.add(job)
@@ -47,46 +53,51 @@ async def enqueue_run(
 
 async def recover_run_jobs() -> None:
     """Requeue runs left in progress when the API process was restarted."""
-    async with AsyncSessionLocal() as session:
-        runs_res = await session.execute(
-            select(Run).where(Run.status == "in_progress")
-        )
-        runs = runs_res.scalars().all()
-        if not runs:
-            return
-
-        jobs_res = await session.execute(
-            select(Job).where(
-                Job.task_type == "execute_run",
-                Job.status.in_(("pending", "processing")),
+    try:
+        factory = get_session_factory()
+        async with factory() as session:
+            runs_res = await session.execute(
+                select(Run).where(Run.status == "in_progress")
             )
-        )
-        active_run_ids = set()
-        for job in jobs_res.scalars().all():
-            try:
-                run_id, _ = _job_payload(job)
-                active_run_ids.add(run_id)
-                if job.status == "processing":
-                    job.status = "pending"
-                    job.error = "Requeued after API restart"
-            except ValueError:
-                job.status = "failed"
-                job.error = "Invalid run job payload"
+            runs = runs_res.scalars().all()
+            if not runs:
+                return
 
-        for run in runs:
-            if run.id not in active_run_ids:
-                session.add(
-                    Job(
-                        task_type="execute_run",
-                        payload={"run_id": run.id, "scenario_ids": None},
-                        status="pending",
-                    )
+            jobs_res = await session.execute(
+                select(Job).where(
+                    Job.task_type == "execute_run",
+                    Job.status.in_(("pending", "processing")),
                 )
-        await session.commit()
+            )
+            active_run_ids = set()
+            for job in jobs_res.scalars().all():
+                try:
+                    run_id, _, _ = _job_payload(job)
+                    active_run_ids.add(run_id)
+                    if job.status == "processing":
+                        job.status = "pending"
+                        job.error = "Requeued after API restart"
+                except ValueError:
+                    job.status = "failed"
+                    job.error = "Invalid run job payload"
+
+            for run in runs:
+                if run.id not in active_run_ids:
+                    session.add(
+                        Job(
+                            task_type="execute_run",
+                            payload={"run_id": run.id, "scenario_ids": None},
+                            status="pending",
+                        )
+                    )
+            await session.commit()
+    except Exception as e:
+        logger.warning(f"recover_run_jobs encountered error: {e}")
 
 
 async def _claim_next_job() -> Optional[str]:
-    async with AsyncSessionLocal() as session:
+    factory = get_session_factory()
+    async with factory() as session:
         stale_before = datetime.now(timezone.utc) - timedelta(
             seconds=STALE_JOB_SECONDS
         )
@@ -122,7 +133,8 @@ async def _claim_next_job() -> Optional[str]:
 
 
 async def _execute_job(job_id: str) -> None:
-    async with AsyncSessionLocal() as session:
+    factory = get_session_factory()
+    async with factory() as session:
         job_res = await session.execute(select(Job).where(Job.id == job_id))
         job = job_res.scalar_one_or_none()
         if not job:
@@ -130,30 +142,43 @@ async def _execute_job(job_id: str) -> None:
             return
 
         try:
-            run_id, scenario_ids = _job_payload(job)
-            await RunOrchestrator().execute_run(session, run_id, scenario_ids)
+            run_id, scenario_ids, simulation_mode = _job_payload(job)
+            await RunOrchestrator(confirmed_by_user=True, simulation_mode=simulation_mode).execute_run(session, run_id, scenario_ids)
             job.status = "completed"
             job.error = None
         except Exception as exc:
             logger.exception("Run job %s failed", job_id)
-            job.status = "failed"
-            job.error = str(exc)
-            payload = job.payload or {}
-            run_id = payload.get("run_id")
-            if isinstance(run_id, str):
-                run_res = await session.execute(select(Run).where(Run.id == run_id))
-                run = run_res.scalar_one_or_none()
-                if run and run.status == "in_progress":
-                    run.status = "failed"
+            await session.rollback()
+            try:
+                job_res = await session.execute(select(Job).where(Job.id == job_id))
+                job = job_res.scalar_one_or_none()
+                if job:
+                    job.status = "failed"
+                    job.error = str(exc)
+                payload = job.payload if job and job.payload else {}
+                run_id = payload.get("run_id")
+                if isinstance(run_id, str):
+                    run_res = await session.execute(select(Run).where(Run.id == run_id))
+                    run = run_res.scalar_one_or_none()
+                    if run and run.status == "in_progress":
+                        run.status = "failed"
+                await session.commit()
+            except Exception as rollback_err:
+                logger.error(f"Failed to update job status after failure: {rollback_err}")
+            return
         await session.commit()
 
 
 async def run_job_worker(stop_event: asyncio.Event) -> None:
     while not stop_event.is_set():
-        job_id = await _claim_next_job()
-        if job_id:
-            await _execute_job(job_id)
-            continue
+        try:
+            job_id = await _claim_next_job()
+            if job_id:
+                await _execute_job(job_id)
+                continue
+        except Exception as e:
+            logger.error(f"Error in job worker loop: {e}", exc_info=True)
+            await asyncio.sleep(2)
         try:
             await asyncio.wait_for(stop_event.wait(), timeout=POLL_INTERVAL_SECONDS)
         except asyncio.TimeoutError:

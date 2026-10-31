@@ -15,6 +15,7 @@ class RunCreate(BaseModel):
     target_id: str
     suite_name: str = Field(default="standard_trai_pack")
     scenario_ids: Optional[List[str]] = None
+    simulation_mode: Optional[bool] = None
 
 class ScenarioSummary(BaseModel):
     id: str
@@ -100,7 +101,7 @@ async def create_run(
     await db.commit()
     await db.refresh(run)
 
-    await enqueue_run(db, run.id, payload.scenario_ids)
+    await enqueue_run(db, run.id, payload.scenario_ids, payload.simulation_mode)
     await db.commit()
 
     return RunDetailResponse(

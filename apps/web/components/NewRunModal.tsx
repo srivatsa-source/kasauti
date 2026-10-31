@@ -32,7 +32,7 @@ interface NewRunModalProps {
   onRunLaunched?: (runId: string) => void;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
 export const NewRunModal: React.FC<NewRunModalProps> = ({
   isOpen,
@@ -44,6 +44,7 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [selectedScenarioIds, setSelectedScenarioIds] = useState<string[]>([]);
   const [suiteName, setSuiteName] = useState("Custom TRAI Compliance Benchmark");
+  const [isSimulated, setIsSimulated] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fetchingScenarios, setFetchingScenarios] = useState(true);
   const [filterLang, setFilterLang] = useState<string>("All");
@@ -64,7 +65,9 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
           const data: Scenario[] = await res.json();
           setScenarios(data);
           // By default, select all scenarios
-          setSelectedScenarioIds(data.map((s) => s.id));
+          if (data.length > 0) {
+            setSelectedScenarioIds([data[0].id]);
+          }
         }
       } catch (err) {
         console.error("Failed to load scenario catalog:", err);
@@ -111,7 +114,8 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
         body: JSON.stringify({
           target_id: selectedTargetId,
           suite_name: suiteName,
-          scenario_ids: selectedScenarioIds
+          scenario_ids: selectedScenarioIds,
+          simulation_mode: isSimulated
         })
       });
 
@@ -196,6 +200,50 @@ export const NewRunModal: React.FC<NewRunModalProps> = ({
               onChange={(e) => setSuiteName(e.target.value)}
               className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
             />
+          </div>
+
+          {/* Execution Mode Selector */}
+          <div>
+            <label className="block text-xs font-black uppercase text-black mb-1.5">
+              Benchmark Execution Mode
+            </label>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setIsSimulated(false)}
+                className={`p-3 rounded-xl border-2 border-black text-left transition-all ${
+                  !isSimulated
+                    ? "bg-emerald-50 border-black shadow-[2px_2px_0px_#000]"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-black text-xs text-black uppercase">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                  Real Bolna Telephony
+                </div>
+                <div className="text-[11px] text-gray-600 mt-1">
+                  Places actual phone call to recipient phone number
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsSimulated(true)}
+                className={`p-3 rounded-xl border-2 border-black text-left transition-all ${
+                  isSimulated
+                    ? "bg-yellow-50 border-black shadow-[2px_2px_0px_#000]"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-1.5 font-black text-xs text-black uppercase">
+                  <span className="w-2 h-2 rounded-full bg-brutal-yellow" />
+                  Simulated Dialogue
+                </div>
+                <div className="text-[11px] text-gray-600 mt-1">
+                  Instant zero-credit testing (Runs simulated Indic persona dialogue)
+                </div>
+              </button>
+            </div>
           </div>
 
           {/* Scenario Selection Header */}

@@ -12,7 +12,7 @@ import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { UnverifiedRuleBadge, LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
 import { PromptDiff } from "@/components/PromptDiff";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
 interface Check {
   id: string;

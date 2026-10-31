@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft, ExternalLink, History, ArrowUpRight } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "https://kasauti-api.onrender.com";
 
 interface Run {
   id: string;
