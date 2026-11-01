@@ -3,7 +3,7 @@ from typing import List, Optional, Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, field_validator
 import httpx
 from app.db.session import get_db
 from app.db.models import Target
@@ -22,6 +22,15 @@ class TargetCreate(BaseModel):
     languages: List[str] = Field(default=["Hindi", "English", "Hinglish", "Kannada"])
     notes: Optional[str] = Field(None, json_schema_extra={"example": "System prompt and agent details"})
 
+class TargetUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    phone_number: Optional[str] = None
+    bolna_agent_id: Optional[str] = None
+    staging_agent_id: Optional[str] = None
+    bolna_api_key: Optional[str] = None
+    languages: Optional[List[str]] = None
+    notes: Optional[str] = None
+
 class TargetResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -33,6 +42,13 @@ class TargetResponse(BaseModel):
     bolna_api_key: Optional[str] = None
     languages: List[str] = ["Hindi", "English"]
     notes: Optional[str] = None
+
+    @field_validator("phone_number", mode="after")
+    @classmethod
+    def mask_restricted_phone(cls, v):
+        if v and "9019823296" in str(v):
+            return "+919800000000"
+        return v
 
 class FetchBolnaAgentsRequest(BaseModel):
     api_key: Optional[str] = None
@@ -53,6 +69,8 @@ class ImportBolnaAgentsRequest(BaseModel):
 
 @router.post("", response_model=TargetResponse)
 async def create_target(payload: TargetCreate, db: AsyncSession = Depends(get_db)):
+    if payload.phone_number and "9019823296" in payload.phone_number:
+        raise HTTPException(status_code=400, detail="This phone number is restricted and cannot be used as a test target.")
     target = Target(
         name=payload.name,
         phone_number=payload.phone_number,
@@ -164,6 +182,8 @@ async def import_bolna_agents(payload: ImportBolnaAgentsRequest, db: AsyncSessio
         raise HTTPException(status_code=400, detail="Bolna API key is required to import agents.")
 
     phone = payload.phone_number or settings.BOLNA_TARGET_PHONE or "+919800000000"
+    if "9019823296" in phone:
+        raise HTTPException(status_code=400, detail="This phone number is restricted and cannot be used as a test target.")
 
     headers = {
         "Authorization": f"Bearer {key}",
@@ -229,6 +249,58 @@ async def import_bolna_agents(payload: ImportBolnaAgentsRequest, db: AsyncSessio
         await db.refresh(t)
 
     return imported_targets
+
+@router.patch("/{target_id}", response_model=TargetResponse)
+async def update_target(
+    target_id: str,
+    payload: TargetUpdateRequest,
+    db: AsyncSession = Depends(get_db)
+):
+    if payload.phone_number and "9019823296" in payload.phone_number:
+        raise HTTPException(status_code=400, detail="This phone number is restricted and cannot be used as a test target.")
+
+    res = await db.execute(select(Target).where(Target.id == target_id))
+    target = res.scalar_one_or_none()
+    if not target:
+        raise HTTPException(status_code=404, detail="Target not found")
+
+    if payload.name is not None and payload.name.strip():
+        target.name = payload.name.strip()
+    if payload.phone_number is not None and payload.phone_number.strip():
+        target.phone_number = payload.phone_number.strip()
+    if payload.bolna_agent_id is not None:
+        target.bolna_agent_id = payload.bolna_agent_id.strip() if payload.bolna_agent_id else None
+    if payload.staging_agent_id is not None:
+        target.staging_agent_id = payload.staging_agent_id.strip() if payload.staging_agent_id else None
+    if payload.bolna_api_key is not None:
+        target.bolna_api_key = payload.bolna_api_key.strip() if payload.bolna_api_key else None
+    if payload.languages is not None:
+        target.languages = payload.languages
+    if payload.notes is not None:
+        target.notes = payload.notes
+
+    await db.commit()
+    await db.refresh(target)
+
+    # Sync to Supabase targets table if configured
+    try:
+        from app.db.supabase_client import supabase_service
+        if supabase_service.is_configured and supabase_service.client:
+            update_data = {}
+            if payload.name is not None:
+                update_data["name"] = target.name
+            if payload.phone_number is not None:
+                update_data["phone_number"] = target.phone_number
+            if payload.languages is not None:
+                update_data["languages"] = target.languages
+            if payload.notes is not None:
+                update_data["notes"] = target.notes
+            if update_data:
+                supabase_service.client.table("targets").update(update_data).eq("id", target_id).execute()
+    except Exception as se:
+        logger.warning(f"Error syncing target update to Supabase: {se}")
+
+    return target
 
 @router.delete("/{target_id}")
 async def delete_target(target_id: str, db: AsyncSession = Depends(get_db)):

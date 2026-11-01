@@ -103,3 +103,44 @@ async def test_hallmark_certification_cryptography():
     assert len(cert.verifiable_hash) == 24
     assert registry.get_certificate(cert.cert_id) is not None
 
+@pytest.mark.asyncio
+async def test_target_update_and_restricted_phone_defense():
+    from httpx import AsyncClient, ASGITransport
+    from app.main import app
+
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+        # 1. Create a test target
+        c_res = await ac.post("/targets", json={
+            "name": "Live Dial Test Target",
+            "phone_number": "+919876543210",
+            "bolna_agent_id": "agent_test_123"
+        })
+        assert c_res.status_code == 200
+        t_id = c_res.json()["id"]
+
+        # 2. Update target's phone number to a new number
+        p_res = await ac.patch(f"/targets/{t_id}", json={
+            "phone_number": "+919999999999"
+        })
+        assert p_res.status_code == 200
+        assert p_res.json()["phone_number"] == "+919999999999"
+
+        # 3. Verify restricted personal number is blocked on PATCH
+        block_patch = await ac.patch(f"/targets/{t_id}", json={
+            "phone_number": "+919019823296"
+        })
+        assert block_patch.status_code == 400
+        assert "restricted" in block_patch.text
+
+        # 4. Verify restricted personal number is blocked on POST /targets
+        block_create = await ac.post("/targets", json={
+            "name": "Restricted Target",
+            "phone_number": "+919019823296"
+        })
+        assert block_create.status_code == 400
+        assert "restricted" in block_create.text
+
+        # 5. Clean up
+        d_res = await ac.delete(f"/targets/{t_id}")
+        assert d_res.status_code == 200
+

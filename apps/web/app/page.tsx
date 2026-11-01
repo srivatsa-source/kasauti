@@ -7,7 +7,7 @@ import {
   ExternalLink, ArrowRight, Activity, Brain,
   ArrowUpRight, Search, CheckCircle2, Globe,
   ShieldCheck, Mic, MessageSquare, Terminal, Zap,
-  DownloadCloud, Trash2, Bot, Sliders
+  DownloadCloud, Trash2, Bot, Sliders, Pencil
 } from "lucide-react";
 import { PurityScoreBadge } from "@/components/PurityScoreBadge";
 import { LegalDisclaimerBanner } from "@/components/UnverifiedRuleBadge";
@@ -30,6 +30,7 @@ interface Run {
   id: string;
   target_id: string;
   target_name?: string;
+  target_phone?: string;
   suite_name: string;
   status: string;
   purity_score: number;
@@ -53,9 +54,31 @@ export default function HomePage() {
   // New target form state
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+919876543210");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [targetToEdit, setTargetToEdit] = useState<Target | null>(null);
+  const [editPhone, setEditPhone] = useState("");
+  const [editName, setEditName] = useState("");
+  const [editBolnaAgentId, setEditBolnaAgentId] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [updatingTarget, setUpdatingTarget] = useState(false);
   const [bolnaAgentId, setBolnaAgentId] = useState("agent_prod_bharat");
   const [stagingAgentId, setStagingAgentId] = useState("kasauti_staging_bharat");
   const [notes, setNotes] = useState("You are an outbound customer assistance agent.");
+
+  useEffect(() => {
+    try {
+      const cachedT = localStorage.getItem("kasauti_targets_cache");
+      if (cachedT) {
+        const parsedT = JSON.parse(cachedT);
+        if (Array.isArray(parsedT) && parsedT.length > 0) setTargets(parsedT);
+      }
+      const cachedR = localStorage.getItem("kasauti_runs_cache");
+      if (cachedR) {
+        const parsedR = JSON.parse(cachedR);
+        if (Array.isArray(parsedR) && parsedR.length > 0) setRuns(parsedR);
+      }
+    } catch (e) {}
+  }, []);
 
   const fetchData = async () => {
     try {
@@ -63,8 +86,24 @@ export default function HomePage() {
         fetch(`${API_BASE}/targets`),
         fetch(`${API_BASE}/runs`)
       ]);
-      if (tRes.ok) setTargets(await tRes.json());
-      if (rRes.ok) setRuns(await rRes.json());
+      if (tRes.ok) {
+        const rawT = await tRes.json();
+        const sanitizedT = Array.isArray(rawT) ? rawT.map((t: Target) => ({
+          ...t,
+          phone_number: t.phone_number?.includes("9019823296") ? "+919800000000" : t.phone_number
+        })) : [];
+        setTargets(sanitizedT);
+        try { localStorage.setItem("kasauti_targets_cache", JSON.stringify(sanitizedT)); } catch(e) {}
+      }
+      if (rRes.ok) {
+        const rawR = await rRes.json();
+        const sanitizedR = Array.isArray(rawR) ? rawR.map((r: Run) => ({
+          ...r,
+          target_phone: r.target_phone?.includes("9019823296") ? "+919800000000" : r.target_phone
+        })) : [];
+        setRuns(sanitizedR);
+        try { localStorage.setItem("kasauti_runs_cache", JSON.stringify(sanitizedR)); } catch(e) {}
+      }
     } catch (err) {
       console.error("API error:", err);
     } finally {
@@ -77,6 +116,53 @@ export default function HomePage() {
     const interval = setInterval(fetchData, 4000);
     return () => clearInterval(interval);
   }, []);
+
+  const handleOpenEditModal = (t: Target) => {
+    setTargetToEdit(t);
+    setEditPhone(t.phone_number);
+    setEditName(t.name);
+    setEditBolnaAgentId(t.bolna_agent_id || "");
+    setEditNotes(t.notes || "");
+    setShowEditModal(true);
+  };
+
+  const handleUpdateTarget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!targetToEdit) return;
+    if (!editPhone.trim()) {
+      alert("Please provide a valid phone number.");
+      return;
+    }
+    if (editPhone.includes("9019823296")) {
+      alert("This phone number is restricted and cannot be used.");
+      return;
+    }
+    setUpdatingTarget(true);
+    try {
+      const res = await fetch(`${API_BASE}/targets/${targetToEdit.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: editName.trim() || targetToEdit.name,
+          phone_number: editPhone.trim(),
+          bolna_agent_id: editBolnaAgentId.trim() || undefined,
+          notes: editNotes.trim() || undefined,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || "Failed to update target");
+      }
+      const updated = await res.json();
+      setTargets((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+      setShowEditModal(false);
+      setTargetToEdit(null);
+    } catch (err: any) {
+      alert(err.message || "Failed to update target");
+    } finally {
+      setUpdatingTarget(false);
+    }
+  };
 
   const handleCreateTarget = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -672,22 +758,46 @@ export default function HomePage() {
                           </span>
                         ) : null}
                       </div>
-                      <div className="text-xs font-mono font-bold text-gray-700 mt-1 flex items-center gap-1.5">
+                      <div 
+                        onClick={() => handleOpenEditModal(target)}
+                        className="text-xs font-mono font-bold text-gray-700 mt-1.5 flex flex-wrap items-center gap-1.5 cursor-pointer hover:text-black group/ph"
+                        title="Click to edit recipient phone number"
+                      >
                         <Phone className="w-3.5 h-3.5 text-black stroke-[2.5]" />
-                        {target.phone_number}
+                        <span className="underline decoration-dotted font-black">{target.phone_number}</span>
+                        <span className="text-[10px] font-sans font-black uppercase text-gray-500 group-hover/ph:text-black">
+                          (Change)
+                        </span>
+                        {(target.phone_number.includes("00000000") || target.phone_number.includes("XXXX")) && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-brutal-yellow border border-black text-black">
+                            Set your number
+                          </span>
+                        )}
                       </div>
                     </div>
 
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTarget(target.id, target.name);
-                      }}
-                      className="p-1.5 rounded-lg bg-white hover:bg-red-50 border border-black text-gray-600 hover:text-red-600 shadow-[1px_1px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all shrink-0"
-                      title="Delete target"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleOpenEditModal(target);
+                        }}
+                        className="p-1.5 rounded-lg bg-white hover:bg-yellow-50 border border-black text-black shadow-[1px_1px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                        title="Edit target & change phone number"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteTarget(target.id, target.name);
+                        }}
+                        className="p-1.5 rounded-lg bg-white hover:bg-red-50 border border-black text-gray-600 hover:text-red-600 shadow-[1px_1px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                        title="Delete target"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Languages Chips */}
@@ -915,6 +1025,109 @@ export default function HomePage() {
                   className="px-6 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#ff90e8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
                 >
                   {submitting ? "Saving..." : "Create Target"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Target Modal */}
+      {showEditModal && targetToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="w-full max-w-lg rounded-2xl bg-white border-3 border-black shadow-[10px_10px_0px_#000000] overflow-hidden my-8">
+            <div className="flex items-center justify-between p-6 border-b-2 border-black bg-brutal-yellow">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-white border-2 border-black flex items-center justify-center text-black font-black shadow-[2px_2px_0px_#000]">
+                  <Pencil className="w-4 h-4 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black uppercase text-black font-display">
+                    Change Target &amp; Phone Number
+                  </h3>
+                  <p className="text-xs font-semibold text-gray-800">
+                    Set the exact recipient phone number for voice tests
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowEditModal(false)}
+                className="w-8 h-8 rounded-full bg-white border-2 border-black flex items-center justify-center font-black text-sm hover:bg-neutral-100 shadow-[1.5px_1.5px_0px_#000]"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateTarget} className="p-6 space-y-4 bg-[#faf9f5]">
+              <div>
+                <label className="block text-xs font-black uppercase text-black mb-1">
+                  Recipient Phone Number to Dial (E.164)
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="+919876543210"
+                  value={editPhone}
+                  onChange={(e) => setEditPhone(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-white border-2 border-black text-black text-xs font-mono font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+                />
+                <p className="text-[11px] font-semibold text-gray-600 mt-1">
+                  Enter your own personal or testing number (e.g. +9198XXXXXXXX) to receive a real test call.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase text-black mb-1">
+                  Target Agent Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={editName}
+                  onChange={(e) => setEditName(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-bold shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase text-black mb-1">
+                  Bolna Agent ID
+                </label>
+                <input
+                  type="text"
+                  value={editBolnaAgentId}
+                  onChange={(e) => setEditBolnaAgentId(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-mono font-medium shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase text-black mb-1">
+                  Notes
+                </label>
+                <textarea
+                  rows={2}
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl bg-white border-2 border-black text-black text-xs font-medium shadow-[2px_2px_0px_#000] focus:outline-none focus:bg-yellow-50"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t-2 border-black">
+                <button
+                  type="button"
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider text-black hover:underline"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingTarget}
+                  className="px-6 py-2.5 rounded-xl bg-black text-white hover:bg-neutral-800 border-2 border-black font-black text-xs uppercase tracking-wider shadow-[3px_3px_0px_#ff90e8] active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all"
+                >
+                  {updatingTarget ? "Saving..." : "Save Phone Number"}
                 </button>
               </div>
             </form>

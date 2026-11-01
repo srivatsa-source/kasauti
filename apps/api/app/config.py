@@ -64,7 +64,16 @@ class Settings(BaseSettings):
             return None
         if " #" in v:
             v = v.split(" #")[0].strip()
+        if "9019823296" in v:
+            return "+919800000000"
         return v or None
+
+    @field_validator("BOLNA_TARGET_PHONE", mode="after")
+    @classmethod
+    def sanitize_bolna_target_phone(cls, v):
+        if not v or "9019823296" in str(v):
+            return "+919800000000"
+        return v
 
     # Bolna Integration
     BOLNA_MODE: str = Field(default="mock", description="mock or real")

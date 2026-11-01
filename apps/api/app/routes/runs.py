@@ -6,7 +6,7 @@ logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from app.db.session import get_db
 from app.db.models import Run, Target, Call, Check, Scenario, Fix
 from app.engine.fixer import PromptFixer
@@ -86,6 +86,13 @@ class RunDetailResponse(BaseModel):
     class Config:
         from_attributes = True
 
+    @field_validator("target_phone", mode="after")
+    @classmethod
+    def mask_restricted_phone(cls, v):
+        if v and "9019823296" in str(v):
+            return "+919800000000"
+        return v
+
 @router.post("", response_model=RunDetailResponse)
 async def create_run(
     payload: RunCreate,
@@ -115,6 +122,8 @@ async def create_run(
             await db.refresh(target)
 
     if payload.target_phone and payload.target_phone.strip():
+        if "9019823296" in payload.target_phone:
+            raise HTTPException(status_code=400, detail="This phone number is restricted and cannot be used as a test target.")
         target.phone_number = payload.target_phone.strip()
         await db.commit()
         await db.refresh(target)
